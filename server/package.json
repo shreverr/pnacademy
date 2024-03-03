@@ -1,0 +1,19 @@
+{
+  "name": "pnacademy-app",
+  "version": "1.0.0",
+  "description": "api server for pnacademy",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": "https://github.com/shreverr/pnacademy",
+  "author": "Shreshth Verma <verma2007s@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
