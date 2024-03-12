@@ -8,7 +8,6 @@ services:
       target: base
     volumes:
       - ./:/home/node/app
-      - ./nodemon.json:/home/node/app/nodemon.json
     container_name: pna-webserver
     expose:
       - '3000'
