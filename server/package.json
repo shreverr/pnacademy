@@ -4,8 +4,9 @@
   "description": "api server for pnacademy",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.ts"
+    "start": "NODE_PATH=./build node build/index.js",
+    "dev": "nodemon index.ts",
+    "build": "tsc"
   },
   "repository": "https://github.com/shreverr/pnacademy",
   "author": "Shreshth Verma <verma2007s@gmail.com>",
