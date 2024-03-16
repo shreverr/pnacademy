@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  pna-webserver:
+    build:
+      target: production
+    command: node build/index.js
