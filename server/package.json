@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_PATH=./build node build/index.js",
-    "dev": "nodemon index.ts",
-    "build": "tsc"
+    "dev": "nodemon server.ts",
+    "build": "tsc",
+    "lint": "eslint . --ext .ts"
   },
   "repository": "https://github.com/shreverr/pnacademy",
   "author": "Shreshth Verma <verma2007s@gmail.com>",
