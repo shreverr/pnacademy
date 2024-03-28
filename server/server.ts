@@ -1,7 +1,16 @@
 import app from './app'
+import logger from './config/logger'
 
-const port = process.env.PORT !== '' ? process.env.PORT : 3000
+logger.info('/////////////////////////////////////////////')
+logger.info('/////////////////////////////////////////////')
+logger.info('//                                         //')
+logger.info('//          Pnacademy Web Server           //')
+logger.info('//                                         //')
+logger.info('/////////////////////////////////////////////')
+logger.info('/////////////////////////////////////////////')
+
+const port = process.env.PORT ?? 3000
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`)
+  logger.info(`Server listening at http://localhost:${port}`)
 })
