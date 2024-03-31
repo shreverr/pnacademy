@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import userRouter from './userRouter'
-// import attendanceRouter from './attendanceRouter'
+import testRouter from './testRouter'
 // import companyRouter from './companyRouter'
 
 const router: Router = Router()
 
 router.use('/user', userRouter)
-// router.use('/attendance', attendanceRouter)
+router.use('/test', testRouter)
 // router.use('/company', companyRouter)
 
 export default router

@@ -14,7 +14,7 @@ const port = process.env.PORT ?? 3000
 
 void connectDatabase()
 
-void sequelize.sync({force: true })
+void sequelize.sync()
   .then(() => {
     console.log('Database & tables created!')
   })

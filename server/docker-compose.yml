@@ -8,6 +8,7 @@ services:
       target: base
     volumes:
       - ./:/home/node/app
+      - /home/node/app/node_modules
     container_name: pna-webserver
     expose:
       - '3000'
