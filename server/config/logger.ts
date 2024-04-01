@@ -22,8 +22,7 @@ const transport = {
   ]
 }
 
-// Create and export the logger
 export default pino({
-  level: process.env.PINO_LOG_LEVEL ?? 'info',
+  level: process.env.PINO_LOG_LEVEL ?? 'debug',
   transport
 })
