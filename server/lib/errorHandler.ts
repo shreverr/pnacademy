@@ -7,9 +7,9 @@ class ErrorHandler {
       logger.error(error);
       return responseStream.status(error.httpCode).json({
         status: 'error',
-        message: error.message
+        message: error.message,
       })
-  };
+  }
 }
 
 export const handler = new ErrorHandler();

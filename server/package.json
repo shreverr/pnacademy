@@ -4,7 +4,7 @@
   "description": "api server for pnacademy",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_PATH=./build node build/index.js",
+    "start": "NODE_PATH=./build node build/server.js",
     "dev": "nodemon server.ts | npx pino-pretty",
     "build": "tsc",
     "lint": "eslint . --ext .ts"

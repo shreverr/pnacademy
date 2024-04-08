@@ -14,12 +14,14 @@ const transport = {
   targets: [
     {
       target: 'pino/file',
+      level: 'trace',
       options: { destination: path.join(logsFolderPath, 'app.log') }
     },
     {
+      level: 'trace',
       target: 'pino/file'
     }
-  ]
+  ] 
 }
 
 // Create and export the logger
