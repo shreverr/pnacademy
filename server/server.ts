@@ -1,4 +1,5 @@
 import app from './app'
+import { connectDatabase } from './config/database'
 import logger from './config/logger'
 
 logger.info('/////////////////////////////////////////////')
@@ -10,6 +11,8 @@ logger.info('/////////////////////////////////////////////')
 logger.info('/////////////////////////////////////////////')
 
 const port = process.env.PORT ?? 3000
+
+void connectDatabase()
 
 const server = app.listen(port, () => {
   logger.info(`Server listening at http://localhost:${port}`)

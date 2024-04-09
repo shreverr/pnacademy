@@ -1,4 +1,4 @@
-import { CommonError } from '../types/error.types';
+import { CommonError } from '../../types/error.types';
 
 const commonErrorsDictionary: { [key: string]: CommonError } = {
   notFound: {
