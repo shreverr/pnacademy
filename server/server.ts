@@ -1,5 +1,5 @@
 import app from './app'
-import { connectDatabase } from './config/database'
+import { connectDatabase, sequelize } from './config/database'
 import logger from './config/logger'
 
 logger.info('/////////////////////////////////////////////')
@@ -13,6 +13,16 @@ logger.info('/////////////////////////////////////////////')
 const port = process.env.PORT ?? 3000
 
 void connectDatabase()
+
+void sequelize.sync({
+  alter: true
+})
+  .then(() => {
+    logger.info('Postgres database synced successfully!')
+  })
+  .catch((error) => {
+    logger.fatal(`Error in syncing to DB: ${error}`)
+  })
 
 const server = app.listen(port, () => {
   logger.info(`Server listening at http://localhost:${port}`)
