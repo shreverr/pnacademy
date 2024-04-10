@@ -56,4 +56,4 @@ const Assessment = sequelize.define('assessment', {
 
 Assessment.belongsTo(User, { foreignKey: 'createdBy' });
 
-module.exports = Assessment;
+export default Assessment;
