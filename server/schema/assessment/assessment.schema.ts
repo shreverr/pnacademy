@@ -34,11 +34,6 @@ const Assessment = sequelize.define('assessment', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-    },
     createdBy: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -47,11 +42,6 @@ const Assessment = sequelize.define('assessment', {
             key: 'id'
         }
     },
-    updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
-    }
 });
 
 Assessment.belongsTo(User, { foreignKey: 'createdBy' });

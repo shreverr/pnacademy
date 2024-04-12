@@ -21,8 +21,6 @@ const User = sequelize.define('user', {
   },
   email: DataTypes.STRING,
   phone: DataTypes.STRING,
-  created_at: DataTypes.DATE,
-  updated_at: DataTypes.DATE
 });
 
 export default User;

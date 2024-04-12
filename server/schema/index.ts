@@ -5,7 +5,8 @@ import User from "./user/user.schema"
 const models = [
   './user/user.schema',
   './user/refreshToken.schema',
-  './user/password.schema'
+  './user/password.schema',
+  './user/role.schema'
 ]
 
 const instantiateModels = async (): Promise<void> => {
