@@ -1,6 +1,7 @@
 import app from "./app";
 import { connectDatabase, sequelize } from "./config/database";
 import logger from "./config/logger";
+import swaggerDocs from "./config/swagger";
 
 logger.info("/////////////////////////////////////////////");
 logger.info("/////////////////////////////////////////////");
@@ -28,6 +29,7 @@ void sequelize
 
 const server = app.listen(port, () => {
   logger.info(`Server listening at http://localhost:${port}`);
+  swaggerDocs(app)
 });
 
 process.on("uncaughtException", (err) => {
