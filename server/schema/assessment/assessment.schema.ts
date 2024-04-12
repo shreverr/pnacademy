@@ -1,13 +1,12 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../../config/database';
-import User from '../user/user.schema';
+
 
 
 const Assessment = sequelize.define('assessment', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true
     },
     name: {
         type: DataTypes.STRING,
@@ -17,16 +16,16 @@ const Assessment = sequelize.define('assessment', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    isActive: {
+    is_active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true
     },
-    startAt: {
+    start_at: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    endAt: {
+    end_at: {
         type: DataTypes.DATE,
         allowNull: false
     },
@@ -34,16 +33,13 @@ const Assessment = sequelize.define('assessment', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    createdBy: {
+    created_by: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: User,
-            key: 'id'
-        }
+        
     },
 });
 
-Assessment.belongsTo(User, { foreignKey: 'createdBy' });
+
 
 export default Assessment;

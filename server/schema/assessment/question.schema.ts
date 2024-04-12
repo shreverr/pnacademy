@@ -4,17 +4,14 @@ import Assessment from './assessment.schema';
 
 const Question = sequelize.define('question', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true
+     
     },
-    assessmentId: {
+    assessment_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Assessment,
-        key: 'id'
-      }
+      
     },
     description: {
       type: DataTypes.STRING,
@@ -26,6 +23,6 @@ const Question = sequelize.define('question', {
     }
   });
   
-  Question.belongsTo(Assessment, { foreignKey: 'assessmentId' });
+ 
   
 export default Question;

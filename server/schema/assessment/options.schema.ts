@@ -4,29 +4,26 @@ import Question from './question.schema';
 
 const Option = sequelize.define('option', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true
+     
     },
-    questionId: {
+    question_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: Question,
-        key: 'id'
-      }
+     
     },
     description: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    isCorrect: {
+    is_correct: {
       type: DataTypes.BOOLEAN,
       allowNull: false, 
-      defaultValue: true
+      defaultValue: false
     }
   });
   
-  Option.belongsTo(Question, { foreignKey: 'questionId' });
+
   
   export default Option;

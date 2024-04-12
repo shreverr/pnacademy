@@ -1,4 +1,4 @@
-import { DataTypes } from 'sequelize'
+cimport { DataTypes } from 'sequelize'
 import { sequelize } from '../../config/database'
 
 const RefreshToken = sequelize.define('refresh_token', {

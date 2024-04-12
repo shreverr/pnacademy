@@ -3,9 +3,8 @@ import { sequelize } from '../../config/database';
 
 const Role = sequelize.define('role', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true
     },
     name: {
       type: DataTypes.STRING,
