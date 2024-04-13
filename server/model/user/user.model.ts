@@ -29,7 +29,7 @@ export const createUser = async (userData: {
   phone: string | null;
   roleId: string | null;
 }): Promise<UserData | null> => {
-  logger.info(`Creating user with email: ${userData.email}`);
+  logger.info(`Creating user with email: ${userData.email}`)
   const transaction = await sequelize.transaction();
   try {
     const user = await User.create({

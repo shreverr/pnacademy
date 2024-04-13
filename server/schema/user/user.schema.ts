@@ -14,9 +14,9 @@ class User extends Model<UserAttributes> implements UserAttributes {
   public id!: string
   public first_name!: string
   public last_name!: string
-  public role_id: string | null = null
+  public role_id!: string | null
   public email!: string
-  public phone: string | null = null
+  public phone!: string | null
 }
 
 User.init(
