@@ -1,13 +1,23 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { AppError } from "../../lib/appError";
-import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { validateRequest } from "../../utils/validateRequest";
+import { registerUser } from "../../service/user/user.service";
 
-export const registerUser: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const registerUserController: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     validateRequest(req);
-    // throw new AppError(commonErrorsDictionary.badRequest.name, commonErrorsDictionary.badRequest.httpCode, "User registration failed", true);
-    return res.status(200).json({ message: "User registered successfully" });
+    const userData = await registerUser({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      password: req.body.password,
+      phone: req.body.phone,
+      roleId: req.body.roleId,
+    })
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      data: userData
+    });
   } catch (error) {
     next(error)
   }

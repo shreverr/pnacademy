@@ -1,16 +1,32 @@
-import { DataTypes } from 'sequelize'
-import { sequelize } from '../../config/database'
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../config/database';
 
-const Password = sequelize.define('password', {
-  user_id : {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    allowNull: false
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-})
+interface PasswordAttributes {
+  user_id: string;
+  password: string;
+}
 
-export default Password
+class Password extends Model<PasswordAttributes> implements PasswordAttributes {
+  public user_id!: string;
+  public password!: string;
+}
+
+Password.init(
+  {
+    user_id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      allowNull: false
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+  },
+  {
+    sequelize,
+    modelName: 'password'
+  }
+);
+
+export default Password;

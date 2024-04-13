@@ -32,4 +32,24 @@ export const validateUserRegister = [
     .isUUID(4)
     .escape()
     .withMessage('Role Id must be UUID v4'),
+
+  check('password')
+    .notEmpty()
+    .isStrongPassword({
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+      returnScore: false,
+      pointsPerUnique: 1,
+      pointsPerRepeat: 0,
+      pointsForContainingLower: 10,
+      pointsForContainingUpper: 10,
+      pointsForContainingNumber: 10,
+      pointsForContainingSymbol: 10
+    })
+    .withMessage(`Password must be more than 8 characters long with
+      at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`),
+
 ]
