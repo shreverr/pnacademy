@@ -1,17 +1,27 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../../config/database';
-import Assessment from './assessment.schema';
+import { DataTypes, Model } from 'sequelize'
+import { sequelize } from '../../config/database'
 
-const Question = sequelize.define('question', {
+interface QuestionAttributes {
+  id: string
+  assessment_id: number
+  description: string
+  marks: number
+}
+class Question extends Model<QuestionAttributes> implements QuestionAttributes {
+  public id!: string
+  public assessment_id!: number
+  public description!: string
+  public marks!: number
+}
+Question.init(
+  {
     id: {
       type: DataTypes.UUID,
-      primaryKey: true,
-     
+      primaryKey: true
     },
     assessment_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      
+      allowNull: false
     },
     description: {
       type: DataTypes.STRING,
@@ -21,8 +31,11 @@ const Question = sequelize.define('question', {
       type: DataTypes.INTEGER,
       allowNull: false
     }
-  });
-  
- 
-  
-export default Question;
+  },
+  {
+    sequelize,
+    modelName: 'question'
+  }
+)
+
+export default Question

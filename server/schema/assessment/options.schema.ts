@@ -1,17 +1,27 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../../config/database';
-import Question from './question.schema';
+import { DataTypes, Model } from 'sequelize'
+import { sequelize } from '../../config/database'
 
-const Option = sequelize.define('option', {
+interface OptionAttributes {
+  id: string
+  question_id: number
+  description: string
+  is_correct: boolean
+}
+class Option extends Model<OptionAttributes> implements OptionAttributes {
+  public id!: string
+  public question_id!: number
+  public description!: string
+  public is_correct!: boolean
+}
+Option.init(
+  {
     id: {
       type: DataTypes.UUID,
-      primaryKey: true,
-     
+      primaryKey: true
     },
     question_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-     
+      allowNull: false
     },
     description: {
       type: DataTypes.STRING,
@@ -19,11 +29,14 @@ const Option = sequelize.define('option', {
     },
     is_correct: {
       type: DataTypes.BOOLEAN,
-      allowNull: false, 
+      allowNull: false,
       defaultValue: false
     }
-  });
-  
+  },
+  {
+    sequelize,
+    modelName: 'option'
+  }
+)
 
-  
-  export default Option;
+export default Option
