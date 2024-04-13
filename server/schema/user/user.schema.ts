@@ -1,22 +1,22 @@
-import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../config/database';
+import { DataTypes, Model } from 'sequelize'
+import { sequelize } from '../../config/database'
 
 interface UserAttributes {
-  id: string;
-  role_id: string | null;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string | null;
+  id: string
+  role_id: string | null
+  first_name: string
+  last_name: string
+  email: string
+  phone: string | null
 }
 
 class User extends Model<UserAttributes> implements UserAttributes {
-  public id!: string;
-  public first_name!: string;
-  public last_name!: string;
-  public role_id: string | null = null;
-  public email!: string;
-  public phone: string | null = null;
+  public id!: string
+  public first_name!: string
+  public last_name!: string
+  public role_id: string | null = null
+  public email!: string
+  public phone: string | null = null
 }
 
 User.init(
@@ -28,7 +28,7 @@ User.init(
     },
     role_id: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: true
     },
     first_name: {
       type: DataTypes.STRING,
@@ -38,20 +38,20 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false
     },
-    email:  {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },
-    phone:  {
+    phone: {
       type: DataTypes.STRING,
       allowNull: true
-    },
+    }
   },
   {
     sequelize,
     modelName: 'user'
   }
-);
+)
 
-export default User;
+export default User
