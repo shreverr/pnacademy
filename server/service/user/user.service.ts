@@ -1,10 +1,14 @@
-import { createUser, getUserByEmail } from "../../model/user/user.model";
+import {
+  createUser,
+  getUserByEmail,
+  updateUserInDb,
+} from "../../model/user/user.model";
 import { UserData } from "../../types/user.types";
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
-
+import { promises } from "dns";
 
 export const registerUser = async (user: {
   firstName: string;
@@ -14,9 +18,14 @@ export const registerUser = async (user: {
   phone: string | null;
   roleId: string | null;
 }): Promise<UserData | null> => {
-
   const userExists = await getUserByEmail(user.email);
-  if (userExists) throw new AppError('User already exists', 409, 'User with this email already exists', false)
+  if (userExists)
+    throw new AppError(
+      "User already exists",
+      409,
+      "User with this email already exists",
+      false
+    );
 
   const userData = await createUser({
     id: uuid(),
@@ -26,16 +35,46 @@ export const registerUser = async (user: {
     password: await hashPassword(user.password),
     phone: user.phone,
     roleId: user.roleId,
-  })
+  });
 
   if (!userData) {
     throw new AppError(
       commonErrorsDictionary.internalServerError.name,
       commonErrorsDictionary.internalServerError.httpCode,
-      'Someting went wrong',
+      "Someting went wrong",
       false
-    )
+    );
   }
 
   return userData;
-}
+};
+
+export const updateUser = async (ToBeUpdatedUser: {
+  id: string;
+
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  password: string | null;
+  phone: string | null;
+  roleId: string | null;
+}): Promise<UserData | null> => {
+  const UpdatedUser = await updateUserInDb({
+    id: ToBeUpdatedUser.id,
+    firstName: ToBeUpdatedUser.firstName,
+    lastName: ToBeUpdatedUser.lastName,
+    email: ToBeUpdatedUser.email,
+    phone: ToBeUpdatedUser.phone,
+    roleId: ToBeUpdatedUser.roleId,
+  });
+
+  if (UpdatedUser === null) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "kuch galat hogya",
+      false
+    );
+  }
+  return UpdatedUser;
+};
