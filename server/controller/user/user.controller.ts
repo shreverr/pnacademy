@@ -4,7 +4,6 @@ import { registerUser } from "../../service/user/user.service";
 
 export const registerUserController: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    validateRequest(req);
     const userData = await registerUser({
       firstName: req.body.firstName,
       lastName: req.body.lastName,

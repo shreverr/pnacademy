@@ -1,7 +1,8 @@
 import express from 'express'
 import type { Router } from 'express'
 import { registerUserController } from '../controller/user/user.controller'
-import { validateUserRegister } from '../lib/validator'
+import { validateUserLogin, validateUserRegister } from '../lib/validator'
+import { validateRequest } from '../utils/validateRequest'
 
 const router: Router = express.Router()
 
@@ -93,6 +94,7 @@ const router: Router = express.Router()
  *       500:
  *         description: Server Error
  */
-router.post('/register', validateUserRegister, registerUserController)
+router.post('/register', validateUserRegister, validateRequest, registerUserController)
+router.post('/login', validateUserLogin)
 
 export default router
