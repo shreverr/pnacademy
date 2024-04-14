@@ -1,15 +1,15 @@
-import { Response } from "express";
-import logger from "../config/logger";
-import { AppError } from "./appError";
+import type { Response } from 'express'
+import logger from '../config/logger'
+import type { AppError } from './appError'
 
 class ErrorHandler {
-  public async handleError(error: AppError, responseStream: Response): Promise<Response> {
-      logger.error(error);
-      return responseStream.status(error.httpCode).json({
-        status: 'error',
-        message: error.message,
-      })
+  public async handleError (error: AppError, responseStream: Response): Promise<Response> {
+    logger.error(error)
+    return responseStream.status(error.httpCode).json({
+      status: 'error',
+      message: error.message
+    })
   }
 }
 
-export const handler = new ErrorHandler();
+export const handler = new ErrorHandler()

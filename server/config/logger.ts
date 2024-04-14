@@ -21,7 +21,7 @@ const transport = {
       level: 'trace',
       target: 'pino/file'
     }
-  ] 
+  ]
 }
 
 // Create and export the logger

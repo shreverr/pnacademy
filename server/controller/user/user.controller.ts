@@ -2,10 +2,9 @@ import {
   type NextFunction,
   type Request,
   type RequestHandler,
-  type Response,
-} from "express";
-import { validateRequest } from "../../utils/validateRequest";
-import { registerUser, updateUser } from "../../service/user/user.service";
+  type Response
+} from 'express'
+import { registerUser, updateUser } from '../../service/user/user.service'
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -19,17 +18,17 @@ export const registerUserController: RequestHandler = async (
       email: req.body.email,
       password: req.body.password,
       phone: req.body.phone,
-      roleId: req.body.roleId,
-    });
+      roleId: req.body.roleId
+    })
 
     return res.status(201).json({
-      message: "User registered successfully",
-      data: userData,
-    });
+      message: 'User registered successfully',
+      data: userData
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 export const UpdateUserController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -43,14 +42,14 @@ export const UpdateUserController: RequestHandler = async (
       email: req.body.dataToUpdate.email,
       password: req.body.dataToUpdate.password,
       phone: req.body.dataToUpdate.phone,
-      roleId: req.body.dataToUpdate.roleId,
-    });
+      roleId: req.body.dataToUpdate.roleId
+    })
 
     return res.status(201).json({
-      message: "User Updated successfully",
-      data: userData,
-    });
+      message: 'User Updated successfully',
+      data: userData
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
