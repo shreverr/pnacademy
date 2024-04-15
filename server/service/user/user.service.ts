@@ -1,14 +1,18 @@
 import {
+  createRoleInDB,
   createUser,
+  getPasswordById,
   getUserByEmail,
+  getUserById,
   updateUserInDb,
 } from "../../model/user/user.model";
-import { UserData } from "../../types/user.types";
+import { RoleData, UserData, authTokens } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
-import { promises } from "dns";
+import bcrypt from "bcrypt"
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async (user: {
   firstName: string;
@@ -51,7 +55,6 @@ export const registerUser = async (user: {
 
 export const updateUser = async (ToBeUpdatedUser: {
   id: string;
-
   firstName: string | null;
   lastName: string | null;
   email: string | null;
@@ -72,9 +75,59 @@ export const updateUser = async (ToBeUpdatedUser: {
     throw new AppError(
       commonErrorsDictionary.internalServerError.name,
       commonErrorsDictionary.internalServerError.httpCode,
-      "kuch galat hogya",
+      "Something went wrong while updating user",
       false
     );
   }
   return UpdatedUser;
-};
+}
+
+// export const loginUser = async (user: {
+//   id: string;
+//   password: string;
+// }): Promise<authTokens> => {
+//   const userExists = await getUserById(user.id)
+//   const correctPassword = (await getPasswordById(user.id))?.password ?? ''
+
+//   if (!userExists || ! await bcrypt.compare(user.password, correctPassword))
+//     throw new AppError(
+//       "Invalid credentials",
+//       401,
+//       "Invalid credentials",
+//       false
+//     );
+
+//   const token = jwt.sign({ userId: user.id, userId: user.username, roles: user.roles, permissions: user.permissions }, secretKey);
+
+//   return userData;
+// }
+
+export const createRole = async (role: {
+  name: string;
+  canManageAssessment: boolean;
+  canManageUser: boolean;
+  canManageRole: boolean;
+  canManageNotification: boolean;
+  canManageLocalGroup: boolean;
+  canAttemptAssessment: boolean;
+  canViewReport: boolean;
+  canManageMyAccount: boolean;
+  canViewNotification: boolean;
+}): Promise<RoleData | null> => {
+  
+  const roleData = await createRoleInDB({
+    id: uuid(),
+    name: role.name,
+    canManageAssessment: role.canManageAssessment,
+    canManageUser: role.canManageUser,
+    canManageRole: role.canManageRole,
+    canManageNotification: role.canManageNotification,
+    canManageLocalGroup: role.canManageLocalGroup,
+    canAttemptAssessment: role.canAttemptAssessment,
+    canViewReport: role.canViewReport,
+    canManageMyAccount: role.canManageMyAccount,
+    canViewNotification: role.canViewNotification,
+  })
+  
+  return roleData;
+}

@@ -1,32 +1,32 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../../config/database'
 
-interface RoleAttributes {
+export interface RoleAttributes {
   id: string
   name: string
-  can_manage_assessment: boolean
-  can_manage_user: boolean
-  can_manage_role: boolean
-  can_manage_notification: boolean
-  can_manage_local_group: boolean
-  can_attempt_assessment: boolean
-  can_view_report: boolean
-  can_manage_my_account: boolean
-  can_view_notification: boolean
+  canManageAssessment: boolean
+  canManageUser: boolean
+  canManageRole: boolean
+  canManageNotification: boolean
+  canManageLocalGroup: boolean
+  canAttemptAssessment: boolean
+  canViewReport: boolean
+  canManageMyAccount: boolean
+  canViewNotification: boolean
 }
 
 class Role extends Model<RoleAttributes> implements RoleAttributes {
   public id!: string
   public name!: string
-  public can_manage_assessment!: boolean
-  public can_manage_user!: boolean
-  public can_manage_role!: boolean
-  public can_manage_notification!: boolean
-  public can_manage_local_group!: boolean
-  public can_attempt_assessment!: boolean
-  public can_view_report!: boolean
-  public can_manage_my_account!: boolean
-  public can_view_notification!: boolean
+  public canManageAssessment!: boolean
+  public canManageUser!: boolean
+  public canManageRole!: boolean
+  public canManageNotification!: boolean
+  public canManageLocalGroup!: boolean
+  public canAttemptAssessment!: boolean
+  public canViewReport!: boolean
+  public canManageMyAccount!: boolean
+  public canViewNotification!: boolean
 }
 Role.init(
   {
@@ -38,47 +38,47 @@ Role.init(
       type: DataTypes.STRING,
       allowNull: false
     },
-    can_manage_assessment: {
+    canManageAssessment: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_manage_user: {
+    canManageUser: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_manage_role: {
+    canManageRole: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_manage_notification: {
+    canManageNotification: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_manage_local_group: {
+    canManageLocalGroup: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_attempt_assessment: {
+    canAttemptAssessment: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_view_report: {
+    canViewReport: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_manage_my_account: {
+    canManageMyAccount: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
-    can_view_notification: {
+    canViewNotification: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false

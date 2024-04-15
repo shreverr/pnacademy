@@ -6,3 +6,22 @@ export type UserData = {
   email: string | null;
   phone: string | null;
 }
+
+export type authTokens = {
+  accessToken: string
+  refreshToken: string
+}
+
+export type RoleData = {
+  id: string;
+  name: string;
+  canManageAssessment: boolean;
+  canManageUser: boolean;
+  canManageRole: boolean;
+  canManageNotification: boolean;
+  canManageLocalGroup: boolean;
+  canAttemptAssessment: boolean;
+  canViewReport: boolean;
+  canManageMyAccount: boolean;
+  canViewNotification: boolean;
+};

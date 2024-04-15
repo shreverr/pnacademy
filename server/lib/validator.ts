@@ -51,12 +51,11 @@ export const validateUserRegister = [
 ]
 
 export const validateUserLogin = [
-  check('id')
-    .optional()
+  check('email')
     .notEmpty()
-    .isUUID(4)
+    .isEmail()
     .escape()
-    .withMessage('User Id must be UUID v4'),
+    .withMessage('Must me valid email address'),
 
   check('password').notEmpty().isStrongPassword({
     minLength: 8,
@@ -108,4 +107,50 @@ export const validateUserUpdate = [
     .isLength({ min: 10, max: 10 })
     .withMessage('Phone number must be a valid phone number'),
   check('dataToUpdate.role_id').notEmpty()
+]
+
+export const validateUserRole = [
+  check('name')
+    .not()
+    .isEmpty()
+    .isLength({ min: 2 })
+    .escape()
+    .withMessage('Role name must be more than 2 characters long'),
+
+  check('permissions.canManageAssessment')
+    .isBoolean()
+    .withMessage('canManageAssessment must be a boolean'),
+
+  check('permissions.canManageUser')
+    .isBoolean()
+    .withMessage('canManageUser must be a boolean'),
+
+  check('permissions.canManageRole')
+    .isBoolean()
+    .withMessage('canManageRole must be a boolean'),
+
+  check('permissions.canManageNotification')
+    .isBoolean()
+    .withMessage('canManageNotification must be a boolean'),
+
+  check('permissions.canManageLocalGroup')
+    .isBoolean()
+    .withMessage('canManageLocalGroup must be a boolean'),
+
+  check('permissions.canAttemptAssessment')
+    .isBoolean()
+    .withMessage('canAttemptAssessment must be a boolean'),
+
+  check('permissions.canViewReport')
+    .isBoolean()
+    .withMessage('canViewReport must be a boolean'),
+
+  check('permissions.canManageMyAccount')
+    .isBoolean()
+    .withMessage('canManageMyAccount must be a boolean'),
+
+  check('permissions.canViewNotification')
+    .isBoolean()
+    .withMessage('canViewNotification must be a boolean'),
+
 ]

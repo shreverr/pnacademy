@@ -1,16 +1,18 @@
 import express from "express";
 import type { Router } from "express";
 import {
+  createRoleController,
   registerUserController,
   UpdateUserController,
+  xd,
 } from "../controller/user/user.controller";
 import {
   validateUserLogin,
   validateUserRegister,
+  validateUserRole,
   validateUserUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
-import { updateUser } from "../service/user/user.service";
 
 const router: Router = express.Router();
 
@@ -204,6 +206,20 @@ router.post(
   validateUserUpdate,
   validateRequest,
   UpdateUserController
-);
+)
+
+// router.post(
+//   '/login',
+//   validateUserLogin,
+//   validateRequest,
+//   loginUserController
+// )
+
+router.post(
+  "/role",
+  validateUserRole,
+  validateRequest,
+  createRoleController
+)
 
 export default router;

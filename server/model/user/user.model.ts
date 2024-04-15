@@ -2,8 +2,9 @@ import { sequelize } from '../../config/database'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Password from '../../schema/user/password.schema'
+import Role from '../../schema/user/role.schema'
 import User from '../../schema/user/user.schema'
-import { type UserData } from '../../types/user.types'
+import { RoleData, type UserData } from '../../types/user.types'
 
 export const getUserByEmail = async (
   email: string
@@ -139,6 +140,76 @@ export const updateUserInDb = async (userData: {
   } catch (error) {
     throw new AppError(
       'error updating user',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const getPasswordById = async (
+  id: string
+): Promise<Password | null> => {
+  try {
+    const password = await Password.findOne({
+      where: {
+        user_id: id
+      },
+      raw: true
+    })
+
+    return password
+  } catch (error) {
+    throw new AppError(
+      'error getting password by id',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const createRoleInDB = async (role: RoleData): Promise<RoleData | null> => {
+  logger.info(`Creating role: ${role.name}`)
+  try {
+    const createdRole = await Role.create({
+      id: role.id,
+      name: role.name,
+      canManageAssessment: role.canManageAssessment,
+      canManageUser: role.canManageUser,
+      canManageRole: role.canManageRole,
+      canManageNotification: role.canManageNotification,
+      canManageLocalGroup: role.canManageLocalGroup,
+      canAttemptAssessment: role.canAttemptAssessment,
+      canViewReport: role.canViewReport,
+      canManageMyAccount: role.canManageMyAccount,
+      canViewNotification: role.canViewNotification
+    }, {
+      raw: true
+    })
+    return createdRole
+  } catch (error) {
+    throw new AppError(
+      'error creating role',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const getRoleById = async (id: string): Promise<RoleData | null> => {
+  logger.info(`Fetching role by id: ${id}`)
+  try {
+    const role = await Role.findOne({
+      where: {
+        id
+      }
+    })
+    return role
+  } catch (error) {
+    throw new AppError(
+      'error finding role',
       500,
       'Something went wrong',
       false
