@@ -1,6 +1,7 @@
 import {
   createUser,
   getUserByEmail,
+  getUserById,
   updateUserInDb,
 } from "../../model/user/user.model";
 import { UserData } from "../../types/user.types";
@@ -59,6 +60,15 @@ export const updateUser = async (ToBeUpdatedUser: {
   phone: string | null;
   roleId: string | null;
 }): Promise<UserData | null> => {
+  const existingUser = await getUserById(ToBeUpdatedUser.id);
+  if (!existingUser) {
+    throw new AppError(
+      'User not found',
+      404,
+      'User with this id does not exist',
+      false
+    )
+  }
   const UpdatedUser = await updateUserInDb({
     id: ToBeUpdatedUser.id,
     firstName: ToBeUpdatedUser.firstName,

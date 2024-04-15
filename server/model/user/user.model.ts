@@ -101,15 +101,8 @@ export const updateUserInDb = async (userData: {
   roleId: string | null
 }): Promise<UserData | null> => {
   logger.info(`Updating user with id ${userData.id}`)
-  const existingUser = await getUserById(userData.id)
-  if (!existingUser) {
-    throw new AppError(
-      'User not found',
-      404,
-      'User with this id does not exist',
-      false
-    )
-  }
+  
+  
 
   try {
     const updateData: any = {

@@ -10,7 +10,6 @@ import {
   validateUserUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
-import { updateUser } from "../service/user/user.service";
 
 const router: Router = express.Router();
 
