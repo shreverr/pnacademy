@@ -2,9 +2,10 @@ import { sequelize } from '../../config/database'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Password from '../../schema/user/password.schema'
+import RefreshToken from '../../schema/user/refreshToken.schema'
 import Role from '../../schema/user/role.schema'
 import User from '../../schema/user/user.schema'
-import { RoleData, type UserData } from '../../types/user.types'
+import { RefreshTokenData, RoleData, type UserData } from '../../types/user.types'
 
 export const getUserByEmail = async (
   email: string
@@ -94,7 +95,7 @@ export const createUser = async (userData: {
 };
 
 export const updateUserInDb = async (userData: {
-  id: UUID;
+  id: string;
   firstName: string | null;
   lastName: string | null;
   email: string | null;
