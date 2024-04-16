@@ -207,7 +207,7 @@ router.post(
   validateUserUpdate,
   validateRequest,
   UpdateUserController
-)
+);
 
 /**
  * @swagger
@@ -389,5 +389,6 @@ router.post(
   validateRequest,
   createRoleController
 )
+router.post("/role", validateUserRole, validateRequest, createRoleController);
 
 export default router;
