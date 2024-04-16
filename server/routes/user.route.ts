@@ -4,7 +4,6 @@ import {
   createRoleController,
   registerUserController,
   UpdateUserController,
-  xd,
 } from "../controller/user/user.controller";
 import {
   validateUserLogin,
@@ -206,7 +205,7 @@ router.post(
   validateUserUpdate,
   validateRequest,
   UpdateUserController
-)
+);
 
 // router.post(
 //   '/login',
@@ -215,11 +214,6 @@ router.post(
 //   loginUserController
 // )
 
-router.post(
-  "/role",
-  validateUserRole,
-  validateRequest,
-  createRoleController
-)
+router.post("/role", validateUserRole, validateRequest, createRoleController);
 
 export default router;

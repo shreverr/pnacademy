@@ -2,10 +2,15 @@ import {
   type NextFunction,
   type Request,
   type RequestHandler,
-  type Response
-} from 'express'
-import { createRole, registerUser, updateUser } from '../../service/user/user.service'
-import { getRoleById } from '../../model/user/user.model'
+  type Response,
+} from "express";
+import {
+  createRole,
+  registerUser,
+  updateUser,
+} from "../../service/user/user.service";
+import { getRoleById } from "../../model/user/user.model";
+import exp from "constants";
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -19,17 +24,17 @@ export const registerUserController: RequestHandler = async (
       email: req.body.email,
       password: req.body.password,
       phone: req.body.phone,
-      roleId: req.body.roleId
-    })
+      roleId: req.body.roleId,
+    });
 
     return res.status(201).json({
-      message: 'User registered successfully',
-      data: userData
-    })
+      message: "User registered successfully",
+      data: userData,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 export const UpdateUserController: RequestHandler = async (
   req: Request,
@@ -44,17 +49,17 @@ export const UpdateUserController: RequestHandler = async (
       email: req.body.dataToUpdate.email,
       password: req.body.dataToUpdate.password,
       phone: req.body.dataToUpdate.phone,
-      roleId: req.body.dataToUpdate.roleId
-    })
+      roleId: req.body.dataToUpdate.roleId,
+    });
 
     return res.status(201).json({
-      message: 'User Updated successfully',
-      data: userData
-    })
+      message: "User Updated successfully",
+      data: userData,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 // export const loginUserController: RequestHandler = async (
 //   req: Request,
@@ -93,17 +98,17 @@ export const createRoleController: RequestHandler = async (
       canAttemptAssessment: req.body.permissions.canAttemptAssessment,
       canViewReport: req.body.permissions.canViewReport,
       canManageMyAccount: req.body.permissions.canManageMyAccount,
-      canViewNotification: req.body.permissions.canViewNotification
-    })
+      canViewNotification: req.body.permissions.canViewNotification,
+    });
 
     return res.status(201).json({
-      message: 'User registered successfully',
-      data: createdRole
-    })
+      message: "User registered successfully",
+      data: createdRole,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 export const xd: RequestHandler = async (
   req: Request,
@@ -111,13 +116,21 @@ export const xd: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const role = await getRoleById(req.body.id)
+    const role = await getRoleById(req.body.id);
 
     return res.status(201).json({
-      message: 'User registered successfully',
-      data: role
-    })
+      message: "User registered successfully",
+      data: role,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
+
+// "name": "Assessment XYZ",
+//   "description": "This assessment evaluates skills in XYZ.",
+//   "is_active": true,
+//   "start_at": "2024-04-15T08:00:00Z",
+//   "end_at": "2024-04-15T18:00:00Z",
+//   "duration": "PT10H",
+//   "created_by": "John Doe",

@@ -1,3 +1,5 @@
+
+
 export type UserData = {
   id: string;
   role_id: string | null;
@@ -5,12 +7,12 @@ export type UserData = {
   last_name: string;
   email: string | null;
   phone: string | null;
-}
+};
 
 export type authTokens = {
-  accessToken: string
-  refreshToken: string
-}
+  accessToken: string;
+  refreshToken: string;
+};
 
 export type RoleData = {
   id: string;
@@ -25,3 +27,4 @@ export type RoleData = {
   canManageMyAccount: boolean;
   canViewNotification: boolean;
 };
+

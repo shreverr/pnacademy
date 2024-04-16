@@ -11,8 +11,9 @@ import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
-import bcrypt from "bcrypt"
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { UUID } from "crypto";
 
 export const registerUser = async (user: {
   firstName: string;
@@ -54,7 +55,7 @@ export const registerUser = async (user: {
 };
 
 export const updateUser = async (ToBeUpdatedUser: {
-  id: string;
+  id: UUID;
   firstName: string | null;
   lastName: string | null;
   email: string | null;
@@ -65,11 +66,11 @@ export const updateUser = async (ToBeUpdatedUser: {
   const existingUser = await getUserById(ToBeUpdatedUser.id);
   if (!existingUser) {
     throw new AppError(
-      'User not found',
+      "User not found",
       404,
-      'User with this id does not exist',
+      "User with this id does not exist",
       false
-    )
+    );
   }
   const UpdatedUser = await updateUserInDb({
     id: ToBeUpdatedUser.id,
@@ -89,7 +90,7 @@ export const updateUser = async (ToBeUpdatedUser: {
     );
   }
   return UpdatedUser;
-}
+};
 
 // export const loginUser = async (user: {
 //   id: string;
@@ -123,7 +124,6 @@ export const createRole = async (role: {
   canManageMyAccount: boolean;
   canViewNotification: boolean;
 }): Promise<RoleData | null> => {
-  
   const roleData = await createRoleInDB({
     id: uuid(),
     name: role.name,
@@ -136,7 +136,7 @@ export const createRole = async (role: {
     canViewReport: role.canViewReport,
     canManageMyAccount: role.canManageMyAccount,
     canViewNotification: role.canViewNotification,
-  })
-  
+  });
+
   return roleData;
-}
+};
