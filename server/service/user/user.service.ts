@@ -2,8 +2,10 @@ import {
   createRoleInDB,
   createUser,
   getPasswordById,
+  getRoleById,
   getUserByEmail,
   getUserById,
+  saveRefreshToken,
   updateUserInDb,
 } from "../../model/user/user.model";
 import { RoleData, UserData, authTokens } from "../../types/user.types";
@@ -91,25 +93,99 @@ export const updateUser = async (ToBeUpdatedUser: {
   return UpdatedUser;
 }
 
-// export const loginUser = async (user: {
-//   id: string;
-//   password: string;
-// }): Promise<authTokens> => {
-//   const userExists = await getUserById(user.id)
-//   const correctPassword = (await getPasswordById(user.id))?.password ?? ''
+export const loginUser = async (user: {
+  email: string;
+  password: string;
+}): Promise<authTokens> => {
+  const existingUser = await getUserByEmail(user.email)
+  if (!existingUser)
+    throw new AppError(
+      "Invalid credentials",
+      401,
+      "Invalid credentials",
+      false
+    )
 
-//   if (!userExists || ! await bcrypt.compare(user.password, correctPassword))
-//     throw new AppError(
-//       "Invalid credentials",
-//       401,
-//       "Invalid credentials",
-//       false
-//     );
+  const correctPassword = (await getPasswordById(existingUser.id))?.password ?? ''
 
-//   const token = jwt.sign({ userId: user.id, userId: user.username, roles: user.roles, permissions: user.permissions }, secretKey);
+  if (! await bcrypt.compare(user.password, correctPassword))
+    throw new AppError(
+      "Invalid credentials",
+      401,
+      "Invalid credentials",
+      false
+    )
 
-//   return userData;
-// }
+  if (!existingUser.role_id)
+    throw new AppError(
+      "Role not assigned",
+      401,
+      "Role not assigned",
+      false
+    )
+
+  const userRole = await getRoleById(existingUser.role_id)
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
+  if (!accessTokenSecret)
+    throw new AppError(
+      "Internal server error",
+      500,
+      "Access token secret not found",
+      false
+    )
+
+  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET
+  if (!refreshTokenSecret)
+    throw new AppError(
+      "Internal server error",
+      500,
+      "Refresh token secret not found",
+      false
+    )
+
+  const accessToken = jwt.sign({
+    userId: existingUser.id,
+    roleId: existingUser.role_id,
+    permissions: {
+      canManageAssessment: userRole?.canManageAssessment,
+      canManageUser: userRole?.canManageUser,
+      canManageRole: userRole?.canManageRole,
+      canManageNotification: userRole?.canManageNotification,
+      canManageLocalGroup: userRole?.canManageLocalGroup,
+      canAttemptAssessment: userRole?.canAttemptAssessment,
+      canViewReport: userRole?.canViewReport,
+      canManageMyAccount: userRole?.canManageMyAccount,
+      canViewNotification: userRole?.canViewNotification,
+    }
+  },
+    accessTokenSecret,
+    {
+      expiresIn: '15m'
+    }
+  )
+
+  const refreshToken = jwt.sign({
+    userId: existingUser.id,
+  },
+    refreshTokenSecret,
+    {
+      expiresIn: '7d'
+    }
+  )
+
+  if (! await saveRefreshToken({ userId: existingUser.id, refreshToken }))
+    throw new AppError(
+      "Internal server error",
+      500,
+      "Error saving refresh token",
+      false
+    )
+
+  return {
+    accessToken,
+    refreshToken
+  }
+}
 
 export const createRole = async (role: {
   name: string;
@@ -123,7 +199,7 @@ export const createRole = async (role: {
   canManageMyAccount: boolean;
   canViewNotification: boolean;
 }): Promise<RoleData | null> => {
-  
+
   const roleData = await createRoleInDB({
     id: uuid(),
     name: role.name,
@@ -137,6 +213,6 @@ export const createRole = async (role: {
     canManageMyAccount: role.canManageMyAccount,
     canViewNotification: role.canViewNotification,
   })
-  
+
   return roleData;
 }

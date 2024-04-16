@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response
 } from 'express'
-import { createRole, registerUser, updateUser } from '../../service/user/user.service'
+import { createRole, loginUser, registerUser, updateUser } from '../../service/user/user.service'
 import { getRoleById } from '../../model/user/user.model'
 
 export const registerUserController: RequestHandler = async (
@@ -56,26 +56,26 @@ export const UpdateUserController: RequestHandler = async (
   }
 }
 
-// export const loginUserController: RequestHandler = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const tokens = await loginUser({
-//       id: req.body.id,
-//       password: req.body.password
-//     })
+export const loginUserController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const tokens = await loginUser ({
+      email: req.body.email,
+      password: req.body.password
+    })
 
-//     return res.status(200).json({
-//       message: 'User logged in successfully',
-//       accessToken: tokens.accessToken,
-//       refreshToken: tokens.refreshToken
-//     })
-//   } catch (error) {
-//     next(error)
-//   }
-// }
+    return res.status(200).json({
+      message: 'User logged in successfully',
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const createRoleController: RequestHandler = async (
   req: Request,
@@ -97,25 +97,8 @@ export const createRoleController: RequestHandler = async (
     })
 
     return res.status(201).json({
-      message: 'User registered successfully',
+      message: 'Role Created successfully',
       data: createdRole
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-export const xd: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const role = await getRoleById(req.body.id)
-
-    return res.status(201).json({
-      message: 'User registered successfully',
-      data: role
     })
   } catch (error) {
     next(error)

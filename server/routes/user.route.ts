@@ -2,6 +2,7 @@ import express from "express";
 import type { Router } from "express";
 import {
   createRoleController,
+  loginUserController,
   // loginUserController,
   registerUserController,
   UpdateUserController,
@@ -208,12 +209,58 @@ router.post(
   UpdateUserController
 )
 
-// router.post(
-//   '/login',
-//   validateUserLogin,
-//   validateRequest,
-//   loginUserController
-// )
+/**
+ * @swagger
+ * /v1/user/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [User Controller]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of user login.
+ *                 accessToken:
+ *                   type: string
+ *                   description: Access token for authenticated user.
+ *                 refreshToken:
+ *                   type: string
+ *                   description: Refresh token for authenticated user.
+ *             example:
+ *               message: User logged in successfully
+ *               accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+ *               refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
+router.post(
+  '/login',
+  validateUserLogin,
+  validateRequest,
+  loginUserController
+)
 
 /**
  * @swagger

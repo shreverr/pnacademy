@@ -25,3 +25,8 @@ export type RoleData = {
   canManageMyAccount: boolean;
   canViewNotification: boolean;
 };
+
+export type RefreshTokenData = {
+  user_id: string;
+  refresh_token: string;
+}

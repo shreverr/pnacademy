@@ -2,9 +2,10 @@ import { sequelize } from '../../config/database'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Password from '../../schema/user/password.schema'
+import RefreshToken from '../../schema/user/refreshToken.schema'
 import Role from '../../schema/user/role.schema'
 import User from '../../schema/user/user.schema'
-import { RoleData, type UserData } from '../../types/user.types'
+import { RefreshTokenData, RoleData, type UserData } from '../../types/user.types'
 
 export const getUserByEmail = async (
   email: string
@@ -102,8 +103,8 @@ export const updateUserInDb = async (userData: {
   roleId: string | null
 }): Promise<UserData | null> => {
   logger.info(`Updating user with id ${userData.id}`)
-  
-  
+
+
 
   try {
     const updateData: any = {
@@ -206,6 +207,29 @@ export const getRoleById = async (id: string): Promise<RoleData | null> => {
       500,
       'Something went wrong',
       false
+    )
+  }
+}
+
+export const saveRefreshToken = async (token: { 
+  userId: string, 
+  refreshToken: string 
+}): Promise<RefreshTokenData> => {
+  logger.info(`Saving refresh token for ${token.userId}`)
+  try {
+    const refreshToken = await RefreshToken.create({
+      user_id: token.userId,
+      refresh_token: token.refreshToken
+    }, {
+      raw: true
+    })
+    return refreshToken
+  } catch (error) {
+    throw new AppError(
+      'error finding role',
+      500,
+      'Something went wrong',
+      true
     )
   }
 }
