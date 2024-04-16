@@ -33,9 +33,10 @@ const instantiateModels = async (): Promise<void> => {
   User.hasOne(Password)
   Password.belongsTo(User)
 
-  User.hasOne(Role)
-  Role.belongsTo(User)
-
+  Role.hasOne(User, {
+    foreignKey: 'role_id'
+  })
+  
   User.hasMany(Assessment)
   Assessment.belongsTo(User)
   Question.hasMany(Option)
