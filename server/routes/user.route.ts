@@ -2,6 +2,7 @@ import express from "express";
 import type { Router } from "express";
 import {
   createRoleController,
+  // loginUserController,
   registerUserController,
   UpdateUserController,
 } from "../controller/user/user.controller";
@@ -214,6 +215,133 @@ router.post(
 //   loginUserController
 // )
 
+/**
+ * @swagger
+ * /v1/user/role:
+ *   post:
+ *     summary: Create a new user role
+ *     tags: [User Controller]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - permissions
+ *             properties:
+ *               name:
+ *                 type: string
+ *               permissions:
+ *                 type: object
+ *                 required:
+ *                   - canManageAssessment
+ *                   - canManageUser
+ *                   - canManageRole
+ *                   - canManageNotification
+ *                   - canManageLocalGroup
+ *                   - canAttemptAssessment
+ *                   - canViewReport
+ *                   - canManageMyAccount
+ *                   - canViewNotification
+ *                 properties:
+ *                   canManageAssessment:
+ *                     type: boolean
+ *                   canManageUser:
+ *                     type: boolean
+ *                   canManageRole:
+ *                     type: boolean
+ *                   canManageNotification:
+ *                     type: boolean
+ *                   canManageLocalGroup:
+ *                     type: boolean
+ *                   canAttemptAssessment:
+ *                     type: boolean
+ *                   canViewReport:
+ *                     type: boolean
+ *                   canManageMyAccount:
+ *                     type: boolean
+ *                   canViewNotification:
+ *                     type: boolean
+ *     responses:
+ *       '201':
+ *         description: Role created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of role creation.
+ *                 data:
+ *                   type: object
+ *                   description: The created role object.
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: The ID of the created role.
+ *                     name:
+ *                       type: string
+ *                       description: The name of the created role.
+ *                     permissions:
+ *                       type: object
+ *                       description: The permissions associated with the created role.
+ *                       properties:
+ *                         canManageAssessment:
+ *                           type: boolean
+ *                           description: Whether the role can manage assessments.
+ *                         canManageUser:
+ *                           type: boolean
+ *                           description: Whether the role can manage users.
+ *                         canManageRole:
+ *                           type: boolean
+ *                           description: Whether the role can manage roles.
+ *                         canManageNotification:
+ *                           type: boolean
+ *                           description: Whether the role can manage notifications.
+ *                         canManageLocalGroup:
+ *                           type: boolean
+ *                           description: Whether the role can manage local groups.
+ *                         canAttemptAssessment:
+ *                           type: boolean
+ *                           description: Whether the role can attempt assessments.
+ *                         canViewReport:
+ *                           type: boolean
+ *                           description: Whether the role can view reports.
+ *                         canManageMyAccount:
+ *                           type: boolean
+ *                           description: Whether the role can manage its own account.
+ *                         canViewNotification:
+ *                           type: boolean
+ *                           description: Whether the role can view notifications.
+ *             example:
+ *               message: Role created successfully
+ *               data:
+ *                 id: "81d0198a-9872-4f73-8ae6-c8e6ee3aaa98"
+ *                 name: admin
+ *                 permissions:
+ *                   canManageAssessment: true
+ *                   canManageUser: true
+ *                   canManageRole: true
+ *                   canManageNotification: true
+ *                   canManageLocalGroup: true
+ *                   canAttemptAssessment: true
+ *                   canViewReport: true
+ *                   canManageMyAccount: true
+ *                   canViewNotification: true
+ *       '409':
+ *         description: Conflict
+ *       '500':
+ *         description: Server Error
+ */
+router.post(
+  "/role",
+  validateUserRole,
+  validateRequest,
+  createRoleController
+)
 router.post("/role", validateUserRole, validateRequest, createRoleController);
 
 export default router;
