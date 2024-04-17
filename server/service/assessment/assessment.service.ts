@@ -3,13 +3,15 @@ import {
   createAssementInDB,
   createOptionInDB,
   createQuestionInDB,
+  createTagInDB,
   getAssessmentById,
   getQuestionById
 } from '../../model/assessment/assesment.model'
 import {
   type OptionData,
   type QuestionData,
-  type AssementData
+  type AssementData,
+  TagData
 } from '../../types/assessment.types'
 import { v4 as uuid } from 'uuid'
 import { getUserById } from '../../model/user/user.model'
@@ -89,4 +91,15 @@ export const createOption = async (option: {
     is_correct: option.is_correct
   })
   return optionData
+}
+export const createTag = async (tag: {
+  name: string
+}): Promise<TagData | null> => {
+  
+  const TagData = await createTagInDB({
+    id: uuid(),
+    name: tag.name
+  
+  })
+  return TagData
 }

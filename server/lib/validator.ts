@@ -220,7 +220,14 @@ export const validateOption = [
     .escape()
     .withMessage('Assessment description must be more than 2 characters long'),
 
-  check('is_correct')
-    .isBoolean()
-    .withMessage('isCorrect must be a boolean')
+  check('is_correct').isBoolean().withMessage('isCorrect must be a boolean')
+]
+
+export const validateTag = [
+  check('name')
+    .not()
+    .isEmpty()
+    .isLength({ min: 2 })
+    .escape()
+    .withMessage('Assessment name must be more than 2 characters long')
 ]

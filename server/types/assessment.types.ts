@@ -19,3 +19,7 @@ export interface OptionData {
   description: string
   is_correct: boolean
 }
+export interface TagData{
+  id: string
+  name: string
+}
