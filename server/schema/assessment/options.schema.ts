@@ -3,13 +3,13 @@ import { sequelize } from '../../config/database'
 
 interface OptionAttributes {
   id: string
-  question_id: number
+  question_id: string
   description: string
   is_correct: boolean
 }
 class Option extends Model<OptionAttributes> implements OptionAttributes {
   public id!: string
-  public question_id!: number
+  public question_id!: string
   public description!: string
   public is_correct!: boolean
 }
@@ -20,7 +20,7 @@ Option.init(
       primaryKey: true
     },
     question_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false
     },
     description: {

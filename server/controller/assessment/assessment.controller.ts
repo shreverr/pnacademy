@@ -1,10 +1,14 @@
-import { createAssessment } from "../../service/assessment/assessment.service";
+import {
+  createAssessment,
+  createOption,
+  createQuestion
+} from '../../service/assessment/assessment.service'
 import {
   type NextFunction,
   type Request,
   type RequestHandler,
-  type Response,
-} from "express";
+  type Response
+} from 'express'
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -19,14 +23,55 @@ export const CreateAssessmentController: RequestHandler = async (
       start_at: req.body.start_at,
       end_at: req.body.end_at,
       duration: req.body.duration,
-      created_by: req.body.created_by,
-    });
+      created_by: req.body.created_by
+    })
 
     return res.status(201).json({
-      message: "Assessment created successfully",
-      data: assessment,
-    });
+      message: 'Assessment created successfully',
+      data: assessment
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
+export const CreateQuestionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const question = await createQuestion({
+      assessment_id: req.body.assessment_id,
+      description: req.body.description,
+      marks: req.body.marks
+    })
+
+    return res.status(201).json({
+      message: 'Question created successfully',
+      data: question
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const CreateOptionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const option = await createOption({
+      question_id: req.body.question_id,
+      description: req.body.description,
+      is_correct: req.body.is_correct
+    })
+
+    return res.status(201).json({
+      message: 'Option created successfully',
+      data: option
+    })
+  } catch (error) {
+    next(error)
+  }
+}

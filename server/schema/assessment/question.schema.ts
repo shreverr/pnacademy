@@ -3,13 +3,13 @@ import { sequelize } from '../../config/database'
 
 interface QuestionAttributes {
   id: string
-  assessment_id: number
+  assessment_id: string
   description: string
   marks: number
 }
 class Question extends Model<QuestionAttributes> implements QuestionAttributes {
   public id!: string
-  public assessment_id!: number
+  public assessment_id!: string
   public description!: string
   public marks!: number
 }
@@ -20,7 +20,7 @@ Question.init(
       primaryKey: true
     },
     assessment_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false
     },
     description: {

@@ -18,7 +18,7 @@ void connectDatabase();
 void sequelize
   .sync({
     // alter: true
-    // force: true,
+   force: true,
   })
   .then(() => {
     logger.info("Postgres database synced successfully!");
@@ -29,7 +29,7 @@ void sequelize
 
 const server = app.listen(port, () => {
   logger.info(`Server listening at http://localhost:${port}`);
-  swaggerDocs(app)
+  swaggerDocs(app);
 });
 
 process.on("uncaughtException", (err) => {
