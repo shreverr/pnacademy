@@ -32,3 +32,4 @@ export type RefreshTokenData = {
   user_id: string;
   refresh_token: string;
 }
+

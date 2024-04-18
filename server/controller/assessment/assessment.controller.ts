@@ -3,6 +3,10 @@ import {
   createOption,
   createQuestion,
   createTag,
+  updateAssessment,
+  updateOption,
+  updateQuestion,
+  updateTag,
 } from "../../service/assessment/assessment.service";
 import {
   type NextFunction,
@@ -93,3 +97,88 @@ export const CreateTagController: RequestHandler = async (
     next(error);
   }
 };
+
+export const UpdateAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessment = await updateAssessment({
+      id: req.body.id,
+      name: req.body.name,
+      description: req.body.description,
+      is_active: req.body.is_active,
+      start_at: req.body.start_at,
+      end_at: req.body.end_at,
+      duration: req.body.duration,
+    });
+
+    return res.status(201).json({
+      message: "Assessment updated successfully",
+      data: assessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UpdateQuestionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const question = await updateQuestion({
+      id: req.body.id,
+      description: req.body.description,
+      marks: req.body.marks,
+    });
+
+    return res.status(201).json({
+      message: "Question updated successfully",
+      data: question,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const UpdateOptionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const option = await updateOption({
+      id: req.body.id,
+      description: req.body.description,
+      is_correct: req.body.is_correct,
+    });
+
+    return res.status(201).json({
+      message: "Option updated successfully",
+      data: option,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UpdateTagController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const Tag = await updateTag({
+      id: req.body.id,
+      name: req.body.name,
+    });
+    return res.status(201).json({
+      message: "Tag updated successfully",
+      data: Tag,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
