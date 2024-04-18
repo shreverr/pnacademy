@@ -1,28 +1,28 @@
-import { type UUID } from "crypto";
+import { type UUID } from 'crypto'
 import {
   type OptionData,
   type QuestionData,
   type AssementData,
-  TagData,
-} from "../../types/assessment.types";
-import { AppError } from "../../lib/appError";
-import logger from "../../config/logger";
-import Assessment from "../../schema/assessment/assessment.schema";
-import Question from "../../schema/assessment/question.schema";
-import Option from "../../schema/assessment/options.schema";
-import Tag from "../../schema/assessment/tag.schema";
+  type TagData
+} from '../../types/assessment.types'
+import { AppError } from '../../lib/appError'
+import logger from '../../config/logger'
+import Assessment from '../../schema/assessment/assessment.schema'
+import Question from '../../schema/assessment/question.schema'
+import Option from '../../schema/assessment/options.schema'
+import Tag from '../../schema/assessment/tag.schema'
 
 export const createAssementInDB = async (assessment: {
-  id: string;
-  name: string;
-  description: string;
-  is_active: boolean;
-  start_at: Date;
-  end_at: Date;
-  duration: number;
-  created_by: UUID;
+  id: string
+  name: string
+  description: string
+  is_active: boolean
+  start_at: Date
+  end_at: Date
+  duration: number
+  created_by: UUID
 }): Promise<AssementData | null> => {
-  logger.info(`Creating assessment: ${assessment.name}`);
+  logger.info(`Creating assessment: ${assessment.name}`)
 
   try {
     // Create the assessment
@@ -35,113 +35,113 @@ export const createAssementInDB = async (assessment: {
         start_at: assessment.start_at,
         end_at: assessment.end_at,
         duration: assessment.duration,
-        created_by: assessment.created_by,
+        created_by: assessment.created_by
       },
       {
-        raw: true,
+        raw: true
       }
-    );
-    return createdAssessment;
+    )
+    return createdAssessment
   } catch (error) {
     throw new AppError(
-      "Error creating assessment",
+      'Error creating assessment',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 export const getOptionById = async (id: UUID): Promise<OptionData | null> => {
-  logger.info(`Getting Option with id: ${id}`);
+  logger.info(`Getting Option with id: ${id}`)
 
   try {
     const option = await Option.findOne({
       where: {
-        id,
+        id
       },
-      raw: true,
-    });
-    return option;
+      raw: true
+    })
+    return option
   } catch (error) {
     throw new AppError(
-      "Error getting assessment",
+      'Error getting assessment',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const getAssessmentById = async (
   id: UUID
 ): Promise<AssementData | null> => {
-  logger.info(`Getting assessment with id: ${id}`);
+  logger.info(`Getting assessment with id: ${id}`)
 
   try {
     // Find the assessment
     const assessment = await Assessment.findOne({
       where: {
-        id,
+        id
       },
-      raw: true,
-    });
-    return assessment;
+      raw: true
+    })
+    return assessment
   } catch (error) {
     throw new AppError(
-      "Error getting assessment",
+      'Error getting assessment',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const getQuestionById = async (
   id: UUID
 ): Promise<QuestionData | null> => {
-  logger.info(`Getting question with id: ${id}`);
+  logger.info(`Getting question with id: ${id}`)
   try {
     // Find the question
     const question = await Question.findOne({
       where: {
-        id,
+        id
       },
-      raw: true,
-    });
-    return question;
+      raw: true
+    })
+    return question
   } catch (error) {
     throw new AppError(
-      "Question not found ",
+      'Question not found ',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const getTagById = async (id: UUID): Promise<TagData | null> => {
-  logger.info(`Getting tag with id: ${id}`);
+  logger.info(`Getting tag with id: ${id}`)
 
   try {
     const tag = await Tag.findOne({
       where: {
-        id,
+        id
       },
-      raw: true,
-    });
-    return tag;
+      raw: true
+    })
+    return tag
   } catch (error) {
-    throw new AppError("Error getting tag", 500, "Something went wrong", false);
+    throw new AppError('Error getting tag', 500, 'Something went wrong', false)
   }
-};
+}
 
 export const createQuestionInDB = async (question: {
-  id: string;
-  assessment_id: UUID;
-  description: string;
-  marks: number;
+  id: string
+  assessment_id: UUID
+  description: string
+  marks: number
 }): Promise<QuestionData | null> => {
-  logger.info(`Creating question for assessment: ${question.assessment_id}`);
+  logger.info(`Creating question for assessment: ${question.assessment_id}`)
 
   try {
     const createdQuestion = await Question.create(
@@ -149,30 +149,30 @@ export const createQuestionInDB = async (question: {
         id: question.id,
         assessment_id: question.assessment_id,
         description: question.description,
-        marks: question.marks,
+        marks: question.marks
       },
       {
-        raw: true,
+        raw: true
       }
-    );
-    return createdQuestion;
+    )
+    return createdQuestion
   } catch (error) {
     throw new AppError(
-      "Error creating question",
+      'Error creating question',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const createOptionInDB = async (option: {
-  id: string;
-  question_id: UUID;
-  description: string;
-  is_correct: boolean;
+  id: string
+  question_id: UUID
+  description: string
+  is_correct: boolean
 }): Promise<OptionData | null> => {
-  logger.info(`Creating option for question: ${option.question_id}`);
+  logger.info(`Creating option for question: ${option.question_id}`)
 
   try {
     const createdOption = await Option.create(
@@ -180,60 +180,60 @@ export const createOptionInDB = async (option: {
         id: option.id,
         question_id: option.question_id,
         description: option.description,
-        is_correct: option.is_correct,
+        is_correct: option.is_correct
       },
       {
-        raw: true,
+        raw: true
       }
-    );
-    return createdOption;
+    )
+    return createdOption
   } catch (error) {
     throw new AppError(
-      "Error creating option",
+      'Error creating option',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const createTagInDB = async (tag: {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }): Promise<TagData | null> => {
-  logger.info(`Creating tag: ${tag.name}`);
+  logger.info(`Creating tag: ${tag.name}`)
 
   try {
     const createdTag = await Tag.create(
       {
         id: tag.id,
-        name: tag.name,
+        name: tag.name
       },
       {
-        raw: true,
+        raw: true
       }
-    );
-    return createdTag;
+    )
+    return createdTag
   } catch (error) {
     throw new AppError(
-      "Error creating tag",
+      'Error creating tag',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const updateAssessmentInDB = async (assessment: {
-  id: UUID;
-  name: string | null;
-  description: string | null;
-  is_active: boolean | null;
-  start_at: Date | null;
-  end_at: Date | null;
-  duration: number | null;
+  id: UUID
+  name: string | null
+  description: string | null
+  is_active: boolean | null
+  start_at: Date | null
+  end_at: Date | null
+  duration: number | null
 }): Promise<AssementData | null> => {
-  logger.info(`Updating assessment with id: ${assessment.id}`);
+  logger.info(`Updating assessment with id: ${assessment.id}`)
 
   try {
     // Find the assessment
@@ -243,143 +243,143 @@ export const updateAssessmentInDB = async (assessment: {
       is_active: assessment.is_active ?? undefined,
       start_at: assessment.start_at ?? undefined,
       end_at: assessment.end_at ?? undefined,
-      duration: assessment.duration ?? undefined,
-    };
+      duration: assessment.duration ?? undefined
+    }
     Object.keys(updatedAssessmentDate).forEach(
       (key) =>
         updatedAssessmentDate[key] === undefined &&
         delete updatedAssessmentDate[key]
-    );
+    )
     if (Object.keys(updatedAssessmentDate).length === 0) {
-      return null;
+      return null
     }
 
     const [_, [updatedAssessment]] = await Assessment.update(
       updatedAssessmentDate,
       {
         where: {
-          id: assessment.id,
+          id: assessment.id
         },
-        returning: true,
+        returning: true
       }
-    );
+    )
 
-    return updatedAssessment.dataValues as AssementData;
+    return updatedAssessment.dataValues as AssementData
   } catch (error) {
     throw new AppError(
-      "Error updating assessment",
+      'Error updating assessment',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const updateQuestionInDB = async (question: {
-  id: UUID;
-  description: string | null;
-  marks: number | null;
+  id: UUID
+  description: string | null
+  marks: number | null
 }): Promise<QuestionData | null> => {
-  logger.info(`Updating question with id: ${question.id}`);
+  logger.info(`Updating question with id: ${question.id}`)
 
   try {
     const updatedQuestionDate: any = {
       description: question.description ?? undefined,
-      marks: question.marks ?? undefined,
-    };
+      marks: question.marks ?? undefined
+    }
     Object.keys(updatedQuestionDate).forEach(
       (key) =>
         updatedQuestionDate[key] === undefined &&
         delete updatedQuestionDate[key]
-    );
+    )
     if (Object.keys(updatedQuestionDate).length === 0) {
-      return null;
+      return null
     }
 
     const [_, [updatedQuestion]] = await Question.update(updatedQuestionDate, {
       where: {
-        id: question.id,
+        id: question.id
       },
-      returning: true,
-    });
-    return updatedQuestion.dataValues as QuestionData;
+      returning: true
+    })
+    return updatedQuestion.dataValues as QuestionData
   } catch (error) {
     throw new AppError(
-      "Error updating question",
+      'Error updating question',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const updateOptionInDB = async (option: {
-  id: UUID;
-  description: string | null;
-  is_correct: boolean | null;
+  id: UUID
+  description: string | null
+  is_correct: boolean | null
 }): Promise<OptionData | null> => {
-  logger.info(`Updating option with id: ${option.id}`);
+  logger.info(`Updating option with id: ${option.id}`)
 
   try {
     const updatedOptionDate: any = {
       description: option.description ?? undefined,
-      is_correct: option.is_correct ?? undefined,
-    };
+      is_correct: option.is_correct ?? undefined
+    }
     Object.keys(updatedOptionDate).forEach(
       (key) =>
         updatedOptionDate[key] === undefined && delete updatedOptionDate[key]
-    );
+    )
     if (Object.keys(updatedOptionDate).length === 0) {
-      return null;
+      return null
     }
 
     const [_, [updatedOption]] = await Option.update(updatedOptionDate, {
       where: {
-        id: option.id,
+        id: option.id
       },
-      returning: true,
-    });
-    return updatedOption.dataValues as OptionData;
+      returning: true
+    })
+    return updatedOption.dataValues as OptionData
   } catch (error) {
     throw new AppError(
-      "Error updating option",
+      'Error updating option',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}
 
 export const updateTagInDB = async (tag: {
-  id: UUID;
-  name: string | null;
+  id: UUID
+  name: string | null
 }): Promise<TagData | null> => {
-  logger.info(`Updating tag with id: ${tag.id}`);
+  logger.info(`Updating tag with id: ${tag.id}`)
 
   try {
     const updatedTagDate: any = {
-      name: tag.name ?? undefined,
-    };
+      name: tag.name ?? undefined
+    }
     Object.keys(updatedTagDate).forEach(
       (key) => updatedTagDate[key] === undefined && delete updatedTagDate[key]
-    );
+    )
     if (Object.keys(updatedTagDate).length === 0) {
-      return null;
+      return null
     }
 
     const [_, [updatedTag]] = await Tag.update(updatedTagDate, {
       where: {
-        id: tag.id,
+        id: tag.id
       },
-      returning: true,
-    });
-    return updatedTag.dataValues as TagData;
+      returning: true
+    })
+    return updatedTag.dataValues as TagData
   } catch (error) {
     throw new AppError(
-      "Error updating tag",
+      'Error updating tag',
       500,
-      "Something went wrong",
+      'Something went wrong',
       false
-    );
+    )
   }
-};
+}

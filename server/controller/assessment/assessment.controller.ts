@@ -39,6 +39,7 @@ export const CreateAssessmentController: RequestHandler = async (
     next(error);
   }
 };
+
 export const CreateQuestionController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -80,6 +81,7 @@ export const CreateOptionController: RequestHandler = async (
     next(error);
   }
 };
+
 export const CreateTagController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -143,6 +145,7 @@ export const UpdateQuestionController: RequestHandler = async (
     next(error);
   }
 };
+
 export const UpdateOptionController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -181,4 +184,4 @@ export const UpdateTagController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
