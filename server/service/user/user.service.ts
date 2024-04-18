@@ -144,20 +144,22 @@ export const loginUser = async (user: {
       false
     )
 
+    const grantedPermissions = [
+      userRole?.canManageAssessment ? 'canManageAssessment' : '',
+      userRole?.canManageUser ? 'canManageUser' : '',
+      userRole?.canManageRole ? 'canManageRole' : '',
+      userRole?.canManageNotification ? 'canManageNotification' : '',
+      userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
+      userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
+      userRole?.canViewReport ? 'canViewReport' : '',
+      userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
+      userRole?.canViewNotification ? 'canViewNotification' : '',
+   ].filter(permission => permission !== '')
+
   const accessToken = jwt.sign({
     userId: existingUser.id,
     roleId: existingUser.role_id,
-    permissions: {
-      canManageAssessment: userRole?.canManageAssessment,
-      canManageUser: userRole?.canManageUser,
-      canManageRole: userRole?.canManageRole,
-      canManageNotification: userRole?.canManageNotification,
-      canManageLocalGroup: userRole?.canManageLocalGroup,
-      canAttemptAssessment: userRole?.canAttemptAssessment,
-      canViewReport: userRole?.canViewReport,
-      canManageMyAccount: userRole?.canManageMyAccount,
-      canViewNotification: userRole?.canViewNotification,
-    }
+    permissions: grantedPermissions
   },
     accessTokenSecret,
     {

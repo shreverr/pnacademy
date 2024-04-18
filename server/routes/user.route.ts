@@ -3,7 +3,6 @@ import type { Router } from "express";
 import {
   createRoleController,
   loginUserController,
-  // loginUserController,
   registerUserController,
   UpdateUserController,
 } from "../controller/user/user.controller";
