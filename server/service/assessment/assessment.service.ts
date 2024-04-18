@@ -4,6 +4,10 @@ import {
   createOptionInDB,
   createQuestionInDB,
   createTagInDB,
+  deleteAssessmentInDB,
+  deleteOptionInDB,
+  deleteQuestionInDB,
+  deleteTagInDB,
   getAssessmentById,
   getOptionById,
   getQuestionById,
@@ -199,4 +203,74 @@ export const updateTag = async (option: {
     name: option.name
   })
   return updatedTag
+}
+export const deleteAssessment = async (Assessment: {
+  id: UUID
+}): Promise<boolean> => {
+  const existingAssessment = await getAssessmentById(Assessment.id)
+  if (existingAssessment == null) {
+    throw new AppError(
+      'Assessment not found',
+      404,
+      "Assessment with this id does not exist so Can't delete assessment",
+      false
+    )
+  }
+  const deletedAssessment = await deleteAssessmentInDB({
+    id: Assessment.id
+  })
+  
+  return deletedAssessment;
+}
+
+export const deleteQuestion = async (question: {
+  id: UUID
+}): Promise<boolean> => {
+  const existingQuestion = await getQuestionById(question.id)
+  if (existingQuestion == null) {
+    throw new AppError(
+      'Question not found',
+      404,
+      "Question with this id does not exist so Can't delete question",
+      false
+    )
+  }
+  const deletedQuestion = await deleteQuestionInDB({
+    id: question.id
+  })
+  return deletedQuestion
+}
+export const deleteOption = async (option: {
+  id: UUID
+}): Promise<boolean> => {
+  const existingOption = await getOptionById(option.id)
+  if (existingOption == null) {
+    throw new AppError(
+      'Option not found',
+      404,
+      "Option with this id does not exist so Can't delete option",
+      false
+    )
+  }
+  const deletedOption = await deleteOptionInDB({
+    id: option.id
+  })
+  return deletedOption
+}
+export const deleteTag = async (tag: {
+  id: UUID
+}): Promise<boolean> => {
+  const existingTag = await getTagById(tag.id)
+  if (existingTag == null) {
+    throw new AppError(
+      'Tag not found',
+      404,
+      "Tag with this id does not exist so Can't delete tag",
+      false
+    )
+  }
+  const deletedTag = await deleteTagInDB({
+    id: tag.id
+  })
+  return deletedTag
 }

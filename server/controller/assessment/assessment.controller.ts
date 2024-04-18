@@ -3,6 +3,10 @@ import {
   createOption,
   createQuestion,
   createTag,
+  deleteAssessment,
+  deleteOption,
+  deleteQuestion,
+  deleteTag,
   updateAssessment,
   updateOption,
   updateQuestion,
@@ -185,3 +189,79 @@ export const UpdateTagController: RequestHandler = async (
     next(error);
   }
 };
+
+export const DeleteAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessment = await deleteAssessment({
+      id: req.body.id,
+    });
+
+    return res.status(201).json({
+      message: "Assessment deleted successfully",
+      data: assessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const DeleteQuestionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const question = await deleteQuestion({
+      id: req.body.id,
+    });
+
+    return res.status(201).json({
+      message: "Question deleted successfully",
+      data: question,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const DeleteOptionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const option = await deleteOption({
+      id: req.body.id,
+    });
+
+    return res.status(201).json({
+      message: "Option deleted successfully",
+      data: option,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const DeleteTagController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const Tag = await deleteTag({
+      id: req.body.id,
+    });
+
+    return res.status(201).json({
+      message: "Tag deleted successfully",
+      data: Tag,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -383,3 +383,99 @@ export const updateTagInDB = async (tag: {
     )
   }
 }
+
+export const deleteAssessmentInDB = async (assessment: {
+  id: UUID
+}): Promise<boolean> => {
+  logger.info(`Deleting assessment with id: ${assessment.id}`)
+
+  try {
+    // Find the assessment
+    const deletedAssessment = await Assessment.destroy({
+      where: {
+        id: assessment.id
+      }
+    })
+
+    return deletedAssessment === 1
+  } catch (error) {
+    throw new AppError(
+      'Error deleting assessment',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const deleteQuestionInDB = async (question: {
+  id: UUID
+}): Promise<boolean> => {
+  logger.info(`Deleting question with id: ${question.id}`)
+
+  try {
+    // Find the question
+    const deletedQuestion = await Question.destroy({
+      where: {
+        id: question.id
+      }
+    })
+
+    return deletedQuestion === 1
+  } catch (error) {
+    throw new AppError(
+      'Error deleting question',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const deleteOptionInDB = async (option: {
+  id: UUID
+}): Promise<boolean> => {
+  logger.info(`Deleting option with id: ${option.id}`)
+
+  try {
+    // Find the option
+    const deletedOption = await Option.destroy({
+      where: {
+        id: option.id
+      }
+    })
+
+    return deletedOption === 1
+  } catch (error) {
+    throw new AppError(
+      'Error deleting option',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const deleteTagInDB = async (tag: {
+  id: UUID
+}): Promise<boolean> => {
+  logger.info(`Deleting tag with id: ${tag.id}`)
+
+  try {
+    // Find the tag
+    const deletedTag = await Tag.destroy({
+      where: {
+        id: tag.id
+      }
+    })
+
+    return deletedTag === 1
+  } catch (error) {
+    throw new AppError(
+      'Error deleting tag',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}

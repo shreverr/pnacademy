@@ -5,6 +5,10 @@ import {
   CreateOptionController,
   CreateQuestionController,
   CreateTagController,
+  DeleteAssessmentController,
+  DeleteOptionController,
+  DeleteQuestionController,
+  DeleteTagController,
   UpdateAssessmentController,
   UpdateOptionController,
   UpdateQuestionController,
@@ -12,12 +16,16 @@ import {
 } from "../controller/assessment/assessment.controller";
 import {
   validateAssessment,
+  validateAssessmentId,
   validateAssessmentUpdate,
   validateOption,
+  validateOptionId,
   validateOptionUpdate,
   validateQuestion,
+  validateQuestionId,
   validateQuestionUpdate,
   validateTag,
+  validateTagId,
   validateTagUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
@@ -349,5 +357,15 @@ router.patch(
  */
 
 router.patch("/tag", validateTagUpdate, validateRequest, UpdateTagController);
+
+
+
+router.delete("/delete", validateAssessmentId , validateRequest, DeleteAssessmentController);
+
+router.delete("/question", validateQuestionId, validateRequest, DeleteQuestionController);
+
+router.delete("/option", validateOptionId, validateRequest, DeleteOptionController);
+
+router.delete("/tag", validateTagId, validateRequest, DeleteTagController);
 
 export default router;

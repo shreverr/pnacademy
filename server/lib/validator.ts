@@ -334,3 +334,37 @@ export const validateTagUpdate = [
     .escape()
     .withMessage('Tag name must be more than 2 characters long')
 ]
+
+export const validateAssessmentId = [
+  check('id')
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage('Should be a valid uuid v4')
+]
+export const validateQuestionId = [
+  check('id')
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage('Should be a valid uuid v4')
+]
+export const validateOptionId = [
+  check('id')
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage('Should be a valid uuid v4')
+]
+
+export const validateTagId = [
+  check('id')
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage('Should be a valid uuid v4')
+]
