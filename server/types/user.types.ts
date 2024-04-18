@@ -33,3 +33,13 @@ export type RefreshTokenData = {
   refresh_token: string;
 }
 
+export type Permissions =
+  | 'canManageAssessment'
+  | 'canManageUser'
+  | 'canManageRole'
+  | 'canManageNotification'
+  | 'canManageLocalGroup'
+  | 'canAttemptAssessment'
+  | 'canViewReport'
+  | 'canManageMyAccount'
+  | 'canViewNotification'

@@ -29,6 +29,7 @@ import {
   validateTagUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
+import { authenticateUser } from "../middleware/Auth";
 
 const router: Router = express.Router();
 
@@ -81,6 +82,7 @@ const router: Router = express.Router();
  */
 router.post(
   "/create",
+  authenticateUser(['canManageAssessment']),
   validateAssessment,
   validateRequest,
   CreateAssessmentController
@@ -121,6 +123,7 @@ router.post(
  */
 router.post(
   "/question",
+  authenticateUser(['canManageAssessment']),
   validateQuestion,
   validateRequest,
   CreateQuestionController
@@ -159,7 +162,13 @@ router.post(
  *       '500':
  *         description: Internal server error.
  */
-router.post("/option", validateOption, validateRequest, CreateOptionController);
+router.post(
+  "/option",
+  authenticateUser(['canManageAssessment']),
+  validateOption,
+  validateRequest,
+  CreateOptionController
+);
 
 /**
  * @openapi
@@ -187,7 +196,13 @@ router.post("/option", validateOption, validateRequest, CreateOptionController);
  *       '500':
  *         description: Internal server error.
  */
-router.post("/tag", validateTag, validateRequest, CreateTagController);
+router.post(
+  "/tag",
+  authenticateUser(['canManageAssessment']),
+  validateTag,
+  validateRequest,
+  CreateTagController
+);
 
 /**
  * @openapi
@@ -237,10 +252,12 @@ router.post("/tag", validateTag, validateRequest, CreateTagController);
  */
 router.patch(
   "/update",
+  authenticateUser(['canManageAssessment']),
   validateAssessmentUpdate,
   validateRequest,
   UpdateAssessmentController
 );
+
 /**
  * @openapi
  * /v1/assessment/question:
@@ -278,6 +295,7 @@ router.patch(
  */
 router.patch(
   "/question",
+  authenticateUser(['canManageAssessment']),
   validateQuestionUpdate,
   validateRequest,
   UpdateQuestionController
@@ -321,6 +339,7 @@ router.patch(
 
 router.patch(
   "/option",
+  authenticateUser(['canManageAssessment']),
   validateOptionUpdate,
   validateRequest,
   UpdateOptionController
@@ -355,8 +374,12 @@ router.patch(
  *       '500':
  *         description: Internal server error.
  */
-
-router.patch("/tag", validateTagUpdate, validateRequest, UpdateTagController);
+router.patch(
+  "/tag",
+  authenticateUser(['canManageAssessment']),
+  validateTagUpdate,
+  validateRequest,
+  UpdateTagController);
 
 
 
