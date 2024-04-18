@@ -13,6 +13,7 @@ import {
   validateUserUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
+import { authenticateUser } from "../middleware/Auth";
 
 const router: Router = express.Router();
 
@@ -106,6 +107,7 @@ const router: Router = express.Router();
  */
 router.post(
   "/register",
+  authenticateUser(['canManageUser']),
   validateUserRegister,
   validateRequest,
   registerUserController
@@ -203,6 +205,7 @@ router.post(
 
 router.post(
   "/update",
+  authenticateUser(['canManageUser']),
   validateUserUpdate,
   validateRequest,
   UpdateUserController
@@ -384,10 +387,10 @@ router.post(
  */
 router.post(
   "/role",
+  authenticateUser(['canManageRole']),
   validateUserRole,
   validateRequest,
   createRoleController
 )
-router.post("/role", validateUserRole, validateRequest, createRoleController);
 
 export default router;

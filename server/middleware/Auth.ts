@@ -32,7 +32,7 @@ export const authenticateUser = (permissions: Permissions[]) => {
       }
 
       // If the environment is dev, the user is set to the request object and the middleware continues
-      if (process.env.ENVIROMENT === 'dev') {
+      if (process.env.ENVIRONMENT === 'dev') {
         req.user = user
         next()
       }
