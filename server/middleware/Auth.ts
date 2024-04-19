@@ -30,15 +30,9 @@ export const authenticateUser = (permissions: Permissions[]) => {
         return res.status(commonErrorsDictionary.forbidden.httpCode)
           .json({ error: commonErrorsDictionary.forbidden.name })
       }
-
-      // If the environment is dev, the user is set to the request object and the middleware continues
-      if (process.env.ENVIRONMENT === 'dev') {
-        req.user = user
-        next()
-      }
-
+      
       //checks if all the permissions in the array are present in the user's permissions
-      if (!permissions.every(permission => user.permissions.includes(permission))) {
+      if ( process.env.ENVIRONMENT === 'prod' && (!permissions.every(permission => user.permissions.includes(permission)))) {
         return res.status(commonErrorsDictionary.unauthorized.httpCode)
           .json({
             error: commonErrorsDictionary.unauthorized.name,
