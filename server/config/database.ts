@@ -2,7 +2,15 @@ import { Sequelize } from 'sequelize'
 import logger from './logger'
 
 const sequelize = new Sequelize(process.env.DB_URI ?? '', {
-  logging: (msg) => { logger.debug(msg) }
+  logging: (msg) => { logger.debug(msg) },
+  dialect: "postgres",
+  ssl: true,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  }
 })
 
 const connectDatabase = async (): Promise<void> => {
