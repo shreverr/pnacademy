@@ -27,6 +27,7 @@ export const authenticateUser = (permissions: Permissions[]) => {
 
     jwt.verify(token as string, process.env.ACCESS_TOKEN_SECRET as string, (err: any, user: any) => {
       if (err) {
+        logger.error(`Error verifying token: ${err}`)
         return res.status(commonErrorsDictionary.forbidden.httpCode)
           .json({ error: commonErrorsDictionary.forbidden.name })
       }
