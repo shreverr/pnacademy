@@ -178,6 +178,7 @@ export const createRoleInDB = async (
         canManageRole: role.canManageRole,
         canManageNotification: role.canManageNotification,
         canManageLocalGroup: role.canManageLocalGroup,
+        canManageReports: role.canManageReports,
         canAttemptAssessment: role.canAttemptAssessment,
         canViewReport: role.canViewReport,
         canManageMyAccount: role.canManageMyAccount,

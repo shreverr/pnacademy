@@ -15,8 +15,9 @@ import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { Jwt } from "jsonwebtoken";
 import { UUID } from "crypto";
+import logger from "../../config/logger";
 
 export const registerUser = async (user: {
   firstName: string;
@@ -141,17 +142,18 @@ export const loginUser = async (user: {
       false
     );
 
-  const grantedPermissions = [
-    userRole?.canManageAssessment ? "canManageAssessment" : "",
-    userRole?.canManageUser ? "canManageUser" : "",
-    userRole?.canManageRole ? "canManageRole" : "",
-    userRole?.canManageNotification ? "canManageNotification" : "",
-    userRole?.canManageLocalGroup ? "canManageLocalGroup" : "",
-    userRole?.canAttemptAssessment ? "canAttemptAssessment" : "",
-    userRole?.canViewReport ? "canViewReport" : "",
-    userRole?.canManageMyAccount ? "canManageMyAccount" : "",
-    userRole?.canViewNotification ? "canViewNotification" : "",
-  ].filter((permission) => permission !== "");
+    const grantedPermissions = [
+      userRole?.canManageAssessment ? 'canManageAssessment' : '',
+      userRole?.canManageUser ? 'canManageUser' : '',
+      userRole?.canManageRole ? 'canManageRole' : '',
+      userRole?.canManageNotification ? 'canManageNotification' : '',
+      userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
+      userRole?.canManageReports ? 'canManageReports' : '',
+      userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
+      userRole?.canViewReport ? 'canViewReport' : '',
+      userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
+      userRole?.canViewNotification ? 'canViewNotification' : '',
+   ].filter(permission => permission !== '')
 
   const accessToken = jwt.sign(
     {
@@ -185,9 +187,80 @@ export const loginUser = async (user: {
 
   return {
     accessToken,
-    refreshToken,
-  };
-};
+    refreshToken
+  }
+}
+
+export const newAccessToken = async (refreshToken: string): Promise<string> => {
+  let userId: string = '' 
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (err: any, user: any) => {
+    if (err) {
+      logger.error(`Error verifying accesss token: ${err}`)
+      throw new AppError(
+        "Token not valid",
+        commonErrorsDictionary.forbidden.httpCode,
+        "Token not valid",
+        false
+      ) 
+    }
+
+    userId = user.userId
+  })
+
+  const existingUser = await getUserById(userId)
+  if (!existingUser)
+    throw new AppError(
+      "User not found",
+      401,
+      "User not found",
+      false
+    )
+
+
+  if (!existingUser.role_id)
+    throw new AppError(
+      "Role not assigned",
+      401,
+      "Role not assigned",
+      false
+    ) 
+
+  const userRole = await getRoleById(existingUser.role_id)
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
+  if (!accessTokenSecret)
+    throw new AppError(
+      "Internal server error",
+      500,
+      "Access token secret not found",
+      false
+    )
+
+    const grantedPermissions = [
+      userRole?.canManageAssessment ? 'canManageAssessment' : '',
+      userRole?.canManageUser ? 'canManageUser' : '',
+      userRole?.canManageRole ? 'canManageRole' : '',
+      userRole?.canManageNotification ? 'canManageNotification' : '',
+      userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
+      userRole?.canManageReports ? 'canManageReports' : '',
+      userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
+      userRole?.canViewReport ? 'canViewReport' : '',
+      userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
+      userRole?.canViewNotification ? 'canViewNotification' : '',
+   ].filter(permission => permission !== '')
+
+  const accessToken = jwt.sign({
+    userId: existingUser.id,
+    roleId: existingUser.role_id,
+    permissions: grantedPermissions
+  },
+    accessTokenSecret,
+    {
+      expiresIn: '15m'
+    }
+  )
+
+  return accessToken
+}
 
 export const createRole = async (role: {
   name: string;
@@ -196,6 +269,7 @@ export const createRole = async (role: {
   canManageRole: boolean;
   canManageNotification: boolean;
   canManageLocalGroup: boolean;
+  canManageReports: boolean;
   canAttemptAssessment: boolean;
   canViewReport: boolean;
   canManageMyAccount: boolean;
@@ -209,6 +283,7 @@ export const createRole = async (role: {
     canManageRole: role.canManageRole,
     canManageNotification: role.canManageNotification,
     canManageLocalGroup: role.canManageLocalGroup,
+    canManageReports: role.canManageReports,
     canAttemptAssessment: role.canAttemptAssessment,
     canViewReport: role.canViewReport,
     canManageMyAccount: role.canManageMyAccount,

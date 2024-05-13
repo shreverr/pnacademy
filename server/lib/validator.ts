@@ -71,8 +71,15 @@ export const validateUserLogin = [
     pointsForContainingNumber: 10,
     pointsForContainingSymbol: 10,
   }).withMessage(`Password must be more than 8 characters long with
-      at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`),
-];
+      at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`)
+]
+
+export const validateNewAccessToken = [
+  check('refreshToken')
+    .notEmpty()
+    .isJWT()
+    .withMessage('Must be a valid JWT token'),
+]
 
 export const validateUserUpdate = [
   check("id")
@@ -136,7 +143,11 @@ export const validateUserRole = [
 
   check("permissions.canManageLocalGroup")
     .isBoolean()
-    .withMessage("canManageLocalGroup must be a boolean"),
+    .withMessage('canManageLocalGroup must be a boolean'),
+  
+  check('permissions.canManageReports')
+    .isBoolean()
+    .withMessage('canManageReports must be a boolean'),
 
   check("permissions.canAttemptAssessment")
     .isBoolean()

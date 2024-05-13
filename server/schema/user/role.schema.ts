@@ -9,6 +9,7 @@ export interface RoleAttributes {
   canManageRole: boolean
   canManageNotification: boolean
   canManageLocalGroup: boolean
+  canManageReports: boolean
   canAttemptAssessment: boolean
   canViewReport: boolean
   canManageMyAccount: boolean
@@ -23,6 +24,7 @@ class Role extends Model<RoleAttributes> implements RoleAttributes {
   public canManageRole!: boolean
   public canManageNotification!: boolean
   public canManageLocalGroup!: boolean
+  public canManageReports!: boolean
   public canAttemptAssessment!: boolean
   public canViewReport!: boolean
   public canManageMyAccount!: boolean
@@ -59,6 +61,11 @@ Role.init(
       defaultValue: false
     },
     canManageLocalGroup: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    canManageReports: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false

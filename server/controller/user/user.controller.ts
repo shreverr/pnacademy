@@ -95,6 +95,7 @@ export const createRoleController: RequestHandler = async (
       canManageRole: req.body.permissions.canManageRole,
       canManageNotification: req.body.permissions.canManageNotification,
       canManageLocalGroup: req.body.permissions.canManageLocalGroup,
+      canManageReports: req.body.permissions.canManageReports,
       canAttemptAssessment: req.body.permissions.canAttemptAssessment,
       canViewReport: req.body.permissions.canViewReport,
       canManageMyAccount: req.body.permissions.canManageMyAccount,

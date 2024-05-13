@@ -4,10 +4,12 @@ import {
   createRoleController,
   deleteRoleController,
   loginUserController,
+  newAccessTokenController,
   registerUserController,
   UpdateUserController,
 } from "../controller/user/user.controller";
 import {
+  validateNewAccessToken,
   validateUserLogin,
   validateUserRegister,
   validateUserRole,
@@ -287,6 +289,7 @@ router.post("/login", validateUserLogin, validateRequest, loginUserController);
  *                   - canManageRole
  *                   - canManageNotification
  *                   - canManageLocalGroup
+ *                   - canManageReports
  *                   - canAttemptAssessment
  *                   - canViewReport
  *                   - canManageMyAccount
@@ -301,6 +304,8 @@ router.post("/login", validateUserLogin, validateRequest, loginUserController);
  *                   canManageNotification:
  *                     type: boolean
  *                   canManageLocalGroup:
+ *                     type: boolean
+ *                   canManageReports:
  *                     type: boolean
  *                   canAttemptAssessment:
  *                     type: boolean
@@ -350,6 +355,9 @@ router.post("/login", validateUserLogin, validateRequest, loginUserController);
  *                         canManageLocalGroup:
  *                           type: boolean
  *                           description: Whether the role can manage local groups.
+ *                         canManageReports:
+ *                           type: boolean
+ *                           description: Whether the role can manage reports.
  *                         canAttemptAssessment:
  *                           type: boolean
  *                           description: Whether the role can attempt assessments.
@@ -373,6 +381,7 @@ router.post("/login", validateUserLogin, validateRequest, loginUserController);
  *                   canManageRole: true
  *                   canManageNotification: true
  *                   canManageLocalGroup: true
+ *                   canManageReports: true
  *                   canAttemptAssessment: true
  *                   canViewReport: true
  *                   canManageMyAccount: true
@@ -397,5 +406,48 @@ router.delete(
   validateRequest,
   deleteRoleController
 );
+
+/**
+ * @swagger
+ * /v1/user/access-token:
+ *   post:
+ *     summary: Get new access token using refresh token 
+ *     tags: [User Controller]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - accessToken
+ *             properties:
+ *               accessToken:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Token generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of access token generation.
+ *                 accessToken:
+ *                   type: string
+ *                   description: Access token for authenticated user.
+ *             example:
+ *               message: New Access Token granted successfully
+ *               accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+ *       '500':
+ *         description: Server Error
+ */
+router.post('/access-token',
+  validateNewAccessToken,
+  validateRequest,
+  newAccessTokenController
+)
 
 export default router;

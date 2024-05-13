@@ -17,8 +17,7 @@ void connectDatabase();
 
 void sequelize
   .sync({
-    // alter: true
-    // force: true,
+   force: process.env.ENVIRONMENT === "dev",
   })
   .then(() => {
     logger.info("Postgres database synced successfully!");
