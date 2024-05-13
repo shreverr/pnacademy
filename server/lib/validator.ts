@@ -139,6 +139,10 @@ export const validateUserRole = [
   check('permissions.canManageLocalGroup')
     .isBoolean()
     .withMessage('canManageLocalGroup must be a boolean'),
+  
+  check('permissions.canManageReports')
+    .isBoolean()
+    .withMessage('canManageReports must be a boolean'),
 
   check('permissions.canAttemptAssessment')
     .isBoolean()

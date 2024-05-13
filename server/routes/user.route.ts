@@ -290,6 +290,7 @@ router.post(
  *                   - canManageRole
  *                   - canManageNotification
  *                   - canManageLocalGroup
+ *                   - canManageReports
  *                   - canAttemptAssessment
  *                   - canViewReport
  *                   - canManageMyAccount
@@ -304,6 +305,8 @@ router.post(
  *                   canManageNotification:
  *                     type: boolean
  *                   canManageLocalGroup:
+ *                     type: boolean
+ *                   canManageReports:
  *                     type: boolean
  *                   canAttemptAssessment:
  *                     type: boolean
@@ -353,6 +356,9 @@ router.post(
  *                         canManageLocalGroup:
  *                           type: boolean
  *                           description: Whether the role can manage local groups.
+ *                         canManageReports:
+ *                           type: boolean
+ *                           description: Whether the role can manage reports.
  *                         canAttemptAssessment:
  *                           type: boolean
  *                           description: Whether the role can attempt assessments.
@@ -376,6 +382,7 @@ router.post(
  *                   canManageRole: true
  *                   canManageNotification: true
  *                   canManageLocalGroup: true
+ *                   canManageReports: true
  *                   canAttemptAssessment: true
  *                   canViewReport: true
  *                   canManageMyAccount: true

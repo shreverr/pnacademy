@@ -22,6 +22,7 @@ export type RoleData = {
   canManageRole: boolean;
   canManageNotification: boolean;
   canManageLocalGroup: boolean;
+  canManageReports: boolean;
   canAttemptAssessment: boolean;
   canViewReport: boolean;
   canManageMyAccount: boolean;
@@ -39,6 +40,7 @@ export type Permissions =
   | 'canManageRole'
   | 'canManageNotification'
   | 'canManageLocalGroup'
+  | 'canManageReports'
   | 'canAttemptAssessment'
   | 'canViewReport'
   | 'canManageMyAccount'
