@@ -24,4 +24,15 @@ export interface TagData {
   name: string;
 }
 
+export interface NotificationData {
+  id: string;
+  description: string;
+  title: string;
+  image_url: string | null;
+  file_url: string | null;
+}
 
+export interface GroupData {
+  name: string;
+  id: string;
+}

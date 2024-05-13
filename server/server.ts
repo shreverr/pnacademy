@@ -18,7 +18,7 @@ void connectDatabase();
 void sequelize
   .sync({
     // alter: true
-   force: true,
+    // force: true,
   })
   .then(() => {
     logger.info("Postgres database synced successfully!");

@@ -2,6 +2,7 @@ import express from "express";
 import type { Router } from "express";
 import {
   createRoleController,
+  deleteRoleController,
   loginUserController,
   registerUserController,
   UpdateUserController,
@@ -10,6 +11,7 @@ import {
   validateUserLogin,
   validateUserRegister,
   validateUserRole,
+  validateUserRoleDelete,
   validateUserUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
@@ -107,7 +109,7 @@ const router: Router = express.Router();
  */
 router.post(
   "/register",
-  authenticateUser(['canManageUser']),
+  authenticateUser(["canManageUser"]),
   validateUserRegister,
   validateRequest,
   registerUserController
@@ -205,7 +207,7 @@ router.post(
 
 router.post(
   "/update",
-  authenticateUser(['canManageUser']),
+  authenticateUser(["canManageUser"]),
   validateUserUpdate,
   validateRequest,
   UpdateUserController
@@ -257,12 +259,7 @@ router.post(
  *       '500':
  *         description: Server Error
  */
-router.post(
-  '/login',
-  validateUserLogin,
-  validateRequest,
-  loginUserController
-)
+router.post("/login", validateUserLogin, validateRequest, loginUserController);
 
 /**
  * @swagger
@@ -387,10 +384,18 @@ router.post(
  */
 router.post(
   "/role",
-  authenticateUser(['canManageRole']),
+  authenticateUser(["canManageRole"]),
   validateUserRole,
   validateRequest,
   createRoleController
-)
+);
+
+router.delete(
+  "/role",
+  authenticateUser(["canManageRole"]),
+  validateUserRoleDelete,
+  validateRequest,
+  deleteRoleController
+);
 
 export default router;
