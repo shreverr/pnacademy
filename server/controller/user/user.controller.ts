@@ -8,6 +8,7 @@ import {
   createRole,
   deleteRole,
   loginUser,
+  newAccessToken,
   registerUser,
   updateUser,
 } from "../../service/user/user.service";
@@ -105,6 +106,23 @@ export const createRoleController: RequestHandler = async (
     return res.status(201).json({
       message: "Role Created successfully",
       data: createdRole,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const newAccessTokenController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const accessToken = await newAccessToken(req.body.refreshToken);
+
+    return res.status(200).json({
+      message: "New Access Token granted successfully",
+      accessToken: accessToken,
     });
   } catch (error) {
     next(error);
