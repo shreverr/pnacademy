@@ -74,6 +74,13 @@ export const validateUserLogin = [
       at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`)
 ]
 
+export const validateNewAccessToken = [
+  check('refreshToken')
+    .notEmpty()
+    .isJWT()
+    .withMessage('Must be a valid JWT token'),
+]
+
 export const validateUserUpdate = [
   check('id')
     .not()

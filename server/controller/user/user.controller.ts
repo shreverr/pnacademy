@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response
 } from 'express'
-import { createRole, loginUser, registerUser, updateUser } from '../../service/user/user.service'
+import { createRole, loginUser, newAccessToken, registerUser, updateUser } from '../../service/user/user.service'
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -99,6 +99,23 @@ export const createRoleController: RequestHandler = async (
     return res.status(201).json({
       message: 'Role Created successfully',
       data: createdRole
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const newAccessTokenController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const accessToken = await newAccessToken(req.body.refreshToken)
+
+    return res.status(200).json({
+      message: 'New Access Token granted successfully',
+      accessToken: accessToken
     })
   } catch (error) {
     next(error)
