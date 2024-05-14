@@ -118,7 +118,7 @@ router.post(
 /**
  * @openapi
  * /v1/user/update:
- *   post:
+ *   patch:
  *     tags:
  *       - User Controller
  *     summary: Update a user
@@ -205,7 +205,7 @@ router.post(
  *         description: Server Error
  */
 
-router.post(
+router.patch(
   "/update",
   authenticateUser(['canManageUser']),
   validateUserUpdate,
