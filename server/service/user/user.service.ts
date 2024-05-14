@@ -1,6 +1,7 @@
 import {
   createRoleInDB,
   createUser,
+  deleteRolesById,
   getPasswordById,
   getRoleById,
   getUserByEmail,
@@ -93,57 +94,53 @@ export const updateUser = async (ToBeUpdatedUser: {
     );
   }
   return UpdatedUser;
-}
+};
 
 export const loginUser = async (user: {
   email: string;
   password: string;
 }): Promise<authTokens> => {
-  const existingUser = await getUserByEmail(user.email)
+  const existingUser = await getUserByEmail(user.email);
   if (!existingUser)
     throw new AppError(
       "Invalid credentials",
       401,
       "Invalid credentials",
       false
-    )
+    );
 
-  const correctPassword = (await getPasswordById(existingUser.id))?.password ?? ''
+  const correctPassword =
+    (await getPasswordById(existingUser.id))?.password ?? "";
 
-  if (! await bcrypt.compare(user.password, correctPassword))
+  if (!(await bcrypt.compare(user.password, correctPassword)))
     throw new AppError(
       "Invalid credentials",
       401,
       "Invalid credentials",
       false
-    )
+    );
 
   if (!existingUser.role_id)
-    throw new AppError(
-      "Role not assigned",
-      401,
-      "Role not assigned",
-      false
-    )
+    throw new AppError("Role not assigned", 401, "Role not assigned", false);
 
-  const userRole = await getRoleById(existingUser.role_id)
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
+  const userRole = await getRoleById(existingUser.role_id);
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
   if (!accessTokenSecret)
     throw new AppError(
       "Internal server error",
       500,
       "Access token secret not found",
       false
-    )
+    );
 
-  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET
+  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
   if (!refreshTokenSecret)
     throw new AppError(
       "Internal server error",
       500,
       "Refresh token secret not found",
       false
-    )
+    );
 
     const grantedPermissions = [
       userRole?.canManageAssessment ? 'canManageAssessment' : '',
@@ -158,33 +155,35 @@ export const loginUser = async (user: {
       userRole?.canViewNotification ? 'canViewNotification' : '',
    ].filter(permission => permission !== '')
 
-  const accessToken = jwt.sign({
-    userId: existingUser.id,
-    roleId: existingUser.role_id,
-    permissions: grantedPermissions
-  },
+  const accessToken = jwt.sign(
+    {
+      userId: existingUser.id,
+      roleId: existingUser.role_id,
+      permissions: grantedPermissions,
+    },
     accessTokenSecret,
     {
-      expiresIn: '15m'
+      expiresIn: "15m",
     }
-  )
+  );
 
-  const refreshToken = jwt.sign({
-    userId: existingUser.id,
-  },
+  const refreshToken = jwt.sign(
+    {
+      userId: existingUser.id,
+    },
     refreshTokenSecret,
     {
-      expiresIn: '7d'
+      expiresIn: "7d",
     }
-  )
+  );
 
-  if (! await saveRefreshToken({ userId: existingUser.id, refreshToken }))
+  if (!(await saveRefreshToken({ userId: existingUser.id, refreshToken })))
     throw new AppError(
       "Internal server error",
       500,
       "Error saving refresh token",
       false
-    )
+    );
 
   return {
     accessToken,
@@ -276,7 +275,6 @@ export const createRole = async (role: {
   canManageMyAccount: boolean;
   canViewNotification: boolean;
 }): Promise<RoleData | null> => {
-
   const roleData = await createRoleInDB({
     id: uuid(),
     name: role.name,
@@ -290,7 +288,35 @@ export const createRole = async (role: {
     canViewReport: role.canViewReport,
     canManageMyAccount: role.canManageMyAccount,
     canViewNotification: role.canViewNotification,
-  })
+  });
 
   return roleData;
+};
+
+export const deleteRole = async (
+  roleIds: { roleId: string }[]
+): Promise<boolean> => {
+  const roleIdsExist = roleIds.map(async (roleId) => {
+    const role = await getRoleById(roleId.roleId);
+    if (!role)
+      throw new AppError(
+        "Role not found",
+        404,
+        "Role with this id does not exist",
+        false
+      );
+  });
+ 
+  const roleDatatoDelete= roleIds.map((roleId)=>roleId.roleId); 
+  const roleData= await deleteRolesById(roleDatatoDelete);
+  if (!roleData)
+    throw new AppError(
+      "Role not found",
+      404,
+      "Role with this id does not exist",
+      false
+    );
+    
+
+  return true;
 };

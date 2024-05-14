@@ -1,49 +1,51 @@
-import { DataTypes, Model } from 'sequelize'
-import { sequelize } from '../../config/database'
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../../config/database";
 
 interface NotificationAttributes {
-  id: string
-  description: string
-  title: string
-  image_url: string | null
-  file_url: string | null
-
+  id: string;
+  description: string;
+  title: string;
+  image_url: string | null;
+  file_url: string | null;
 }
-class Notification extends Model<NotificationAttributes> implements NotificationAttributes {
-  public id!: string
-  public description!: string
-  public title!: string
-  public image_url: string | null = null
-  public file_url: string | null = null
+class Notification
+  extends Model<NotificationAttributes>
+  implements NotificationAttributes
+{
+  public id!: string;
+  public description!: string;
+  public title!: string;
+  public image_url!: string | null;
+  public file_url!: string | null;
 }
 Notification.init(
   {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     image_url: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     file_url: {
       type: DataTypes.STRING,
-      allowNull: true
-    }
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    modelName: 'notification'
+    modelName: "notification",
   }
-)
+);
 
-export default Notification
+export default Notification;
