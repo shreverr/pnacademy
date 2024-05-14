@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { createGroup, createNotification } from "../../service/notification/notification.service";
+import { createGroup, createNotification, deleteNotification } from "../../service/notification/notification.service";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -13,8 +13,7 @@ export const CreateNotificationController: RequestHandler = async (
 ) => {
   try {
     const notification = await createNotification({
-      id: req.body.id,
-      description: req.body.description,
+     description: req.body.description,
       title: req.body.title,
       image_url: req.body.image_url,
       file_url: req.body.file_url,
@@ -22,6 +21,25 @@ export const CreateNotificationController: RequestHandler = async (
 
     return res.status(201).json({
       message: "Notification created successfully",
+      data: notification,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const DeleteNotificationController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const notification = await deleteNotification({
+      id: req.body.id,
+    });
+
+    return res.status(201).json({
+      message: "Notification deleted successfully",
       data: notification,
     });
   } catch (error) {

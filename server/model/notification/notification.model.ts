@@ -2,7 +2,8 @@ import logger from "../../config/logger";
 import { AppError } from "../../lib/appError";
 import Group from "../../schema/group/group.schema";
 import Notification from "../../schema/group/notification.schema";
-import { GroupData, NotificationData } from "../../types/assessment.types";
+import { GroupData } from "../../types/group.types";
+import { NotificationData } from "../../types/notification.types";
 
 export const createNotificationInDB = async (notification: {
   id: string;
@@ -35,10 +36,51 @@ export const createNotificationInDB = async (notification: {
   }
 };
 
+export const getnotificationById = async (
+  id: string
+): Promise<NotificationData | null> => {
+  try {
+    logger.info(`Getting notification by id ${id}`);
+    const notification = await Notification.findOne({
+      where: {
+        id,
+      },
+      raw: true,
+    });
+    return notification;
+  } catch (error) {
+    throw new AppError(
+      "error getting notification",
+      500,
+      "Something went wrong",
+      false
+    );
+  }
+};
+
+export const deleteNotificationInDB = async (notification: {
+  id: string;
+}): Promise<Boolean | null> => {
+  try {
+    const notificationData = await Notification.destroy({
+      where: {
+        id: notification.id,
+      },
+    });
+    return true;
+  } catch (error) {
+    throw new AppError(
+      "error deleting notification",
+      500,
+      "Something went wrong",
+      false
+    );
+  }
+};
 export const createGroupInDB = async (group: {
   name: string;
   id: string;
-}): Promise<GroupData| null> => {
+}): Promise<GroupData | null> => {
   try {
     const groupData = await Group.create(
       {
@@ -58,9 +100,11 @@ export const createGroupInDB = async (group: {
       false
     );
   }
-}
+};
 
-export const getGroupByName = async (name: string): Promise<GroupData | null> => {
+export const getGroupByName = async (
+  name: string
+): Promise<GroupData | null> => {
   try {
     logger.info(`Getting group by name ${name}`);
     const group = await Group.findOne({
@@ -78,4 +122,4 @@ export const getGroupByName = async (name: string): Promise<GroupData | null> =>
       false
     );
   }
-}
+};

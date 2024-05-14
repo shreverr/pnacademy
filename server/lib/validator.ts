@@ -71,15 +71,15 @@ export const validateUserLogin = [
     pointsForContainingNumber: 10,
     pointsForContainingSymbol: 10,
   }).withMessage(`Password must be more than 8 characters long with
-      at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`)
-]
+      at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`),
+];
 
 export const validateNewAccessToken = [
-  check('refreshToken')
+  check("refreshToken")
     .notEmpty()
     .isJWT()
-    .withMessage('Must be a valid JWT token'),
-]
+    .withMessage("Must be a valid JWT token"),
+];
 
 export const validateUserUpdate = [
   check("id")
@@ -143,11 +143,11 @@ export const validateUserRole = [
 
   check("permissions.canManageLocalGroup")
     .isBoolean()
-    .withMessage('canManageLocalGroup must be a boolean'),
-  
-  check('permissions.canManageReports')
+    .withMessage("canManageLocalGroup must be a boolean"),
+
+  check("permissions.canManageReports")
     .isBoolean()
-    .withMessage('canManageReports must be a boolean'),
+    .withMessage("canManageReports must be a boolean"),
 
   check("permissions.canAttemptAssessment")
     .isBoolean()
@@ -378,12 +378,6 @@ export const validateTagId = [
 ];
 
 export const validateNotification = [
-  check("id")
-    .not()
-    .isEmpty()
-    .isUUID(4)
-    .withMessage("Should be a valid UUID v4"),
-
   check("description")
     .optional()
     .isLength({ min: 2 })
@@ -406,6 +400,14 @@ export const validateNotification = [
     .withMessage("File URL must be a valid URL"),
 ];
 
+export const validateNotificationDelete = [
+  check("id")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];
 export const validateGroup = [
   check("name")
     .not()
