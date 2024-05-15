@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-export const authenticateUser = (permissions: Permissions[]) => {
+export const authenticateUser = (permissions?: Permissions[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]
@@ -31,9 +31,11 @@ export const authenticateUser = (permissions: Permissions[]) => {
         return res.status(commonErrorsDictionary.forbidden.httpCode)
           .json({ error: commonErrorsDictionary.forbidden.name })
       }
-      
+
       //checks if all the permissions in the array are present in the user's permissions
-      if ( process.env.ENVIRONMENT === 'prod' && (!permissions.every(permission => user.permissions.includes(permission)))) {
+      if (permissions
+        && process.env.ENVIRONMENT === 'prod'
+        && (!permissions.every(permission => user.permissions.includes(permission)))) {
         return res.status(commonErrorsDictionary.unauthorized.httpCode)
           .json({
             error: commonErrorsDictionary.unauthorized.name,

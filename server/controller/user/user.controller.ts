@@ -11,6 +11,7 @@ import {
   newAccessToken,
   registerUser,
   updateUser,
+  viewUserDetails,
 } from "../../service/user/user.service";
 
 export const registerUserController: RequestHandler = async (
@@ -30,6 +31,23 @@ export const registerUserController: RequestHandler = async (
 
     return res.status(201).json({
       message: "User registered successfully",
+      data: userData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const viewUserDetailsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userData = await viewUserDetails(req.user.userId);
+
+    return res.status(201).json({
+      message: "success",
       data: userData,
     });
   } catch (error) {

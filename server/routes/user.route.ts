@@ -7,6 +7,7 @@ import {
   newAccessTokenController,
   registerUserController,
   UpdateUserController,
+  viewUserDetailsController,
 } from "../controller/user/user.controller";
 import {
   validateNewAccessToken,
@@ -20,6 +21,12 @@ import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 
 const router: Router = express.Router();
+
+router.get(
+  "/info",
+  authenticateUser(),
+  viewUserDetailsController
+);
 
 /**
  * @openapi

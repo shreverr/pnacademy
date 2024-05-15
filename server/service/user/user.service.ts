@@ -19,6 +19,28 @@ import jwt, { Jwt } from "jsonwebtoken";
 import { UUID } from "crypto";
 import logger from "../../config/logger";
 
+export const viewUserDetails = async (userId: string): Promise<UserData | null> => {
+  const existingUserData = await getUserById(userId);
+  if (!existingUserData)
+    throw new AppError(
+      "User does not exist",
+      409,
+      "User with this user id does not exist",
+      false
+    );
+
+  if (!existingUserData) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  return existingUserData;
+};
+
 export const registerUser = async (user: {
   firstName: string;
   lastName: string;
