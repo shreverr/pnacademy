@@ -34,6 +34,16 @@ export type RefreshTokenData = {
   refresh_token: string;
 }
 
+export type userAttributes =
+  'id'
+  | 'role_id'
+  | 'first_name'
+  | 'last_name'
+  | 'email'
+  | 'phone'
+  | 'createdAt'
+  | 'updatedAt'
+
 export type Permissions =
   | 'canManageAssessment'
   | 'canManageUser'

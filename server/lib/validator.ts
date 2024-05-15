@@ -1,4 +1,4 @@
-import { check } from "express-validator";
+import { check, query } from "express-validator";
 
 export const validateUserRegister = [
   check("firstName")
@@ -48,6 +48,43 @@ export const validateUserRegister = [
     pointsForContainingSymbol: 10,
   }).withMessage(`Password must be more than 8 characters long with
       at least 1 lowercase, 1 uppercase, 1 number and 1 symbol`),
+];
+
+export const validateGetAllUsers = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+    query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+    query("sortBy")
+    .optional()
+    .matches(
+      "^(id|role_id|first_name|last_name|email|phone|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+     "id", "role_id", "first_name", "last_name", "email", 
+     "phone", "createdAt", or "updatedAt"`
+    ),
+
+    query("order")
+    .optional()
+    .matches(
+      "^(ASC|DESC)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+     "ASC", "DESC",`
+    ),
 ];
 
 export const validateUserLogin = [

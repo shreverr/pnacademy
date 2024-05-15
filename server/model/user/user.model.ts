@@ -7,6 +7,7 @@ import RefreshToken from "../../schema/user/refreshToken.schema";
 import Role from "../../schema/user/role.schema";
 import User from "../../schema/user/user.schema";
 import {
+  userAttributes,
   type RefreshTokenData,
   type RoleData,
   type UserData,
@@ -49,6 +50,33 @@ export const getUserById = async (id: string): Promise<UserData | null> => {
       500,
       "Something went wrong",
       false
+    );
+  }
+};
+
+export const getAllUsers = async (
+  offset: number,
+  pageSize: number,
+  sortBy: userAttributes,
+  order: "ASC" | "DESC",
+): Promise<{
+  rows: UserData[],
+  count: number
+}> => {
+  try {
+    const allUsersData = User.findAndCountAll({
+        limit: pageSize,
+        offset: offset,
+        order: [[sortBy, order]] // Assuming you want to order by createdAt column
+      });
+
+    return await allUsersData;
+  } catch (error) {
+    throw new AppError(
+      "error getting all users",
+      500,
+      "Something went wrong",
+      true
     );
   }
 };
@@ -239,31 +267,31 @@ export const saveRefreshToken = async (token: {
   }
 };
 
-export const deleteRolesById = async (roleId:string[]): Promise<boolean> => {
+export const deleteRolesById = async (roleId: string[]): Promise<boolean> => {
   roleId.forEach(async (roleId) => {
 
-  logger.info(`Deleting role with id: ${roleId}`);
-  try {
-    const role = await Role.findOne({
-      where: {
-        id: roleId,
-      },
-    });
+    logger.info(`Deleting role with id: ${roleId}`);
+    try {
+      const role = await Role.findOne({
+        where: {
+          id: roleId,
+        },
+      });
 
-    if (!role) {
-      return null;
+      if (!role) {
+        return null;
+      }
+
+      await role.destroy();
+
+    } catch (error) {
+      throw new AppError(
+        "error deleting role",
+        500,
+        "Something went wrong",
+        false
+      );
     }
-
-    await role.destroy();
-    
-  } catch (error) {
-    throw new AppError(
-      "error deleting role",
-      500,
-      "Something went wrong",
-      false
-    );
-  }
-});
-return true;
+  });
+  return true;
 };

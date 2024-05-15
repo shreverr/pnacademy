@@ -2,6 +2,7 @@ import {
   createRoleInDB,
   createUser,
   deleteRolesById,
+  getAllUsers,
   getPasswordById,
   getRoleById,
   getUserByEmail,
@@ -9,7 +10,7 @@ import {
   saveRefreshToken,
   updateUserInDb,
 } from "../../model/user/user.model";
-import { RoleData, UserData, authTokens } from "../../types/user.types";
+import { RoleData, UserData, authTokens, userAttributes } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
@@ -39,6 +40,46 @@ export const viewUserDetails = async (userId: string): Promise<UserData | null> 
   }
 
   return existingUserData;
+};
+
+export const viewAllUsers = async (
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: userAttributes,
+  order?: "ASC" | "DESC",
+): Promise<{
+  users :UserData[],
+  totalPages: number,
+}> => {
+  const page = parseInt(pageStr ?? '1');
+  const pageSize = parseInt(pageSizeStr ?? '10');
+  sortBy = sortBy ?? 'first_name';
+  order = order ?? 'ASC';
+
+  const offset = (page - 1) * pageSize;
+
+  const {rows: allUsersData,count: allUsersCount} = await getAllUsers(
+    offset,
+    pageSize,
+    sortBy,
+    order
+  )
+
+  if (!allUsersData) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  const totalPages = Math.ceil(allUsersCount / pageSize);
+
+  return {
+    users: allUsersData,
+    totalPages: totalPages
+  };
 };
 
 export const registerUser = async (user: {

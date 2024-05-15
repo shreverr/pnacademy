@@ -11,8 +11,10 @@ import {
   newAccessToken,
   registerUser,
   updateUser,
+  viewAllUsers,
   viewUserDetails,
 } from "../../service/user/user.service";
+import { userAttributes } from "../../types/user.types";
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -54,6 +56,28 @@ export const viewUserDetailsController: RequestHandler = async (
     next(error);
   }
 };
+
+export const viewAllUsersController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userData = await viewAllUsers(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as userAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(201).json({
+      message: "success",
+      data: userData,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export const UpdateUserController: RequestHandler = async (
   req: Request,

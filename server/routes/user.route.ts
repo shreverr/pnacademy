@@ -7,9 +7,11 @@ import {
   newAccessTokenController,
   registerUserController,
   UpdateUserController,
+  viewAllUsersController,
   viewUserDetailsController,
 } from "../controller/user/user.controller";
 import {
+  validateGetAllUsers,
   validateNewAccessToken,
   validateUserLogin,
   validateUserRegister,
@@ -89,6 +91,137 @@ router.get(
   authenticateUser(),
   viewUserDetailsController
 );
+
+/**
+ * @swagger
+ * /v1/user/bulk:
+ *   get:
+ *     summary: Get bulk user information
+ *     tags: [User Controller]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Number of items per page for pagination.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [id, role_id, first_name, last_name, email, phone, createdAt, updatedAt]
+ *         required: false
+ *         description: Field to sort by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         required: false
+ *         description: Sort order (ASC or DESC).
+ *     responses:
+ *       '200':
+ *         description: Bulk user information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of retrieving bulk user info.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the user.
+ *                           role_id:
+ *                             type: string
+ *                             description: The role ID of the user.
+ *                           first_name:
+ *                             type: string
+ *                             description: The first name of the user.
+ *                           last_name:
+ *                             type: string
+ *                             description: The last name of the user.
+ *                           email:
+ *                             type: string
+ *                             description: The email address of the user.
+ *                           phone:
+ *                             type: string
+ *                             description: The phone number of the user.
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the user was created.
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the user was last updated.
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages for pagination.
+ *             example:
+ *               message: success
+ *               data:
+ *                 users:
+ *                   - id: "31620378-8396-42c9-a73d-9e75cabcbea0"
+ *                     role_id: "fc4c79ed-134e-4539-8e50-b6c6084e357b"
+ *                     first_name: "shre"
+ *                     last_name: "ver"
+ *                     email: "johndoe1@mail.com"
+ *                     phone: "1234567890"
+ *                     createdAt: "2024-05-15T18:20:01.818Z"
+ *                     updatedAt: "2024-05-15T18:20:01.818Z"
+ *                   - id: "9845b3d0-189c-4109-b7cf-0a3ee1ba387c"
+ *                     role_id: "fc4c79ed-134e-4539-8e50-b6c6084e357b"
+ *                     first_name: "shre"
+ *                     last_name: "ver"
+ *                     email: "johndoe5@mail.com"
+ *                     phone: "1234567890"
+ *                     createdAt: "2024-05-15T18:20:01.830Z"
+ *                     updatedAt: "2024-05-15T18:20:01.830Z"
+ *                   - id: "b9d9cf9a-c19a-435c-8d7b-283956c2445f"
+ *                     role_id: "fc4c79ed-134e-4539-8e50-b6c6084e357b"
+ *                     first_name: "shre"
+ *                     last_name: "ver"
+ *                     email: "johndoe4@mail.com"
+ *                     phone: "1234567890"
+ *                     createdAt: "2024-05-15T18:20:01.841Z"
+ *                     updatedAt: "2024-05-15T18:20:01.841Z"
+ *                   - id: "0d50e6f1-dd66-4fc1-84ee-98b2067acc0b"
+ *                     role_id: "fc4c79ed-134e-4539-8e50-b6c6084e357b"
+ *                     first_name: "shre"
+ *                     last_name: "ver"
+ *                     email: "johndoe3@mail.com"
+ *                     phone: "1234567890"
+ *                     createdAt: "2024-05-15T18:20:01.844Z"
+ *                     updatedAt: "2024-05-15T18:20:01.844Z"
+ *                 totalPages: 3
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
+router.get(
+  "/bulk",
+  authenticateUser(["canManageUser"]),
+  validateGetAllUsers,
+  validateRequest,
+  viewAllUsersController
+)
 
 /**
  * @openapi
