@@ -22,6 +22,68 @@ import { authenticateUser } from "../middleware/Auth";
 
 const router: Router = express.Router();
 
+/**
+ * @swagger
+ * /v1/user/info:
+ *   get:
+ *     summary: Get your user information (JWT auth header necessary)
+ *     tags: [User Controller]
+ *     responses:
+ *       '200':
+ *         description: User information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of retrieving user info.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: The unique identifier of the user.
+ *                     role_id:
+ *                       type: string
+ *                       description: The role ID of the user.
+ *                     first_name:
+ *                       type: string
+ *                       description: The first name of the user.
+ *                     last_name:
+ *                       type: string
+ *                       description: The last name of the user.
+ *                     email:
+ *                       type: string
+ *                       description: The email address of the user.
+ *                     phone:
+ *                       type: string
+ *                       description: The phone number of the user.
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp of when the user was created.
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp of when the user was last updated.
+ *             example:
+ *               message: success
+ *               data:
+ *                 id: "ca39d670-225b-422b-8ce4-1bea3993efe8"
+ *                 role_id: "fc4c79ed-134e-4539-8e50-b6c6084e357b"
+ *                 first_name: "shre"
+ *                 last_name: "ver"
+ *                 email: "johndoe@mail.com"
+ *                 phone: "1234567890"
+ *                 createdAt: "2024-05-15T08:59:00.124Z"
+ *                 updatedAt: "2024-05-15T08:59:00.124Z"
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
 router.get(
   "/info",
   authenticateUser(),
