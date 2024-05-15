@@ -1,21 +1,24 @@
 import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { type UUID } from "crypto";
-import { GroupData, NotificationData } from "../../types/assessment.types";
+
 import {
   createGroupInDB,
   createNotificationInDB,
+  deleteNotificationInDB,
   getGroupByName,
+  getnotificationById,
 } from "../../model/notification/notification.model";
+import { NotificationData } from "../../types/notification.types";
+import { GroupData } from "../../types/group.types";
 
 export const createNotification = async (notification: {
-  id: UUID;
   description: string;
   title: string;
   image_url: string | null;
   file_url: string | null;
 }): Promise<NotificationData | null> => {
-  // create notification
+  
   const notificationData = await createNotificationInDB({
     id: uuid(),
     title: notification.title,
@@ -25,6 +28,25 @@ export const createNotification = async (notification: {
   });
   return notificationData;
 };
+
+export const deleteNotification = async (notification: {
+  id: UUID;
+}): Promise<boolean | null> => {
+  const checkNotification = await getnotificationById(notification.id);
+  if (!checkNotification) {
+    throw new AppError(
+      "Notification not found",
+      404,
+      "Notification with that id does not exist",
+      false
+    );
+  }
+  const notificationData = await deleteNotificationInDB({
+    id: notification.id,
+  });
+  return true;
+}
+
 
 export const createGroup = async (group: {
   name: string;
