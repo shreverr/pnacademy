@@ -11,10 +11,11 @@ import {
   newAccessToken,
   registerUser,
   updateUser,
+  viewAllRoles,
   viewAllUsers,
   viewUserDetails,
 } from "../../service/user/user.service";
-import { userAttributes } from "../../types/user.types";
+import { roleAttributes, userAttributes } from "../../types/user.types";
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -187,3 +188,25 @@ export const deleteRoleController: RequestHandler = async (
     next(error);
   }
 };
+
+export const viewAllRolesController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const rolesData = await viewAllRoles(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as roleAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(201).json({
+      message: "success",
+      data: rolesData,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

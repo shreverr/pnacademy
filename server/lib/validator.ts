@@ -58,14 +58,14 @@ export const validateGetAllUsers = [
     })
     .withMessage("Page must be a number >= 1"),
 
-    query("pageSize")
+  query("pageSize")
     .optional()
     .isInt({
       min: 1,
     })
     .withMessage("Page size must be a number >= 1"),
 
-    query("sortBy")
+  query("sortBy")
     .optional()
     .matches(
       "^(id|role_id|first_name|last_name|email|phone|createdAt|updatedAt)$"
@@ -76,7 +76,45 @@ export const validateGetAllUsers = [
      "phone", "createdAt", or "updatedAt"`
     ),
 
-    query("order")
+  query("order")
+    .optional()
+    .matches(
+      "^(ASC|DESC)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+     "ASC", "DESC",`
+    ),
+];
+
+export const validateGetAllRoles = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(`^(id|name|canManageAssessment|canManageUser|canManageRole|canManageNotification|canManageLocalGroup|canManageReports|canAttemptAssessment|canViewReport|canManageMyAccount|canViewNotification|createdAt|updatedAt|role_id)$`)
+    .withMessage(
+      `Column names must match one of the specified options:
+      "id", "name", "canManageAssessment", "canManageUser", 
+      "canManageRole", "canManageNotification", "canManageLocalGroup",
+      "canManageReports", "canAttemptAssessment", "canViewReport",
+      "canManageMyAccount", "canViewNotification", "createdAt",
+      or "updatedAt".`
+    ),
+
+  query("order")
     .optional()
     .matches(
       "^(ASC|DESC)$"

@@ -44,6 +44,22 @@ export type userAttributes =
   | 'createdAt'
   | 'updatedAt'
 
+  export type roleAttributes =
+  | 'id'
+  | 'name'
+  | 'canManageAssessment'
+  | 'canManageUser'
+  | 'canManageRole'
+  | 'canManageNotification'
+  | 'canManageLocalGroup'
+  | 'canManageReports'
+  | 'canAttemptAssessment'
+  | 'canViewReport'
+  | 'canManageMyAccount'
+  | 'canViewNotification'
+  | 'createdAt'
+  | 'updatedAt';
+
 export type Permissions =
   | 'canManageAssessment'
   | 'canManageUser'

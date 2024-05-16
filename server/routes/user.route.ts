@@ -7,10 +7,12 @@ import {
   newAccessTokenController,
   registerUserController,
   UpdateUserController,
+  viewAllRolesController,
   viewAllUsersController,
   viewUserDetailsController,
 } from "../controller/user/user.controller";
 import {
+  validateGetAllRoles,
   validateGetAllUsers,
   validateNewAccessToken,
   validateUserLogin,
@@ -599,6 +601,186 @@ router.post(
   validateUserRole,
   validateRequest,
   createRoleController
+);
+
+/**
+ * @swagger
+ * /v1/user/roles:
+ *   get:
+ *     summary: Get roles information
+ *     tags: [User Controller]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Number of items per page for pagination.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [id, name, canManageAssessment, canManageUser, canManageRole, canManageNotification, canManageLocalGroup, canManageReports, canAttemptAssessment, canViewReport, canManageMyAccount, canViewNotification, createdAt, updatedAt, role_id]
+ *         required: false
+ *         description: Field to sort by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         required: false
+ *         description: Sort order (ASC or DESC).
+ *     responses:
+ *       '200':
+ *         description: Roles information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of retrieving roles information.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     roles:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the role.
+ *                           name:
+ *                             type: string
+ *                             description: The name of the role.
+ *                           canManageAssessment:
+ *                             type: boolean
+ *                             description: Whether the role can manage assessments.
+ *                           canManageUser:
+ *                             type: boolean
+ *                             description: Whether the role can manage users.
+ *                           canManageRole:
+ *                             type: boolean
+ *                             description: Whether the role can manage roles.
+ *                           canManageNotification:
+ *                             type: boolean
+ *                             description: Whether the role can manage notifications.
+ *                           canManageLocalGroup:
+ *                             type: boolean
+ *                             description: Whether the role can manage local groups.
+ *                           canManageReports:
+ *                             type: boolean
+ *                             description: Whether the role can manage reports.
+ *                           canAttemptAssessment:
+ *                             type: boolean
+ *                             description: Whether the role can attempt assessments.
+ *                           canViewReport:
+ *                             type: boolean
+ *                             description: Whether the role can view reports.
+ *                           canManageMyAccount:
+ *                             type: boolean
+ *                             description: Whether the role can manage its own account.
+ *                           canViewNotification:
+ *                             type: boolean
+ *                             description: Whether the role can view notifications.
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the role was created.
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the role was last updated.
+ *                           role_id:
+ *                             type: string
+ *                             description: The ID of the role.
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages for pagination.
+ *             example:
+ *               message: success
+ *               data:
+ *                 roles:
+ *                   - id: "e0e76f1c-f167-4d78-a7d9-4dd7dd548f11"
+ *                     name: "admin"
+ *                     canManageAssessment: true
+ *                     canManageUser: true
+ *                     canManageRole: true
+ *                     canManageNotification: true
+ *                     canManageLocalGroup: true
+ *                     canManageReports: true
+ *                     canAttemptAssessment: true
+ *                     canViewReport: true
+ *                     canManageMyAccount: true
+ *                     canViewNotification: true
+ *                     createdAt: "2024-05-16T04:49:04.668Z"
+ *                     updatedAt: "2024-05-16T04:49:04.668Z"
+ *                     role_id: null
+ *                   - id: "7fe5fe98-fa73-457c-aea5-7fad527c58e7"
+ *                     name: "admin"
+ *                     canManageAssessment: true
+ *                     canManageUser: true
+ *                     canManageRole: true
+ *                     canManageNotification: true
+ *                     canManageLocalGroup: true
+ *                     canManageReports: true
+ *                     canAttemptAssessment: true
+ *                     canViewReport: true
+ *                     canManageMyAccount: true
+ *                     canViewNotification: true
+ *                     createdAt: "2024-05-16T04:49:10.715Z"
+ *                     updatedAt: "2024-05-16T04:49:10.715Z"
+ *                     role_id: null
+ *                   - id: "88fec24f-520c-4430-8d9e-79522c41d1af"
+ *                     name: "admin"
+ *                     canManageAssessment: true
+ *                     canManageUser: true
+ *                     canManageRole: true
+ *                     canManageNotification: true
+ *                     canManageLocalGroup: true
+ *                     canManageReports: true
+ *                     canAttemptAssessment: true
+ *                     canViewReport: true
+ *                     canManageMyAccount: true
+ *                     canViewNotification: true
+ *                     createdAt: "2024-05-16T04:49:28.535Z"
+ *                     updatedAt: "2024-05-16T04:49:28.535Z"
+ *                     role_id: null
+ *                   - id: "14568cdb-17a8-4b4e-bddd-66ea0be635ec"
+ *                     name: "admin"
+ *                     canManageAssessment: true
+ *                     canManageUser: true
+ *                     canManageRole: true
+ *                     canManageNotification: true
+ *                     canManageLocalGroup: true
+ *                     canManageReports: true
+ *                     canAttemptAssessment: true
+ *                     canViewReport: true
+ *                     canManageMyAccount: true
+ *                     canViewNotification: true
+ *                     createdAt: "2024-05-16T04:49:29.453Z"
+ *                     updatedAt: "2024-05-16T04:49:29.453Z"
+ *                     role_id: null
+ *                 totalPages: 4
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
+router.get(
+  "/roles",
+  authenticateUser(["canManageRole"]),
+  validateGetAllRoles,
+  validateRequest,
+  viewAllRolesController
 );
 
 router.delete(

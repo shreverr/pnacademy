@@ -7,6 +7,7 @@ import RefreshToken from "../../schema/user/refreshToken.schema";
 import Role from "../../schema/user/role.schema";
 import User from "../../schema/user/user.schema";
 import {
+  roleAttributes,
   userAttributes,
   type RefreshTokenData,
   type RoleData,
@@ -74,6 +75,33 @@ export const getAllUsers = async (
   } catch (error) {
     throw new AppError(
       "error getting all users",
+      500,
+      "Something went wrong",
+      true
+    );
+  }
+};
+
+export const getAllRoles = async (
+  offset: number,
+  pageSize: number,
+  sortBy: roleAttributes,
+  order: "ASC" | "DESC",
+): Promise<{
+  rows: RoleData[],
+  count: number
+}> => {
+  try {
+    const allRolesData = Role.findAndCountAll({
+        limit: pageSize,
+        offset: offset,
+        order: [[sortBy, order]] 
+      });
+
+    return await allRolesData;
+  } catch (error) {
+    throw new AppError(
+      "error getting all roles",
       500,
       "Something went wrong",
       true
