@@ -7,6 +7,9 @@ node_modules/
 # Ignore environment variables file
 .env
 
+# Ignore Temp Folder
+temp/
+
 # Ignore build artifacts
 build/
 dist/

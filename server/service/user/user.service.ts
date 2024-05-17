@@ -31,15 +31,6 @@ export const viewUserDetails = async (userId: string): Promise<UserData | null> 
       false
     );
 
-  if (!existingUserData) {
-    throw new AppError(
-      commonErrorsDictionary.internalServerError.name,
-      commonErrorsDictionary.internalServerError.httpCode,
-      "Someting went wrong",
-      false
-    );
-  }
-
   return existingUserData;
 };
 
