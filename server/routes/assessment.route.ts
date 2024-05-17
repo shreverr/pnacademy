@@ -82,7 +82,7 @@ const router: Router = express.Router();
  */
 router.post(
   "/create",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateAssessment,
   validateRequest,
   CreateAssessmentController
@@ -123,7 +123,7 @@ router.post(
  */
 router.post(
   "/question",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateQuestion,
   validateRequest,
   CreateQuestionController
@@ -164,7 +164,7 @@ router.post(
  */
 router.post(
   "/option",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateOption,
   validateRequest,
   CreateOptionController
@@ -198,7 +198,7 @@ router.post(
  */
 router.post(
   "/tag",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateTag,
   validateRequest,
   CreateTagController
@@ -252,7 +252,7 @@ router.post(
  */
 router.patch(
   "/update",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateAssessmentUpdate,
   validateRequest,
   UpdateAssessmentController
@@ -295,7 +295,7 @@ router.patch(
  */
 router.patch(
   "/question",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateQuestionUpdate,
   validateRequest,
   UpdateQuestionController
@@ -339,7 +339,7 @@ router.patch(
 
 router.patch(
   "/option",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateOptionUpdate,
   validateRequest,
   UpdateOptionController
@@ -376,18 +376,151 @@ router.patch(
  */
 router.patch(
   "/tag",
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateTagUpdate,
   validateRequest,
-  UpdateTagController);
+  UpdateTagController
+);
 
+/**
+ * @openapi
+ * /v1/assessment/delete:
+ *  delete:
+ *    tags:
+ *      - Assessment Delete Controller
+ *    summary: Delete an assessment
+ *    description: Endpoint to delete an assessment.
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              id:
+ *                type: string
+ *                format: uuid
+ *            description: The UUID of the assessment to be deleted.
+ *    responses:
+ *      '200':
+ *        description: Successfully deleted assessment.
+ *      '400':
+ *        description: Bad request. Invalid data provided.
+ *      '404':
+ *        description: Assessment not found.
+ *      '500':
+ *        description: Internal server error.
+ */
+router.delete(
+  "/delete",
+  validateAssessmentId,
+  validateRequest,
+  DeleteAssessmentController
+);
 
+/**
+ * @openapi
+ * /v1/assessment/question:
+ *   delete:
+ *     tags:
+ *       - Assessment Delete Controller
+ *     summary: Delete a question
+ *     description: Endpoint to delete a question.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 format: uuid
+ *             description: The UUID of the question to be deleted.
+ *     responses:
+ *       '200':
+ *         description: Successfully deleted question.
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Question not found.
+ *       '500':
+ *         description: Internal server error.
+ */
 
-router.delete("/delete", validateAssessmentId , validateRequest, DeleteAssessmentController);
+router.delete(
+  "/question",
+  validateQuestionId,
+  validateRequest,
+  DeleteQuestionController
+);
 
-router.delete("/question", validateQuestionId, validateRequest, DeleteQuestionController);
+/**
+ * @openapi
+ * /v1/assessment/option:
+ *   delete:
+ *     tags:
+ *       - Assessment Delete Controller
+ *     summary: Delete an option
+ *     description: Endpoint to delete an option.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 format: uuid
+ *             description: The UUID of the option to be deleted.
+ *     responses:
+ *       '200':
+ *         description: Successfully deleted option.
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Option not found.
+ *       '500':
+ *         description: Internal server error.
+ */
 
-router.delete("/option", validateOptionId, validateRequest, DeleteOptionController);
+router.delete(
+  "/option",
+  validateOptionId,
+  validateRequest,
+  DeleteOptionController
+);
+
+/**
+ * @openapi
+ * /v1/assessment/tag:
+ *   delete:
+ *     tags:
+ *       - Assessment Delete Controller
+ *     summary: Delete a tag
+ *     description: Endpoint to delete a tag.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 format: uuid
+ *             description: The UUID of the tag to be deleted.
+ *     responses:
+ *       '200':
+ *         description: Successfully deleted tag.
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Tag not found.
+ *       '500':
+ *         description: Internal server error.
+ */
 
 router.delete("/tag", validateTagId, validateRequest, DeleteTagController);
 
