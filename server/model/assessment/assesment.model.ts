@@ -3,7 +3,9 @@ import {
   type OptionData,
   type QuestionData,
   type AssementData,
-  type TagData
+  type TagData,
+  type AssementDetailedData,
+  type QuestionDetailedData
 } from '../../types/assessment.types'
 import { AppError } from '../../lib/appError'
 import logger from '../../config/logger'
@@ -51,6 +53,7 @@ export const createAssementInDB = async (assessment: {
     )
   }
 }
+
 export const getOptionById = async (id: UUID): Promise<OptionData | null> => {
   logger.info(`Getting Option with id: ${id}`)
 
@@ -72,20 +75,18 @@ export const getOptionById = async (id: UUID): Promise<OptionData | null> => {
   }
 }
 
-export const getAssessmentById = async (
-  id: UUID
-): Promise<AssementData | null> => {
-  logger.info(`Getting assessment with id: ${id}`)
+export const checkAssessmentExists = async (id: UUID): Promise<boolean | null> => {
+  logger.info(`Checking if assessment exists with id: ${id}`)
 
   try {
-    // Find the assessment
     const assessment = await Assessment.findOne({
       where: {
         id
       },
       raw: true
     })
-    return assessment
+
+    return assessment !== null
   } catch (error) {
     throw new AppError(
       'Error getting assessment',
@@ -96,9 +97,70 @@ export const getAssessmentById = async (
   }
 }
 
+
+export const getAssessmentById = async (
+  id: UUID
+): Promise<AssementDetailedData | null> => {
+  logger.info(`Getting assessment with id: ${id}`)
+
+  try {
+    const assessment = await Assessment.findOne({
+      where: {
+        id
+      },
+      include: [
+        {
+          model: Question,
+          as: 'questions',
+          include: [
+            {
+              model: Option,
+              as: 'options'
+            }
+          ]
+        }
+      ]
+    })
+
+    if (!assessment) {
+      return null
+    }
+
+    return assessment.dataValues as AssementDetailedData
+  } catch (error) {
+    throw new AppError(
+      'Error getting assessment',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const checkQuestionExists = async (id: UUID): Promise<boolean |null> => {
+  logger.info(`Checking if question exists with id: ${id}`)
+
+  try {
+    const question = await Question.findOne({
+      where: {
+        id
+      }
+    })
+
+    return question !== null
+  } catch (error) {
+    throw new AppError(
+      'Error getting question',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
 export const getQuestionById = async (
   id: UUID
-): Promise<QuestionData | null> => {
+): Promise<QuestionDetailedData | null> => {
   logger.info(`Getting question with id: ${id}`)
   try {
     // Find the question
@@ -106,12 +168,21 @@ export const getQuestionById = async (
       where: {
         id
       },
-      raw: true
+      include: [
+        {
+          model: Option,
+          as: 'options'
+        }
+      ],
+    
     })
-    return question
+    if (!question) {
+      return null
+    }
+    return question.dataValues as QuestionDetailedData
   } catch (error) {
     throw new AppError(
-      'Question not found ',
+      'Error getting question',
       500,
       'Something went wrong',
       false
@@ -140,6 +211,7 @@ export const createQuestionInDB = async (question: {
   assessment_id: UUID
   description: string
   marks: number
+  section: number
 }): Promise<QuestionData | null> => {
   logger.info(`Creating question for assessment: ${question.assessment_id}`)
 
@@ -149,7 +221,8 @@ export const createQuestionInDB = async (question: {
         id: question.id,
         assessment_id: question.assessment_id,
         description: question.description,
-        marks: question.marks
+        marks: question.marks,
+        section: question.section
       },
       {
         raw: true
@@ -279,13 +352,15 @@ export const updateQuestionInDB = async (question: {
   id: UUID
   description: string | null
   marks: number | null
+  section: number | null
 }): Promise<QuestionData | null> => {
   logger.info(`Updating question with id: ${question.id}`)
 
   try {
     const updatedQuestionDate: any = {
       description: question.description ?? undefined,
-      marks: question.marks ?? undefined
+      marks: question.marks ?? undefined,
+      section: question.section ?? undefined
     }
     Object.keys(updatedQuestionDate).forEach(
       (key) =>
@@ -456,9 +531,7 @@ export const deleteOptionInDB = async (option: {
   }
 }
 
-export const deleteTagInDB = async (tag: {
-  id: UUID
-}): Promise<boolean> => {
+export const deleteTagInDB = async (tag: { id: UUID }): Promise<boolean> => {
   logger.info(`Deleting tag with id: ${tag.id}`)
 
   try {

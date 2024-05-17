@@ -78,9 +78,7 @@ export const validateGetAllUsers = [
 
   query("order")
     .optional()
-    .matches(
-      "^(ASC|DESC)$"
-    )
+    .matches("^(ASC|DESC)$")
     .withMessage(
       `Must match one of the specified options:
      "ASC", "DESC",`
@@ -104,7 +102,9 @@ export const validateGetAllRoles = [
 
   query("sortBy")
     .optional()
-    .matches(`^(id|name|canManageAssessment|canManageUser|canManageRole|canManageNotification|canManageLocalGroup|canManageReports|canAttemptAssessment|canViewReport|canManageMyAccount|canViewNotification|createdAt|updatedAt|role_id)$`)
+    .matches(
+      `^(id|name|canManageAssessment|canManageUser|canManageRole|canManageNotification|canManageLocalGroup|canManageReports|canAttemptAssessment|canViewReport|canManageMyAccount|canViewNotification|createdAt|updatedAt|role_id)$`
+    )
     .withMessage(
       `Column names must match one of the specified options:
       "id", "name", "canManageAssessment", "canManageUser", 
@@ -116,9 +116,7 @@ export const validateGetAllRoles = [
 
   query("order")
     .optional()
-    .matches(
-      "^(ASC|DESC)$"
-    )
+    .matches("^(ASC|DESC)$")
     .withMessage(
       `Must match one of the specified options:
      "ASC", "DESC",`
@@ -298,6 +296,7 @@ export const validateQuestion = [
     .withMessage("Question description must be more than 2 characters long"),
 
   check("marks").isNumeric().withMessage("marks must be a valid number"),
+  check("section").isNumeric().withMessage("section must be a valid number"),
 ];
 
 export const validateOption = [
@@ -386,6 +385,11 @@ export const validateQuestionUpdate = [
     .optional()
     .isNumeric()
     .withMessage("marks must be a valid number"),
+
+  check("section")
+    .optional()
+    .isNumeric()
+    .withMessage("section must be a valid number"),
 ];
 export const validateOptionUpdate = [
   check("id")

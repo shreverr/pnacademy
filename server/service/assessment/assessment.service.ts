@@ -1,5 +1,7 @@
 import { type UUID } from 'crypto'
 import {
+  checkAssessmentExists,
+  checkQuestionExists,
   createAssementInDB,
   createOptionInDB,
   createQuestionInDB,
@@ -21,7 +23,9 @@ import {
   type OptionData,
   type QuestionData,
   type AssementData,
-  type TagData
+  type TagData,
+  type AssementDetailedData,
+  type QuestionDetailedData
 } from '../../types/assessment.types'
 import { v4 as uuid } from 'uuid'
 import { getUserById } from '../../model/user/user.model'
@@ -62,8 +66,9 @@ export const createQuestion = async (question: {
   assessment_id: UUID
   description: string
   marks: number
+  section: number
 }): Promise<QuestionData | null> => {
-  const existingAssessment = await getAssessmentById(question.assessment_id)
+  const existingAssessment = await checkAssessmentExists(question.assessment_id)
   if (existingAssessment == null) {
     throw new AppError(
       'Assessment not found',
@@ -76,16 +81,18 @@ export const createQuestion = async (question: {
     id: uuid(),
     assessment_id: question.assessment_id,
     description: question.description,
-    marks: question.marks
+    marks: question.marks,
+    section: question.section
   })
   return questionData
 }
+
 export const createOption = async (option: {
   question_id: UUID
   description: string
   is_correct: boolean
 }): Promise<OptionData | null> => {
-  const existingQuestion = await getQuestionById(option.question_id)
+  const existingQuestion = await checkQuestionExists(option.question_id)
   if (existingQuestion == null) {
     throw new AppError(
       'Question not found',
@@ -111,6 +118,7 @@ export const createTag = async (tag: {
   })
   return TagData
 }
+
 export const updateAssessment = async (assessment: {
   id: UUID
   name: string | null
@@ -120,7 +128,7 @@ export const updateAssessment = async (assessment: {
   end_at: Date | null
   duration: number | null
 }): Promise<AssementData | null> => {
-  const existingAssessment = await getAssessmentById(assessment.id)
+  const existingAssessment = await checkAssessmentExists(assessment.id)
   if (existingAssessment == null) {
     throw new AppError(
       'Assessment not found',
@@ -145,8 +153,9 @@ export const updateQuestion = async (question: {
   id: UUID
   description: string | null
   marks: number | null
+  section: number | null
 }): Promise<QuestionData | null> => {
-  const existingQuestion = await getQuestionById(question.id)
+  const existingQuestion = await checkQuestionExists(question.id)
   if (existingQuestion == null) {
     throw new AppError(
       'Question not found',
@@ -158,7 +167,8 @@ export const updateQuestion = async (question: {
   const updatedQuestion = await updateQuestionInDB({
     id: question.id,
     description: question.description,
-    marks: question.marks
+    marks: question.marks,
+    section: question.section
   })
   return updatedQuestion
 }
@@ -168,7 +178,7 @@ export const updateOption = async (option: {
   description: string | null
   is_correct: boolean | null
 }): Promise<OptionData | null> => {
-  const existingOption = await getOptionById(option.id)
+  const existingOption = await checkQuestionExists(option.id)
   if (existingOption == null) {
     throw new AppError(
       'Option not found',
@@ -204,10 +214,11 @@ export const updateTag = async (option: {
   })
   return updatedTag
 }
+
 export const deleteAssessment = async (Assessment: {
   id: UUID
 }): Promise<boolean> => {
-  const existingAssessment = await getAssessmentById(Assessment.id)
+  const existingAssessment = await checkAssessmentExists(Assessment.id)
   if (existingAssessment == null) {
     throw new AppError(
       'Assessment not found',
@@ -219,14 +230,14 @@ export const deleteAssessment = async (Assessment: {
   const deletedAssessment = await deleteAssessmentInDB({
     id: Assessment.id
   })
-  
-  return deletedAssessment;
+
+  return deletedAssessment
 }
 
 export const deleteQuestion = async (question: {
   id: UUID
 }): Promise<boolean> => {
-  const existingQuestion = await getQuestionById(question.id)
+  const existingQuestion = await checkQuestionExists(question.id)
   if (existingQuestion == null) {
     throw new AppError(
       'Question not found',
@@ -240,9 +251,8 @@ export const deleteQuestion = async (question: {
   })
   return deletedQuestion
 }
-export const deleteOption = async (option: {
-  id: UUID
-}): Promise<boolean> => {
+
+export const deleteOption = async (option: { id: UUID }): Promise<boolean> => {
   const existingOption = await getOptionById(option.id)
   if (existingOption == null) {
     throw new AppError(
@@ -257,9 +267,8 @@ export const deleteOption = async (option: {
   })
   return deletedOption
 }
-export const deleteTag = async (tag: {
-  id: UUID
-}): Promise<boolean> => {
+
+export const deleteTag = async (tag: { id: UUID }): Promise<boolean> => {
   const existingTag = await getTagById(tag.id)
   if (existingTag == null) {
     throw new AppError(
@@ -273,4 +282,34 @@ export const deleteTag = async (tag: {
     id: tag.id
   })
   return deletedTag
+}
+
+export const viewAssessmentDetails = async (
+  userId: UUID
+): Promise<AssementDetailedData | null> => {
+  const assementData = await getAssessmentById(userId)
+  if (assementData == null) {
+    throw new AppError(
+      'Assessment not found',
+      404,
+      'Assessment with this id does not exist',
+      false
+    )
+  }
+  return assementData
+}
+
+export const viewQuestionDetails = async (
+  userId: UUID
+): Promise<QuestionDetailedData | null> => {
+  const questionData = await getQuestionById(userId)
+  if (questionData === null) {
+    throw new AppError(
+      'Question not found',
+      404,
+      'Question with this id does not exist',
+      false
+    )
+  }
+  return questionData
 }

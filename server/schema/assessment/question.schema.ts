@@ -6,12 +6,14 @@ interface QuestionAttributes {
   assessment_id: string
   description: string
   marks: number
+  section: number
 }
 class Question extends Model<QuestionAttributes> implements QuestionAttributes {
   public id!: string
   public assessment_id!: string
   public description!: string
   public marks!: number
+  public section!: number
 }
 Question.init(
   {
@@ -28,6 +30,10 @@ Question.init(
       allowNull: false
     },
     marks: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    section: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
