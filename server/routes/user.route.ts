@@ -804,9 +804,9 @@ router.delete(
  *           schema:
  *             type: object
  *             required:
- *               - accessToken
+ *               - refreshToken
  *             properties:
- *               accessToken:
+ *               refreshToken:
  *                 type: string
  *     responses:
  *       '200':
