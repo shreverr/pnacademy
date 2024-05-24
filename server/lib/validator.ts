@@ -103,7 +103,7 @@ export const validateGetAllRoles = [
   query("sortBy")
     .optional()
     .matches(
-      `^(id|name|canManageAssessment|canManageUser|canManageRole|canManageNotification|canManageLocalGroup|canManageReports|canAttemptAssessment|canViewReport|canManageMyAccount|canViewNotification|createdAt|updatedAt|role_id)$`
+      "^(id|name|canManageAssessment|canManageUser|canManageRole|canManageNotification|canManageLocalGroup|canManageReports|canAttemptAssessment|canViewReport|canManageMyAccount|canViewNotification|createdAt|updatedAt|role_id)$"
     )
     .withMessage(
       `Column names must match one of the specified options:
@@ -430,6 +430,15 @@ export const validateAssessmentId = [
     .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
+
+export const validateAssessmentGetId = [
+  query("id")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];
 export const validateQuestionId = [
   check("id")
     .not()
@@ -438,6 +447,16 @@ export const validateQuestionId = [
     .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
+
+export const validateQuestionGetId = [
+  query("id")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];
+
 export const validateOptionId = [
   check("id")
     .not()

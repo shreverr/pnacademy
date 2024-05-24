@@ -1,5 +1,5 @@
-import express from 'express'
-import type { Router } from 'express'
+import express from "express";
+import type { Router } from "express";
 import {
   CreateAssessmentController,
   CreateOptionController,
@@ -14,26 +14,28 @@ import {
   UpdateQuestionController,
   UpdateTagController,
   viewAssessmentController,
-  viewQuestionController
-} from '../controller/assessment/assessment.controller'
+  viewQuestionController,
+} from "../controller/assessment/assessment.controller";
 import {
   validateAssessment,
+  validateAssessmentGetId,
   validateAssessmentId,
   validateAssessmentUpdate,
   validateOption,
   validateOptionId,
   validateOptionUpdate,
   validateQuestion,
+  validateQuestionGetId,
   validateQuestionId,
   validateQuestionUpdate,
   validateTag,
   validateTagId,
-  validateTagUpdate
-} from '../lib/validator'
-import { validateRequest } from '../utils/validateRequest'
-import { authenticateUser } from '../middleware/Auth'
+  validateTagUpdate,
+} from "../lib/validator";
+import { validateRequest } from "../utils/validateRequest";
+import { authenticateUser } from "../middleware/Auth";
 
-const router: Router = express.Router()
+const router: Router = express.Router();
 
 /**
  * @openapi
@@ -83,12 +85,12 @@ const router: Router = express.Router()
  *         description: Internal server error.
  */
 router.post(
-  '/create',
-  authenticateUser(['canManageAssessment']),
+  "/create",
+  authenticateUser(["canManageAssessment"]),
   validateAssessment,
   validateRequest,
   CreateAssessmentController
-)
+);
 
 /**
  * @openapi
@@ -115,9 +117,9 @@ router.post(
  *               marks:
  *                 type: number
  *                 description: The marks allocated for the question.
- *              section:
- *                type: number
- *               description: The section of the question.
+ *               section:
+ *                 type: number
+ *                 description: The section of the question.
  *     responses:
  *       '200':
  *         description: Successfully created question.
@@ -126,13 +128,14 @@ router.post(
  *       '500':
  *         description: Internal server error.
  */
+
 router.post(
-  '/question',
-  authenticateUser(['canManageAssessment']),
+  "/question",
+  authenticateUser(["canManageAssessment"]),
   validateQuestion,
   validateRequest,
   CreateQuestionController
-)
+);
 
 /**
  * @openapi
@@ -168,12 +171,12 @@ router.post(
  *         description: Internal server error.
  */
 router.post(
-  '/option',
-  authenticateUser(['canManageAssessment']),
+  "/option",
+  authenticateUser(["canManageAssessment"]),
   validateOption,
   validateRequest,
   CreateOptionController
-)
+);
 
 /**
  * @openapi
@@ -202,12 +205,12 @@ router.post(
  *         description: Internal server error.
  */
 router.post(
-  '/tag',
-  authenticateUser(['canManageAssessment']),
+  "/tag",
+  authenticateUser(["canManageAssessment"]),
   validateTag,
   validateRequest,
   CreateTagController
-)
+);
 
 /**
  * @openapi
@@ -256,12 +259,12 @@ router.post(
  *         description: Internal server error.
  */
 router.patch(
-  '/update',
-  authenticateUser(['canManageAssessment']),
+  "/update",
+  authenticateUser(["canManageAssessment"]),
   validateAssessmentUpdate,
   validateRequest,
   UpdateAssessmentController
-)
+);
 
 /**
  * @openapi
@@ -299,12 +302,12 @@ router.patch(
  *         description: Internal server error.
  */
 router.patch(
-  '/question',
-  authenticateUser(['canManageAssessment']),
+  "/question",
+  authenticateUser(["canManageAssessment"]),
   validateQuestionUpdate,
   validateRequest,
   UpdateQuestionController
-)
+);
 
 /**
  * @openapi
@@ -343,12 +346,12 @@ router.patch(
  */
 
 router.patch(
-  '/option',
-  authenticateUser(['canManageAssessment']),
+  "/option",
+  authenticateUser(["canManageAssessment"]),
   validateOptionUpdate,
   validateRequest,
   UpdateOptionController
-)
+);
 
 /**
  * @openapi
@@ -380,12 +383,12 @@ router.patch(
  *         description: Internal server error.
  */
 router.patch(
-  '/tag',
-  authenticateUser(['canManageAssessment']),
+  "/tag",
+  authenticateUser(["canManageAssessment"]),
   validateTagUpdate,
   validateRequest,
   UpdateTagController
-)
+);
 
 /**
  * @openapi
@@ -417,13 +420,13 @@ router.patch(
  *        description: Internal server error.
  */
 router.delete(
-  '/delete',
+  "/delete",
 
-  authenticateUser(['canManageAssessment']),
+  authenticateUser(["canManageAssessment"]),
   validateAssessmentId,
   validateRequest,
   DeleteAssessmentController
-)
+);
 
 /**
  * @openapi
@@ -456,12 +459,12 @@ router.delete(
  */
 
 router.delete(
-  '/question',
-  authenticateUser(['canManageAssessment']),
+  "/question",
+  authenticateUser(["canManageAssessment"]),
   validateQuestionId,
   validateRequest,
   DeleteQuestionController
-)
+);
 
 /**
  * @openapi
@@ -494,12 +497,12 @@ router.delete(
  */
 
 router.delete(
-  '/option',
-  authenticateUser(['canManageAssessment']),
+  "/option",
+  authenticateUser(["canManageAssessment"]),
   validateOptionId,
   validateRequest,
   DeleteOptionController
-)
+);
 
 /**
  * @openapi
@@ -531,22 +534,90 @@ router.delete(
  *         description: Internal server error.
  */
 
-router.delete('/tag', validateTagId, validateRequest, DeleteTagController)
+router.delete("/tag", validateTagId, validateRequest, DeleteTagController);
+
+/**
+ * @openapi
+ * /v1/assessment/view:
+ *   get:
+ *     tags:
+ *       - Assessment View Controller
+ *     summary: View an assessment
+ *     description: Endpoint to view an assessment by its ID.
+ *     parameters:
+ *       - name: id
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the assessment to view.
+ *     responses:
+ *       '200':
+ *         description: Successfully viewed assessment.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 assessment:
+ *                   type: object
+ *                   description: The details of the assessment.
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Assessment not found.
+ *       '500':
+ *         description: Internal server error.
+ */
 
 router.get(
-  '/view',
-  authenticateUser(['canManageAssessment']),
-  validateAssessmentId,
+  "/view",
+  authenticateUser(["canManageAssessment"]),
+  validateAssessmentGetId,
   validateRequest,
   viewAssessmentController
-)
+);
+
+/**
+ * @openapi
+ * /v1/assessment/question:
+ *   get:
+ *     tags:
+ *       - Assessment View Controller
+ *     summary: View a question
+ *     description: Endpoint to view a question by its ID.
+ *     parameters:
+ *       - name: id
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the question to view.
+ *     responses:
+ *       '200':
+ *         description: Successfully viewed question.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 question:
+ *                   type: object
+ *                   description: The details of the question.
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Question not found.
+ *       '500':
+ *         description: Internal server error.
+ */
 
 router.get(
-  '/question',
-  authenticateUser(['canManageAssessment']),
-  validateQuestionId,
+  "/question",
+  authenticateUser(["canManageAssessment"]),
+  validateQuestionGetId,
   validateRequest,
   viewQuestionController
-)
+);
 
-export default router
+export default router;

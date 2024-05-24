@@ -88,11 +88,7 @@ const router: Router = express.Router();
  *       '500':
  *         description: Server Error
  */
-router.get(
-  "/info",
-  authenticateUser(),
-  viewUserDetailsController
-);
+router.get("/info", authenticateUser(), viewUserDetailsController);
 
 /**
  * @swagger
@@ -223,7 +219,7 @@ router.get(
   validateGetAllUsers,
   validateRequest,
   viewAllUsersController
-)
+);
 
 /**
  * @openapi
@@ -783,6 +779,61 @@ router.get(
   viewAllRolesController
 );
 
+/**
+ * @openapi
+ * /v1/user/role:
+ *   delete:
+ *     tags:
+ *       - User Controller
+ *     summary: Delete a user role
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               roleIds:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     roleId:
+ *                       type: string
+ *                       description: The ID of the role to delete.
+ *             required:
+ *               - roleIds
+ *     responses:
+ *       '200':
+ *         description: Role deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of role deletion.
+ *                   example: Role deleted successfully
+ *       '400':
+ *         description: Bad Request
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
+ *       '404':
+ *         description: Role not found
+ *       '409':
+ *         description: Conflict
+ *       '500':
+ *         description: Server Error
+ *       '405':
+ *         description: Method Not Allowed
+ *       '406':
+ *         description: Not Acceptable
+ *       '408':
+ *         description: Request Timeout
+ */
 router.delete(
   "/role",
   authenticateUser(["canManageRole"]),
@@ -795,7 +846,7 @@ router.delete(
  * @swagger
  * /v1/user/access-token:
  *   post:
- *     summary: Get new access token using refresh token 
+ *     summary: Get new access token using refresh token
  *     tags: [User Controller]
  *     requestBody:
  *       required: true
@@ -828,10 +879,11 @@ router.delete(
  *       '500':
  *         description: Server Error
  */
-router.post('/access-token',
+router.post(
+  "/access-token",
   validateNewAccessToken,
   validateRequest,
   newAccessTokenController
-)
+);
 
 export default router;
