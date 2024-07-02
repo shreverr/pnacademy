@@ -290,8 +290,8 @@ export const saveRefreshToken = async (token: {
       }
     );
     return refreshToken;
-  } catch (error) {
-    throw new AppError("error finding role", 500, "Something went wrong", true);
+  } catch (error: any) {
+    throw new AppError("error saving refresh token", 500, error, true);
   }
 };
 
