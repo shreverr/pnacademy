@@ -130,6 +130,11 @@ export const validateUserLogin = [
     .escape()
     .withMessage("Must me valid email address"),
 
+  check("deviceType")
+  .notEmpty()
+  .matches("^(mobile|web)$")
+  .withMessage('deviceType can only be mobile or web'),
+
   check("password").notEmpty().isStrongPassword({
     minLength: 8,
     minLowercase: 1,

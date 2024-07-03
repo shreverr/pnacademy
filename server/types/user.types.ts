@@ -29,8 +29,11 @@ export type RoleData = {
   canViewNotification: boolean;
 };
 
+export type device = 'mobile' | 'web';
+
 export type RefreshTokenData = {
-  user_id: string;
+  user_id: string; 
+  device_type: device;
   refresh_token: string;
 }
 

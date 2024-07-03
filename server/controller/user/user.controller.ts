@@ -114,6 +114,7 @@ export const loginUserController: RequestHandler = async (
     const tokens = await loginUser({
       email: req.body.email,
       password: req.body.password,
+      deviceType: req.body.deviceType,
     });
 
     return res.status(200).json({

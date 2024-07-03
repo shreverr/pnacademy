@@ -8,10 +8,10 @@ import {
   getRoleById,
   getUserByEmail,
   getUserById,
-  saveRefreshToken,
+  updateOrSaveRefreshToken,
   updateUserInDb,
 } from "../../model/user/user.model";
-import { RoleData, UserData, authTokens, roleAttributes, userAttributes } from "../../types/user.types";
+import { RoleData, UserData, authTokens, device, roleAttributes, userAttributes } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
@@ -154,6 +154,7 @@ export const updateUser = async (ToBeUpdatedUser: {
 export const loginUser = async (user: {
   email: string;
   password: string;
+  deviceType: device;
 }): Promise<authTokens> => {
   const existingUser = await getUserByEmail(user.email);
   if (!existingUser)
@@ -232,7 +233,7 @@ export const loginUser = async (user: {
     }
   );
 
-  if (!(await saveRefreshToken({ userId: existingUser.id, refreshToken })))
+  if (!(await updateOrSaveRefreshToken({ userId: existingUser.id, refreshToken }, user.deviceType)))
     throw new AppError(
       "Internal server error",
       500,

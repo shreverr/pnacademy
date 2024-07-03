@@ -7,6 +7,7 @@ import RefreshToken from "../../schema/user/refreshToken.schema";
 import Role from "../../schema/user/role.schema";
 import User from "../../schema/user/user.schema";
 import {
+  device,
   roleAttributes,
   userAttributes,
   type RefreshTokenData,
@@ -66,10 +67,10 @@ export const getAllUsers = async (
 }> => {
   try {
     const allUsersData = User.findAndCountAll({
-        limit: pageSize,
-        offset: offset,
-        order: [[sortBy, order]] // Assuming you want to order by createdAt column
-      });
+      limit: pageSize,
+      offset: offset,
+      order: [[sortBy, order]] // Assuming you want to order by createdAt column
+    });
 
     return await allUsersData;
   } catch (error) {
@@ -93,10 +94,10 @@ export const getAllRoles = async (
 }> => {
   try {
     const allRolesData = Role.findAndCountAll({
-        limit: pageSize,
-        offset: offset,
-        order: [[sortBy, order]] 
-      });
+      limit: pageSize,
+      offset: offset,
+      order: [[sortBy, order]]
+    });
 
     return await allRolesData;
   } catch (error) {
@@ -274,22 +275,23 @@ export const getRoleById = async (id: string): Promise<RoleData | null> => {
   }
 };
 
-export const saveRefreshToken = async (token: {
+// Update the refresh token if exists otherwise create one
+export const updateOrSaveRefreshToken = async (token: {
   userId: string;
   refreshToken: string;
-}): Promise<RefreshTokenData> => {
+}, 
+  deviceType: device
+): Promise<boolean> => {
   logger.info(`Saving refresh token for ${token.userId}`);
   try {
-    const refreshToken = await RefreshToken.create(
+    const refreshToken = await RefreshToken.upsert(
       {
         user_id: token.userId,
+        device_type: deviceType,
         refresh_token: token.refreshToken,
       },
-      {
-        raw: true,
-      }
     );
-    return refreshToken;
+    return true;
   } catch (error: any) {
     throw new AppError("error saving refresh token", 500, error, true);
   }

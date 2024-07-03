@@ -430,9 +430,12 @@ router.patch(
  *             required:
  *               - email
  *               - password
+ *               - deviceType
  *             properties:
  *               email:
  *                 type: string
+ *               deviceType:
+ *                 type: mobile | web
  *               password:
  *                 type: string
  *     responses:
