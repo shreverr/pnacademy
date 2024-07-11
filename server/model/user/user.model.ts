@@ -279,7 +279,7 @@ export const getRoleById = async (id: string): Promise<RoleData | null> => {
 export const updateOrSaveRefreshToken = async (token: {
   userId: string;
   refreshToken: string;
-}, 
+},
   deviceType: device
 ): Promise<boolean> => {
   logger.info(`Saving refresh token for ${token.userId}`);
@@ -297,31 +297,26 @@ export const updateOrSaveRefreshToken = async (token: {
   }
 };
 
-export const deleteRolesById = async (roleId: string[]): Promise<boolean> => {
-  roleId.forEach(async (roleId) => {
+export const deleteRolesById = async (roleIds: string[]): Promise<boolean> => {
+  logger.info(`Deleting roles with id: ${roleIds}`);
+  try {
+    const result = await Role.destroy({
+      where: {
+        id: roleIds,
+      },
+    })
 
-    logger.info(`Deleting role with id: ${roleId}`);
-    try {
-      const role = await Role.findOne({
-        where: {
-          id: roleId,
-        },
-      });
+    if (result === 0) {
+      return false;
+    };
 
-      if (!role) {
-        return null;
-      }
-
-      await role.destroy();
-
-    } catch (error) {
-      throw new AppError(
-        "error deleting role",
-        500,
-        "Something went wrong",
-        false
-      );
-    }
-  });
+  } catch (error: any) {
+    throw new AppError(
+      "error deleting role",
+      500,
+      error,
+      false
+    );
+  }
   return true;
 };

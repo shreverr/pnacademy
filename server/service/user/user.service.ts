@@ -352,20 +352,9 @@ export const createRole = async (role: {
 export const deleteRole = async (
   roleIds: { roleId: string }[]
 ): Promise<boolean> => {
-  const roleIdsExist = roleIds.map(async (roleId) => {
-    const role = await getRoleById(roleId.roleId);
-    if (!role)
-      throw new AppError(
-        "Role not found",
-        404,
-        "Role with this id does not exist",
-        false
-      );
-  });
- 
   const roleDatatoDelete= roleIds.map((roleId)=>roleId.roleId); 
-  const roleData= await deleteRolesById(roleDatatoDelete);
-  if (!roleData)
+  const roleDeletionResult= await deleteRolesById(roleDatatoDelete);
+  if (!roleDeletionResult)
     throw new AppError(
       "Role not found",
       404,
@@ -373,7 +362,6 @@ export const deleteRole = async (
       false
     );
     
-
   return true;
 };
 
