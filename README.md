@@ -14,26 +14,26 @@ Welcome to **Pnacademy**, your all-in-one solution for AI-powered online test co
 - **Easy Integration:** Seamlessly integrate **Pnacademy** with other educational platforms and systems, making it a versatile addition to your existing infrastructure.
 
 ## Getting Started
+### Database Design
+https://app.eraser.io/workspace/6xLX1SuitBZkI2DdKN5O
 
 ### Prerequisites
 
-- Node.js (version X.X.X)
-- MongoDB (version X.X)
-- Python (version X.X)
+- Node.js 
 
 ### Installation
 
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/Pnacademy.git
+    git clone https://github.com/shreverr/pnacademy.git
     ```
 
 2. **Install dependencies:**
 
     ```bash
-    cd Pnacademy
-    npm install
+    cd pnacademy/server
+    yarn
     ```
 
 3. **Configure the environment:**
@@ -47,10 +47,10 @@ Welcome to **Pnacademy**, your all-in-one solution for AI-powered online test co
 4. **Start the application:**
 
     ```bash
-    npm start
+    yarn dev
     ```
 
-    Visit `http://localhost:3000` in your web browser.
+    Visit `http://localhost:4000` in your web browser.
 
 ## Usage
 
@@ -76,5 +76,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For any inquiries, please contact the **Pnacademy** development team at [info@pnacademy.com](mailto:info@pnacademy.com).
-
-Thank you for choosing **Pnacademy** for your online test conduction needs!
