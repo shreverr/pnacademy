@@ -131,9 +131,9 @@ export const validateUserLogin = [
     .withMessage("Must me valid email address"),
 
   check("deviceType")
-  .notEmpty()
-  .matches("^(mobile|web)$")
-  .withMessage('deviceType can only be mobile or web'),
+    .notEmpty()
+    .matches("^(mobile|web)$")
+    .withMessage("deviceType can only be mobile or web"),
 
   check("password").notEmpty().isStrongPassword({
     minLength: 8,
@@ -250,6 +250,14 @@ export const validateUserRoleDelete = [
     .withMessage("RoleId cannot be empty")
     .isUUID(4)
     .withMessage("RoleId should be a valid UUID v4"),
+];
+export const validateUserDelete = [
+  check("userIds.*.userId")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Last name must be more than 2 characters long"),
 ];
 
 export const validateAssessment = [

@@ -7,6 +7,7 @@ import {
 import {
   createRole,
   deleteRole,
+  deleteUser,
   loginUser,
   newAccessToken,
   registerUser,
@@ -189,6 +190,23 @@ export const deleteRoleController: RequestHandler = async (
     next(error);
   }
 };
+
+export const deleteUserController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const deletedUser = await deleteUser(req.body.userIds);
+
+    return res.status(200).json({
+      message: "Users Deleted successfully",
+      data: deletedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export const viewAllRolesController: RequestHandler = async (
   req: Request,

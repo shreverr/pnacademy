@@ -3,6 +3,7 @@ import type { Router } from "express";
 import {
   createRoleController,
   deleteRoleController,
+  deleteUserController,
   loginUserController,
   newAccessTokenController,
   registerUserController,
@@ -15,6 +16,7 @@ import {
   validateGetAllRoles,
   validateGetAllUsers,
   validateNewAccessToken,
+  validateUserDelete,
   validateUserLogin,
   validateUserRegister,
   validateUserRole,
@@ -843,6 +845,14 @@ router.delete(
   validateUserRoleDelete,
   validateRequest,
   deleteRoleController
+);
+
+router.delete(
+  "/delete",
+  authenticateUser(["canManageUser"]),
+  validateUserDelete,
+  validateRequest,
+  deleteUserController
 );
 
 /**

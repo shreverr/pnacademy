@@ -28,27 +28,25 @@ const instantiateModels = async (): Promise<void> => {
   }
 
   // Define relationships
-  User.hasOne(RefreshToken);
-  RefreshToken.belongsTo(User);
-  User.hasOne(Password);
-  Password.belongsTo(User);
+  User.hasOne(RefreshToken, { foreignKey: "user_id" });
+  User.hasOne(Password, { foreignKey: "user_id" });
+  User.belongsTo(Role, { foreignKey: "role_id" });
 
-  User.hasOne(Role, { foreignKey: "role_id" });
-  Role.belongsTo(User, { foreignKey: "role_id" });
+  Role.hasMany(User, { foreignKey: "role_id" });
+  RefreshToken.belongsTo(User, { foreignKey: "user_id" });
+  Password.belongsTo(User, { foreignKey: "user_id" });
 
-  User.hasMany(Assessment, { foreignKey: "created_by" });
-  
   Assessment.belongsTo(User, { foreignKey: "created_by" });
   Assessment.hasMany(Question, { foreignKey: "assessment_id" });
-  
+
   Question.belongsTo(Assessment, { foreignKey: "assessment_id" });
-  
+
   Question.hasMany(Option, { foreignKey: "question_id" });
-  
+
   Option.belongsTo(Question, { foreignKey: "question_id" });
 
   Question.belongsToMany(Tag, { through: "question_tag" });
-  
+
   Tag.belongsToMany(Question, { through: "question_tag" });
 
   Notification.belongsToMany(Group, {
@@ -62,7 +60,6 @@ const instantiateModels = async (): Promise<void> => {
   });
 
   User.belongsToMany(Group, { through: "user_group" });
-
 
   Group.belongsToMany(User, { through: "user_group" });
   Group.belongsToMany(Assessment, { through: "group_assessment" });

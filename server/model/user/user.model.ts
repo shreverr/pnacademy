@@ -60,16 +60,16 @@ export const getAllUsers = async (
   offset: number,
   pageSize: number,
   sortBy: userAttributes,
-  order: "ASC" | "DESC",
+  order: "ASC" | "DESC"
 ): Promise<{
-  rows: UserData[],
-  count: number
+  rows: UserData[];
+  count: number;
 }> => {
   try {
     const allUsersData = User.findAndCountAll({
       limit: pageSize,
       offset: offset,
-      order: [[sortBy, order]] // Assuming you want to order by createdAt column
+      order: [[sortBy, order]], // Assuming you want to order by createdAt column
     });
 
     return await allUsersData;
@@ -87,16 +87,16 @@ export const getAllRoles = async (
   offset: number,
   pageSize: number,
   sortBy: roleAttributes,
-  order: "ASC" | "DESC",
+  order: "ASC" | "DESC"
 ): Promise<{
-  rows: RoleData[],
-  count: number
+  rows: RoleData[];
+  count: number;
 }> => {
   try {
     const allRolesData = Role.findAndCountAll({
       limit: pageSize,
       offset: offset,
-      order: [[sortBy, order]]
+      order: [[sortBy, order]],
     });
 
     return await allRolesData;
@@ -276,21 +276,20 @@ export const getRoleById = async (id: string): Promise<RoleData | null> => {
 };
 
 // Update the refresh token if exists otherwise create one
-export const updateOrSaveRefreshToken = async (token: {
-  userId: string;
-  refreshToken: string;
-},
+export const updateOrSaveRefreshToken = async (
+  token: {
+    userId: string;
+    refreshToken: string;
+  },
   deviceType: device
 ): Promise<boolean> => {
   logger.info(`Saving refresh token for ${token.userId}`);
   try {
-    const refreshToken = await RefreshToken.upsert(
-      {
-        user_id: token.userId,
-        device_type: deviceType,
-        refresh_token: token.refreshToken,
-      },
-    );
+    const refreshToken = await RefreshToken.upsert({
+      user_id: token.userId,
+      device_type: deviceType,
+      refresh_token: token.refreshToken,
+    });
     return true;
   } catch (error: any) {
     throw new AppError("error saving refresh token", 500, error, true);
@@ -304,19 +303,31 @@ export const deleteRolesById = async (roleIds: string[]): Promise<boolean> => {
       where: {
         id: roleIds,
       },
-    })
+    });
 
     if (result === 0) {
       return false;
-    };
-
+    }
   } catch (error: any) {
-    throw new AppError(
-      "error deleting role",
-      500,
-      error,
-      false
-    );
+    throw new AppError("error deleting role", 500, error, false);
+  }
+  return true;
+};
+
+export const deleteUsersById = async (userIds: string[]): Promise<boolean> => {
+  logger.info(`Deleting users with id: ${userIds}`);
+  try {
+    const result = await User.destroy({
+      where: {
+        id: userIds,
+      },
+    });
+
+    if (result === 0) {
+      return false;
+    }
+  } catch (error: any) {
+    throw new AppError("error deleting user", 500, error, false);
   }
   return true;
 };
