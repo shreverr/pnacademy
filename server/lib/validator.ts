@@ -131,9 +131,9 @@ export const validateUserLogin = [
     .withMessage("Must me valid email address"),
 
   check("deviceType")
-  .notEmpty()
-  .matches("^(mobile|web)$")
-  .withMessage('deviceType can only be mobile or web'),
+    .notEmpty()
+    .matches("^(mobile|web)$")
+    .withMessage('deviceType can only be mobile or web'),
 
   check("password").notEmpty().isStrongPassword({
     minLength: 8,
@@ -518,3 +518,20 @@ export const validateGroup = [
     .isLength({ min: 2 })
     .withMessage("Group name must be at least 2 characters long"),
 ];
+
+export const validateUsersImport = [
+  check('users')
+    .custom((value, { req }) => {
+      // Checks if mime type is csv
+      if (req!.file.mimetype === 'text/csv') {
+        return '.csv';
+      } else {
+        return false;
+      }
+    })
+    .withMessage('Please only upload CSV file'),
+
+  check('updateExisting')
+    .isBoolean()
+    .withMessage('updateExisting must be a boolean'),
+]

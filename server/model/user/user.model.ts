@@ -1,4 +1,3 @@
-import { UUID } from "crypto";
 import { sequelize } from "../../config/database";
 import logger from "../../config/logger";
 import { AppError } from "../../lib/appError";
@@ -10,7 +9,6 @@ import {
   device,
   roleAttributes,
   userAttributes,
-  type RefreshTokenData,
   type RoleData,
   type UserData,
 } from "../../types/user.types";
@@ -319,4 +317,28 @@ export const deleteRolesById = async (roleIds: string[]): Promise<boolean> => {
     );
   }
   return true;
+};
+
+export const createBulkUsers = async (
+  userData: UserData[],
+  updateExisting: boolean = false
+): Promise<boolean> => {
+  logger.info(`creating bulk users`);
+  try {
+    logger.debug(userData)
+    await User.bulkCreate(userData, updateExisting ? {
+      updateOnDuplicate: ["first_name", "last_name", "email", "phone", "role_id"],
+    } : {
+      ignoreDuplicates: true,
+    });
+
+    return true;
+  } catch (error: any) {
+    throw new AppError(
+      "Error creating bulk users",
+      500,
+      error,
+      false
+    );
+  }
 };

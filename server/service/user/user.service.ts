@@ -8,6 +8,7 @@ import {
   getRoleById,
   getUserByEmail,
   getUserById,
+  createBulkUsers,
   updateOrSaveRefreshToken,
   updateUserInDb,
 } from "../../model/user/user.model";
@@ -20,6 +21,8 @@ import bcrypt from "bcrypt";
 import jwt, { Jwt } from "jsonwebtoken";
 import { UUID } from "crypto";
 import logger from "../../config/logger";
+import { csvToObjectArray } from "../../utils/csvParser";
+import { deleteFileFromDisk } from "../../utils/file";
 
 export const viewUserDetails = async (userId: string): Promise<UserData | null> => {
   const existingUserData = await getUserById(userId);
@@ -403,4 +406,17 @@ export const viewAllRoles = async (
     roles: allRolesData,
     totalPages: totalPages
   };
+};
+
+export const importUsers = async (
+  filePath: string,
+  updateExisting: boolean = false
+): Promise<boolean> => {
+  const parsedData = await csvToObjectArray<UserData>(filePath)
+  logger.debug(parsedData)
+
+  const result = createBulkUsers(parsedData, updateExisting);
+  deleteFileFromDisk(filePath);
+
+  return result;
 };

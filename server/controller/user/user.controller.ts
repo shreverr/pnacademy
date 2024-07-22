@@ -7,6 +7,7 @@ import {
 import {
   createRole,
   deleteRole,
+  importUsers,
   loginUser,
   newAccessToken,
   registerUser,
@@ -16,6 +17,10 @@ import {
   viewUserDetails,
 } from "../../service/user/user.service";
 import { roleAttributes, userAttributes } from "../../types/user.types";
+import User from "../../schema/user/user.schema";
+import { sequelize } from "../../config/database";
+import logger from "../../config/logger";
+import { log } from "console";
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -211,3 +216,19 @@ export const viewAllRolesController: RequestHandler = async (
     next(error);
   }
 }
+
+export const importUserController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const importResult = await importUsers(req.file!.path, req.body.updateExisting);
+
+    return res.status(200).json({
+      message: "success",
+    });
+  } catch (error) {
+    next(error);
+  }
+} 

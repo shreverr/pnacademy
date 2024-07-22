@@ -5,7 +5,7 @@ export type UserData = {
   role_id: string | null;
   first_name: string;
   last_name: string;
-  email: string | null;
+  email: string;
   phone: string | null;
 };
 

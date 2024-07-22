@@ -1,18 +1,23 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
-import { v4 as uuid } from "uuid";
+import { nanoid } from "nanoid";
+import { AppError } from "../lib/appError";
 
 
-const tempStorageDir = './temp';
-
-// Ensure the temp directory exists
-fs.mkdirSync(tempStorageDir, { recursive: true });
+const tempStorageDir = process.env.TEMP_DIR;
+if (!tempStorageDir) {
+  throw new AppError(
+    "environment variable not set", 
+    500, 
+    "TEMP_DIR not set", 
+    false
+  );
+}
 
 const storage = multer.diskStorage({
   destination: tempStorageDir,
   filename: (req, file, cb) => {
-    cb(null, uuid() + path.extname(file.originalname));
+    cb(null, nanoid(5) + '-uploaded-data' + path.extname(file.originalname));
   }
 });
 

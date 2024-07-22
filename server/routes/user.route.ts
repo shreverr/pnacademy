@@ -3,6 +3,7 @@ import type { Router } from "express";
 import {
   createRoleController,
   deleteRoleController,
+  importUserController,
   loginUserController,
   newAccessTokenController,
   registerUserController,
@@ -19,10 +20,12 @@ import {
   validateUserRegister,
   validateUserRole,
   validateUserRoleDelete,
+  validateUsersImport,
   validateUserUpdate,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
+import { upload } from "../middleware/multer";
 
 const router: Router = express.Router();
 
@@ -888,5 +891,60 @@ router.post(
   validateRequest,
   newAccessTokenController
 );
+
+/**
+ * @swagger
+ * /v1/user/import:
+ *   post:
+ *     summary: Import users from a CSV file
+ *     description: This endpoint allows for importing users from a CSV file. It also provides an option to update existing users.
+ *     tags: [User Controller]
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: users
+ *         type: file
+ *         required: true
+ *         description: The CSV file containing the users to import.
+ *       - in: formData
+ *         name: updateExisting
+ *         type: boolean
+ *         required: true
+ *         description: Flag indicating whether to update existing users.
+ *     responses:
+ *       200:
+ *         description: Users imported successfully.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               example: success
+ *       400:
+ *         description: Bad request, possibly due to invalid file format or missing parameters.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               example: Bad request. Invalid file format or missing parameters.
+ *       500:
+ *         description: Internal server error.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               example: Internal server error.
+ */
+router.post(
+  '/import',
+  authenticateUser(["canManageUser"]),
+  upload.single('users'),
+  validateUsersImport,
+  validateRequest,
+  importUserController
+)
 
 export default router;
