@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import logger from './logger'
 
 const sequelize = new Sequelize(process.env.DB_URI ?? '', {
-  logging: (msg) => { logger.debug(msg) },
+  logging: (msg) => { logger.info(msg) },
   dialect: "postgres",
   ssl: process.env.ENVIRONMENT === 'prod' ? true : false,
   dialectOptions: process.env.ENVIRONMENT === 'prod'? {
