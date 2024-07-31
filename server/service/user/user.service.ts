@@ -21,7 +21,7 @@ import bcrypt from "bcrypt";
 import jwt, { Jwt } from "jsonwebtoken";
 import { UUID } from "crypto";
 import logger from "../../config/logger";
-import { csvToObjectArray } from "../../utils/csvParser";
+import { csvToObjectArray, objectArrayToCSV } from "../../utils/csvParser";
 import { deleteFileFromDisk } from "../../utils/file";
 
 export const viewUserDetails = async (userId: string): Promise<UserData | null> => {
@@ -43,7 +43,7 @@ export const viewAllUsers = async (
   sortBy?: userAttributes,
   order?: "ASC" | "DESC",
 ): Promise<{
-  users :UserData[],
+  users: UserData[],
   totalPages: number,
 }> => {
   const page = parseInt(pageStr ?? '1');
@@ -53,7 +53,7 @@ export const viewAllUsers = async (
 
   const offset = (page - 1) * pageSize;
 
-  const {rows: allUsersData,count: allUsersCount} = await getAllUsers(
+  const { rows: allUsersData, count: allUsersCount } = await getAllUsers(
     offset,
     pageSize,
     sortBy,
@@ -201,18 +201,18 @@ export const loginUser = async (user: {
       false
     );
 
-    const grantedPermissions = [
-      userRole?.canManageAssessment ? 'canManageAssessment' : '',
-      userRole?.canManageUser ? 'canManageUser' : '',
-      userRole?.canManageRole ? 'canManageRole' : '',
-      userRole?.canManageNotification ? 'canManageNotification' : '',
-      userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
-      userRole?.canManageReports ? 'canManageReports' : '',
-      userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
-      userRole?.canViewReport ? 'canViewReport' : '',
-      userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
-      userRole?.canViewNotification ? 'canViewNotification' : '',
-   ].filter(permission => permission !== '')
+  const grantedPermissions = [
+    userRole?.canManageAssessment ? 'canManageAssessment' : '',
+    userRole?.canManageUser ? 'canManageUser' : '',
+    userRole?.canManageRole ? 'canManageRole' : '',
+    userRole?.canManageNotification ? 'canManageNotification' : '',
+    userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
+    userRole?.canManageReports ? 'canManageReports' : '',
+    userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
+    userRole?.canViewReport ? 'canViewReport' : '',
+    userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
+    userRole?.canViewNotification ? 'canViewNotification' : '',
+  ].filter(permission => permission !== '')
 
   const accessToken = jwt.sign(
     {
@@ -251,7 +251,7 @@ export const loginUser = async (user: {
 }
 
 export const newAccessToken = async (refreshToken: string): Promise<string> => {
-  let userId: string = '' 
+  let userId: string = ''
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (err: any, user: any) => {
     if (err) {
       logger.error(`Error verifying accesss token: ${err}`)
@@ -260,7 +260,7 @@ export const newAccessToken = async (refreshToken: string): Promise<string> => {
         commonErrorsDictionary.forbidden.httpCode,
         "Token not valid",
         false
-      ) 
+      )
     }
 
     userId = user.userId
@@ -282,7 +282,7 @@ export const newAccessToken = async (refreshToken: string): Promise<string> => {
       401,
       "Role not assigned",
       false
-    ) 
+    )
 
   const userRole = await getRoleById(existingUser.role_id)
   const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
@@ -294,18 +294,18 @@ export const newAccessToken = async (refreshToken: string): Promise<string> => {
       false
     )
 
-    const grantedPermissions = [
-      userRole?.canManageAssessment ? 'canManageAssessment' : '',
-      userRole?.canManageUser ? 'canManageUser' : '',
-      userRole?.canManageRole ? 'canManageRole' : '',
-      userRole?.canManageNotification ? 'canManageNotification' : '',
-      userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
-      userRole?.canManageReports ? 'canManageReports' : '',
-      userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
-      userRole?.canViewReport ? 'canViewReport' : '',
-      userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
-      userRole?.canViewNotification ? 'canViewNotification' : '',
-   ].filter(permission => permission !== '')
+  const grantedPermissions = [
+    userRole?.canManageAssessment ? 'canManageAssessment' : '',
+    userRole?.canManageUser ? 'canManageUser' : '',
+    userRole?.canManageRole ? 'canManageRole' : '',
+    userRole?.canManageNotification ? 'canManageNotification' : '',
+    userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
+    userRole?.canManageReports ? 'canManageReports' : '',
+    userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
+    userRole?.canViewReport ? 'canViewReport' : '',
+    userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
+    userRole?.canViewNotification ? 'canViewNotification' : '',
+  ].filter(permission => permission !== '')
 
   const accessToken = jwt.sign({
     userId: existingUser.id,
@@ -355,8 +355,8 @@ export const createRole = async (role: {
 export const deleteRole = async (
   roleIds: { roleId: string }[]
 ): Promise<boolean> => {
-  const roleDatatoDelete= roleIds.map((roleId)=>roleId.roleId); 
-  const roleDeletionResult= await deleteRolesById(roleDatatoDelete);
+  const roleDatatoDelete = roleIds.map((roleId) => roleId.roleId);
+  const roleDeletionResult = await deleteRolesById(roleDatatoDelete);
   if (!roleDeletionResult)
     throw new AppError(
       "Role not found",
@@ -364,7 +364,7 @@ export const deleteRole = async (
       "Role with this id does not exist",
       false
     );
-    
+
   return true;
 };
 
@@ -374,7 +374,7 @@ export const viewAllRoles = async (
   sortBy?: roleAttributes,
   order?: "ASC" | "DESC",
 ): Promise<{
-  roles :RoleData[],
+  roles: RoleData[],
   totalPages: number,
 }> => {
   const page = parseInt(pageStr ?? '1');
@@ -384,7 +384,7 @@ export const viewAllRoles = async (
 
   const offset = (page - 1) * pageSize;
 
-  const {rows: allRolesData,count: allRolesCount} = await getAllRoles(
+  const { rows: allRolesData, count: allRolesCount } = await getAllRoles(
     offset,
     pageSize,
     sortBy,
@@ -419,4 +419,11 @@ export const importUsers = async (
   deleteFileFromDisk(filePath);
 
   return result;
+};
+
+export const exportUsers = async (): Promise<string> => {
+  const result = await getAllUsers();
+  const convetedCSVPath = objectArrayToCSV<UserData>(result.rows);
+  
+  return convetedCSVPath;
 };

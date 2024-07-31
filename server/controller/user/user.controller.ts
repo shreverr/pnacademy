@@ -7,6 +7,7 @@ import {
 import {
   createRole,
   deleteRole,
+  exportUsers,
   importUsers,
   loginUser,
   newAccessToken,
@@ -232,3 +233,17 @@ export const importUserController: RequestHandler = async (
     next(error);
   }
 } 
+
+export const exportUserController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const exportedFilePath = await exportUsers();
+
+    return res.status(200).sendFile(exportedFilePath);
+  } catch (error) {
+    next(error);
+  }
+}

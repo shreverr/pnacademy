@@ -3,6 +3,7 @@ import type { Router } from "express";
 import {
   createRoleController,
   deleteRoleController,
+  exportUserController,
   importUserController,
   loginUserController,
   newAccessTokenController,
@@ -945,6 +946,47 @@ router.post(
   validateUsersImport,
   validateRequest,
   importUserController
+)
+
+/**
+ * @swagger
+ * /v1/user/export:
+ *   get:
+ *     summary: Export user data as a CSV file
+ *     tags: [User Controller]
+ *     description: This endpoint allows exporting user data in CSV format. The CSV file will include all user data from the user table.
+ *     responses:
+ *       '200':
+ *         description: Successfully exported user data as a CSV file.
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             examples:
+ *               example-1:
+ *                 summary: Example CSV file
+ *                 value: |
+ *                   id,first_name,last_name,email,phone,createdAt,updatedAt
+ *                   b9f49f4f-4790-4edd-a833-a426f301c804,admin,sa,admin@xyz.com,9876543210,2024-07-20T05:35:59.042Z,2024-07-20T05:35:59.042Z
+ *                   29d832ef-b488-4d87-8471-f9e1ce7e1841,admin,admin,admin@pna.com,9876543210,2024-07-20T13:46:13.421Z,2024-07-20T13:46:13.421Z
+ *                   fb1202ed-9714-4781-abb9-e160ea3f7f4b,Shakti,Dubey,shakti@gmail.com,9898989898,2024-07-20T13:48:44.722Z,2024-07-20T13:48:44.722Z
+ *                   3ef2bbe7-54ab-4b30-8c66-84ad5f1cee87,Bhumi,2.0,bhumi@ibn.com,4204204200,2024-07-22T09:10:04.441Z,2024-07-22T09:10:04.441Z
+ *       '500':
+ *         description: Internal server error occurred while generating the CSV file.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error occurred while generating the CSV file.
+ */
+router.get(
+  '/export',
+  authenticateUser(['canManageUser']),
+  exportUserController
 )
 
 export default router;

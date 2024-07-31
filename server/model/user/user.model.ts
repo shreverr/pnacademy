@@ -1,3 +1,4 @@
+import { FindAndCountOptions } from "sequelize";
 import { sequelize } from "../../config/database";
 import logger from "../../config/logger";
 import { AppError } from "../../lib/appError";
@@ -55,22 +56,33 @@ export const getUserById = async (id: string): Promise<UserData | null> => {
 };
 
 export const getAllUsers = async (
-  offset: number,
-  pageSize: number,
-  sortBy: userAttributes,
-  order: "ASC" | "DESC",
+  offset?: number,
+  pageSize?: number,
+  sortBy?: userAttributes,
+  order?: "ASC" | "DESC",
 ): Promise<{
   rows: UserData[],
   count: number
 }> => {
   try {
-    const allUsersData = User.findAndCountAll({
+    const findOptions: FindAndCountOptions = offset && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
-      order: [[sortBy, order]] // Assuming you want to order by createdAt column
-    });
+      order: [[sortBy, order]]
+    } : {}
 
-    return await allUsersData;
+    const allUsersData = await User.findAndCountAll(findOptions);
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: UserData[]
+      count: number
+    } = {
+      rows: allUsersData.rows.map((user) => user.get({ plain: true })),
+      count: allUsersData.count
+    }
+
+    return plainData;
   } catch (error) {
     throw new AppError(
       "error getting all users",
