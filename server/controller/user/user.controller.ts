@@ -22,6 +22,7 @@ import User from "../../schema/user/user.schema";
 import { sequelize } from "../../config/database";
 import logger from "../../config/logger";
 import { log } from "console";
+import { deleteFileFromDisk } from "../../utils/file";
 
 export const registerUserController: RequestHandler = async (
   req: Request,
@@ -242,7 +243,13 @@ export const exportUserController: RequestHandler = async (
   try {
     const exportedFilePath = await exportUsers();
 
-    return res.status(200).sendFile(exportedFilePath);
+    return res.status(200).sendFile(exportedFilePath, (err) => {
+      if (err) {
+        next(err);
+      } else {
+        deleteFileFromDisk(exportedFilePath);
+      }
+    });
   } catch (error) {
     next(error);
   }
