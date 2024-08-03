@@ -11,6 +11,7 @@ import {
   createBulkUsers,
   updateOrSaveRefreshToken,
   updateUserInDb,
+  deleteUsersById,
 } from "../../model/user/user.model";
 import { RoleData, UserData, authTokens, device, roleAttributes, userAttributes } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
@@ -426,4 +427,9 @@ export const exportUsers = async (): Promise<string> => {
   const convetedCSVPath = objectArrayToCSV<UserData>(result.rows);
   
   return convetedCSVPath;
+};
+
+export const deleteUsers = async (userIds: string[]): Promise<boolean> => {
+  const result = await deleteUsersById(userIds);
+  return result;
 };

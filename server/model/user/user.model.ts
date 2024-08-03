@@ -354,3 +354,27 @@ export const createBulkUsers = async (
     );
   }
 };
+
+export const deleteUsersById = async (userIds: string[]): Promise<boolean> => {
+  logger.debug(`Deleting roles with id: ${userIds}`);
+  try {
+    const result = await User.destroy({
+      where: {
+        id: userIds,
+      },
+    })
+
+    if (result === 0) {
+      return false;
+    };
+
+    return true
+  } catch (error: any) {
+    throw new AppError(
+      "error deleting users",
+      500,
+      error,
+      false
+    );
+  }
+};

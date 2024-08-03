@@ -7,6 +7,7 @@ import {
 import {
   createRole,
   deleteRole,
+  deleteUsers,
   exportUsers,
   importUsers,
   loginUser,
@@ -18,10 +19,6 @@ import {
   viewUserDetails,
 } from "../../service/user/user.service";
 import { roleAttributes, userAttributes } from "../../types/user.types";
-import User from "../../schema/user/user.schema";
-import { sequelize } from "../../config/database";
-import logger from "../../config/logger";
-import { log } from "console";
 import { deleteFileFromDisk } from "../../utils/file";
 
 export const registerUserController: RequestHandler = async (
@@ -249,6 +246,22 @@ export const exportUserController: RequestHandler = async (
       } else {
         deleteFileFromDisk(exportedFilePath);
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const deleteUserController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const allUsersDeleted = await deleteUsers(req.body.userIds);
+
+    return res.status(200).json({
+      message: allUsersDeleted ? "Users Deleted successfully" :  "Some users deleted"
     });
   } catch (error) {
     next(error);

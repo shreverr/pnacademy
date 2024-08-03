@@ -3,6 +3,7 @@ import type { Router } from "express";
 import {
   createRoleController,
   deleteRoleController,
+  deleteUserController,
   exportUserController,
   importUserController,
   loginUserController,
@@ -17,6 +18,7 @@ import {
   validateGetAllRoles,
   validateGetAllUsers,
   validateNewAccessToken,
+  validateUserDelete,
   validateUserLogin,
   validateUserRegister,
   validateUserRole,
@@ -987,6 +989,55 @@ router.get(
   '/export',
   authenticateUser(['canManageUser']),
   exportUserController
+)
+
+/**
+ * @swagger
+ * /v1/user/delete:
+ *   delete:
+ *     summary: Delete multiple users
+ *     tags: [User Controller]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [
+ *                   "1f8cd887-8871-49bb-955e-e40dc023ff5f",
+ *                   "75131057-326d-4dd6-88bc-172a3aa51f09",
+ *                   "cb57be3c-ba47-4a27-b425-0a9b33bb3e68",
+ *                   "0b0fcaff-68d3-4a64-a227-9d67d257315c"
+ *                 ]
+ *     responses:
+ *       '200':
+ *         description: Users deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Confirmation message.
+ *             example:
+ *               message: Users deleted successfully
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server error
+ */
+router.delete(
+  '/delete', 
+  authenticateUser(['canManageUser']),
+  validateUserDelete,
+  validateRequest,
+  deleteUserController
 )
 
 export default router;

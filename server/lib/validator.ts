@@ -535,3 +535,12 @@ export const validateUsersImport = [
     .isBoolean()
     .withMessage('updateExisting must be a boolean'),
 ]
+
+export const validateUserDelete = [
+  check("userIds.*")
+    .not()
+    .isEmpty()
+    .withMessage("UserId cannot be empty")
+    .isUUID(4)
+    .withMessage("UserId should be a valid UUID v4"),
+];
