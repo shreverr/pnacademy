@@ -8,6 +8,10 @@ import Role from "./user/role.schema";
 import User from "./user/user.schema";
 import Group from "./group/group.schema";
 import Notification from "./group/notification.schema";
+import QuestionTag from "./junction/questionTag.schema";
+import NotificationGroup from "./junction/notificationGroup.schema";
+import UserGroup from "./junction/userGroup.schema";
+import AssessmentGroup from "./junction/assessmentGroup.schema";
 
 const models = [
   "./user/user.schema",
@@ -20,6 +24,10 @@ const models = [
   "./assessment/tag.schema",
   "./group/group.schema",
   "./group/notification.schema",
+  "./junction/questionTag.schema",
+  "./junction/notificationGroup.schema",
+  "./junction/userGroup.schema",
+  "./junction/assessmentGroup.schema",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -28,46 +36,82 @@ const instantiateModels = async (): Promise<void> => {
   }
 
   // Define relationships
-  User.hasOne(RefreshToken);
-  RefreshToken.belongsTo(User);
-  User.hasOne(Password);
-  Password.belongsTo(User);
+  User.hasOne(RefreshToken, {
+    onDelete: "CASCADE",
+    foreignKey: 'user_id',
+  });
 
-  User.hasOne(Role, { foreignKey: "role_id" });
-  Role.belongsTo(User, { foreignKey: "role_id" });
+  User.hasOne(Password, {
+    onDelete: "CASCADE",
+    foreignKey: 'user_id',
+  });
 
-  User.hasMany(Assessment, { foreignKey: "created_by" });
-  
-  Assessment.belongsTo(User, { foreignKey: "created_by" });
-  Assessment.hasMany(Question, { foreignKey: "assessment_id" });
-  
-  Question.belongsTo(Assessment, { foreignKey: "assessment_id" });
-  
-  Question.hasMany(Option, { foreignKey: "question_id" });
-  
-  Option.belongsTo(Question, { foreignKey: "question_id" });
+  Role.hasMany(User, {
+    foreignKey: "role_id"
+  });
 
-  Question.belongsToMany(Tag, { through: "question_tag" });
-  
-  Tag.belongsToMany(Question, { through: "question_tag" });
+  User.hasMany(Assessment, {
+    foreignKey: "created_by",
+    onDelete: "CASCADE",
+  });
+
+  Assessment.hasMany(Question, { 
+    foreignKey: "assessment_id", 
+    onDelete: "CASCADE",
+  });
+
+  Question.hasMany(Option, { 
+    foreignKey: "question_id",
+    onDelete: "CASCADE", 
+  });
+
+  Question.belongsToMany(Tag, { 
+    through: QuestionTag,
+    foreignKey: "question_id",
+    onDelete: "CASCADE",
+  });
+
+  Tag.belongsToMany(Question, { 
+    through: QuestionTag,
+    foreignKey: "tag_id",
+    onDelete: "CASCADE",
+  });
 
   Notification.belongsToMany(Group, {
-    through: "notification_group",
-    foreignKey: "notification_Id",
+    through: NotificationGroup,
+    foreignKey: "notification_id",
+    onDelete: "CASCADE",
   });
 
   Group.belongsToMany(Notification, {
-    through: "notification_group",
-    foreignKey: "group_Id",
+    through: NotificationGroup,
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
   });
 
-  User.belongsToMany(Group, { through: "user_group" });
+  User.belongsToMany(Group, { 
+    through: UserGroup,
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+  });
 
+  Group.belongsToMany(User, { 
+    through: UserGroup,
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
+  });
+  
+  Assessment.belongsToMany(Group, { 
+    through: AssessmentGroup,
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  });
 
-  Group.belongsToMany(User, { through: "user_group" });
-  Group.belongsToMany(Assessment, { through: "group_assessment" });
-
-  Assessment.belongsToMany(Group, { through: "group_assessment" });
+  Group.belongsToMany(Assessment, { 
+    through: AssessmentGroup,
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
+  });
 };
 
 export default instantiateModels;
