@@ -5,7 +5,8 @@ import {
   type AssementData,
   type TagData,
   type AssementDetailedData,
-  type QuestionDetailedData
+  type QuestionDetailedData,
+  TagAttribute
 } from '../../types/assessment.types'
 import { AppError } from '../../lib/appError'
 import logger from '../../config/logger'
@@ -13,6 +14,7 @@ import Assessment from '../../schema/assessment/assessment.schema'
 import Question from '../../schema/assessment/question.schema'
 import Option from '../../schema/assessment/options.schema'
 import Tag from '../../schema/assessment/tag.schema'
+import { FindAndCountOptions } from 'sequelize'
 
 export const createAssementInDB = async (assessment: {
   id: string
@@ -552,3 +554,41 @@ export const deleteTagInDB = async (tag: { id: UUID }): Promise<boolean> => {
     )
   }
 }
+
+export const getAllTags = async (
+  offset?: number,
+  pageSize?: number,
+  sortBy?: TagAttribute,
+  order?: "ASC" | "DESC",
+): Promise<{
+  rows: TagData[],
+  count: number
+}> => {
+  try {
+    const findOptions: FindAndCountOptions = offset && pageSize && sortBy && order ? {
+      limit: pageSize,
+      offset: offset,
+      order: [[sortBy, order]]
+    } : {}
+
+    const allTagsData = await Tag.findAndCountAll(findOptions);
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: TagData[]
+      count: number
+    } = {
+      rows: allTagsData.rows.map((tag) => tag.get({ plain: true })),
+      count: allTagsData.count
+    }
+
+    return plainData;
+  } catch (error) {
+    throw new AppError(
+      "error getting all tags",
+      500,
+      "Something went wrong",
+      true
+    );
+  }
+};

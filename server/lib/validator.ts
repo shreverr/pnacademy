@@ -553,3 +553,37 @@ export const validateGetTag = [
     .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
+
+export const validateGetAllTags = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(id|name|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+     "id", "name", "createdAt", or "updatedAt"`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+     "ASC", "DESC",`
+    ),
+];

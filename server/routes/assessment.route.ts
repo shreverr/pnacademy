@@ -13,6 +13,7 @@ import {
   UpdateOptionController,
   UpdateQuestionController,
   UpdateTagController,
+  viewAllTagsController,
   viewAssessmentController,
   viewQuestionController,
   viewTagController,
@@ -22,6 +23,7 @@ import {
   validateAssessmentGetId,
   validateAssessmentId,
   validateAssessmentUpdate,
+  validateGetAllTags,
   validateGetTag,
   validateOption,
   validateOptionId,
@@ -678,6 +680,97 @@ router.get(
   validateGetTag,
   validateRequest,
   viewTagController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/tags:
+ *   get:
+ *     summary: Get a list of tags
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Number of items per page for pagination.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [id, name, createdAt, updatedAt]
+ *         required: false
+ *         description: Field to sort by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         required: false
+ *         description: Sort order (ASC or DESC).
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved tags.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     tags:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the tag.
+ *                             example: 6e9a8727-9c71-442a-bd2e-b912e8533176
+ *                           name:
+ *                             type: string
+ *                             description: The name of the tag.
+ *                             example: bicep
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the tag was created.
+ *                             example: 2024-08-04T14:29:34.857Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the tag was last updated.
+ *                             example: 2024-08-04T14:29:34.857Z
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages for pagination.
+ *                       example: 1
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Tags not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  '/tags',
+  authenticateUser(["canManageAssessment"]),
+  validateGetAllTags,
+  validateRequest,
+  viewAllTagsController
 )
 
 export default router;

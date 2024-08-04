@@ -12,6 +12,7 @@ import {
   updateOption,
   updateQuestion,
   updateTag,
+  viewAllTags,
   viewAssessmentDetails,
   viewQuestionDetails,
   viewTag,
@@ -22,6 +23,7 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
+import { TagAttribute } from "../../types/assessment.types";
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -321,3 +323,25 @@ export const viewTagController: RequestHandler = async (
     next(error);
   }
 };
+
+export const viewAllTagsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const tagsData = await viewAllTags(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as TagAttribute,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(201).json({
+      message: "success",
+      data: tagsData,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

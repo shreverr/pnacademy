@@ -45,3 +45,5 @@ export interface AssementDetailedData {
   created_by: string
   questions: QuestionDetailedData[]
 }
+
+export type TagAttribute = 'id' | 'name' | 'createdAt' | 'updatedAt'

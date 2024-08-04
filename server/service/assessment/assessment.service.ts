@@ -10,6 +10,7 @@ import {
   deleteOptionInDB,
   deleteQuestionInDB,
   deleteTagInDB,
+  getAllTags,
   getAssessmentById,
   getOptionById,
   getQuestionById,
@@ -25,11 +26,13 @@ import {
   type AssementData,
   type TagData,
   type AssementDetailedData,
-  type QuestionDetailedData
+  type QuestionDetailedData,
+  TagAttribute
 } from '../../types/assessment.types'
 import { v4 as uuid } from 'uuid'
 import { getUserById } from '../../model/user/user.model'
 import { AppError } from '../../lib/appError'
+import commonErrorsDictionary from '../../utils/error/commonErrors'
 import { TagAttributes } from '../../schema/assessment/tag.schema'
 
 export const createAssessment = async (assement: {
@@ -330,3 +333,43 @@ export const viewTag = async (
 
   return tagData
 }
+
+export const viewAllTags = async (
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: TagAttribute,
+  order?: "ASC" | "DESC",
+): Promise<{
+  tags: TagData[],
+  totalPages: number,
+}> => {
+  const page = parseInt(pageStr ?? '1');
+  const pageSize = parseInt(pageSizeStr ?? '10');
+  sortBy = sortBy ?? 'name';
+  order = order ?? 'ASC';
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: allTagsData, count: allTagsCount } = await getAllTags(
+    offset,
+    pageSize,
+    sortBy,
+    order
+  )
+
+  if (!allTagsData) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  const totalPages = Math.ceil(allTagsCount / pageSize);
+
+  return {
+    tags: allTagsData,
+    totalPages: totalPages
+  };
+};
