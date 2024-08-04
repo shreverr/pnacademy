@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../../config/database'
 
-interface TagAttributes {
+export interface TagAttributes {
   id: string
   name: string
 }

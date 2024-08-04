@@ -14,6 +14,7 @@ import {
   updateTag,
   viewAssessmentDetails,
   viewQuestionDetails,
+  viewTag,
 } from "../../service/assessment/assessment.service";
 import {
   type NextFunction,
@@ -298,6 +299,23 @@ export const viewQuestionController: RequestHandler = async (
     return res.status(201).json({
       message: "Question fetched successfully",
       data: question,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const viewTagController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const tagData = await viewTag(req.query.id as UUID);
+
+    return res.status(200).json({
+      status: "success",
+      data: tagData,
     });
   } catch (error) {
     next(error);

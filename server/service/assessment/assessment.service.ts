@@ -30,6 +30,7 @@ import {
 import { v4 as uuid } from 'uuid'
 import { getUserById } from '../../model/user/user.model'
 import { AppError } from '../../lib/appError'
+import { TagAttributes } from '../../schema/assessment/tag.schema'
 
 export const createAssessment = async (assement: {
   name: string
@@ -312,4 +313,20 @@ export const viewQuestionDetails = async (
     )
   }
   return questionData
+}
+
+export const viewTag = async (
+  tagId: UUID
+): Promise<TagAttributes | null> => {
+  const tagData = await getTagById(tagId)
+  if (!tagData) {
+    throw new AppError(
+      'Tag not found',
+      404,
+      'Tag with this id does not exist',
+      false
+    )
+  }
+
+  return tagData
 }

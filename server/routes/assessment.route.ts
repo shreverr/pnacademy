@@ -15,12 +15,14 @@ import {
   UpdateTagController,
   viewAssessmentController,
   viewQuestionController,
+  viewTagController,
 } from "../controller/assessment/assessment.controller";
 import {
   validateAssessment,
   validateAssessmentGetId,
   validateAssessmentId,
   validateAssessmentUpdate,
+  validateGetTag,
   validateOption,
   validateOptionId,
   validateOptionUpdate,
@@ -619,5 +621,63 @@ router.get(
   validateRequest,
   viewQuestionController
 );
+
+/**
+ * @openapi
+ * /v1/assessment/tag:
+ *   get:
+ *     tags:
+ *       - Assessment View Controller
+ *     summary: View a tag
+ *     description: Endpoint to view a tag by its ID.
+ *     parameters:
+ *       - name: id
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the tag to view.
+ *     responses:
+ *       '200':
+ *         description: Successfully viewed tag.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 486cda4c-12c6-4358-90c8-2af9ef978cd1
+ *                     name:
+ *                       type: string
+ *                       example: legs
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2024-08-04T06:35:40.335Z
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2024-08-04T06:35:40.335Z
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Tag not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/tag",
+  authenticateUser(["canManageAssessment"]),
+  validateGetTag,
+  validateRequest,
+  viewTagController
+)
 
 export default router;

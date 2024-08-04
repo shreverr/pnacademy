@@ -544,3 +544,12 @@ export const validateUserDelete = [
     .isUUID(4)
     .withMessage("UserId should be a valid UUID v4"),
 ];
+
+export const validateGetTag = [
+  query("id")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];
