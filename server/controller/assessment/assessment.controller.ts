@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import {
+  addTag,
   createAssessment,
   createOption,
   createQuestion,
@@ -345,3 +346,22 @@ export const viewAllTagsController: RequestHandler = async (
     next(error);
   }
 }
+
+export const addTagController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await addTag(
+      req.body.questionId,
+      req.body.tagId,
+    );
+
+    return res.status(201).json({
+      status: "success",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

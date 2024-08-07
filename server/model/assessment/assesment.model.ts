@@ -15,6 +15,8 @@ import Question from '../../schema/assessment/question.schema'
 import Option from '../../schema/assessment/options.schema'
 import Tag from '../../schema/assessment/tag.schema'
 import { FindAndCountOptions } from 'sequelize'
+import QuestionTag from '../../schema/junction/questionTag.schema'
+import { sequelize } from '../../config/database'
 
 export const createAssementInDB = async (assessment: {
   id: string
@@ -139,7 +141,7 @@ export const getAssessmentById = async (
   }
 }
 
-export const checkQuestionExists = async (id: UUID): Promise<boolean |null> => {
+export const checkQuestionExists = async (id: UUID): Promise<boolean | null> => {
   logger.info(`Checking if question exists with id: ${id}`)
 
   try {
@@ -176,7 +178,7 @@ export const getQuestionById = async (
           as: 'options'
         }
       ],
-    
+
     })
     if (!question) {
       return null
@@ -592,3 +594,42 @@ export const getAllTags = async (
     );
   }
 };
+
+export const addTagToQuestion = async (
+  tagId: string,
+  questionId: string
+): Promise<boolean> => {
+  logger.info(`Adding tag to question`)
+  const transaction = await sequelize.transaction();
+  try {
+    const questionExists = await Question.findOne({ where: { id: questionId }, transaction });
+    const tagExists = await Tag.findOne({ where: { id: tagId }, transaction });
+
+    if (questionExists && tagExists) {
+      const questionTag = await QuestionTag.create({
+        question_id: questionId,
+        tag_id: tagId
+      }, {
+        transaction
+      });
+      await transaction.commit();
+
+      return !!questionTag;
+    } else {
+      await transaction.rollback();
+      throw new AppError(
+        "question or tag not found",
+        500,
+        'Either question or tag does not exist',
+        false
+      );
+    }
+  } catch (error:any) {
+    throw new AppError(
+      'Error adding tag to question',
+      500,
+      error,
+      true
+    )
+  }
+}

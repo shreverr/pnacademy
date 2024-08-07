@@ -587,3 +587,19 @@ export const validateGetAllTags = [
      "ASC", "DESC",`
     ),
 ];
+
+export const validateAddTag = [
+  check("questionId")
+    .not()
+    .isEmpty()
+    .withMessage("questionId cannot be empty")
+    .isUUID(4)
+    .withMessage("questionId should be a valid UUID v4"),
+
+  check('tagId')
+    .not()
+    .isEmpty()
+    .withMessage("tagId cannot be empty")
+    .isUUID(4)
+    .withMessage("tagId should be a valid UUID v4"),
+];

@@ -1,6 +1,7 @@
 import express from "express";
 import type { Router } from "express";
 import {
+  addTagController,
   CreateAssessmentController,
   CreateOptionController,
   CreateQuestionController,
@@ -19,6 +20,7 @@ import {
   viewTagController,
 } from "../controller/assessment/assessment.controller";
 import {
+  validateAddTag,
   validateAssessment,
   validateAssessmentGetId,
   validateAssessmentId,
@@ -771,6 +773,55 @@ router.get(
   validateGetAllTags,
   validateRequest,
   viewAllTagsController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/question/addTag:
+ *   post:
+ *     summary: Add a tag to a question
+ *     tags:
+ *       - Assessment Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               questionId:
+ *                 type: string
+ *                 description: The unique identifier of the question.
+ *                 example: 3aa3d021-ddd8-4fd5-ae5b-a612699962bd
+ *               tagId:
+ *                 type: string
+ *                 description: The unique identifier of the tag.
+ *                 example: 2b1b5e76-0ace-41b9-bb89-b18651099308
+ *     responses:
+ *       '200':
+ *         description: Tag successfully added to the question.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Question or Tag not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.post(
+  '/question/addTag',
+  authenticateUser(["canManageAssessment"]),
+  validateAddTag,
+  validateRequest,
+  addTagController
 )
 
 export default router;

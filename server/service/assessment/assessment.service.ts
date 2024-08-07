@@ -1,5 +1,6 @@
 import { type UUID } from 'crypto'
 import {
+  addTagToQuestion,
   checkAssessmentExists,
   checkQuestionExists,
   createAssementInDB,
@@ -373,3 +374,12 @@ export const viewAllTags = async (
     totalPages: totalPages
   };
 };
+
+export const addTag = async (
+  tagId: UUID,
+  questionId: UUID
+): Promise<boolean> => {
+  const isTagAdded = await addTagToQuestion(questionId, tagId)
+
+  return isTagAdded
+}
