@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { createGroup, createNotification, deleteNotification } from "../../service/notification/notification.service";
+import { createGroup, createNotification, deleteNotification, updateGroup } from "../../service/notification/notification.service";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -59,6 +59,25 @@ export const CreateGroupController: RequestHandler = async (
 
     return res.status(201).json({
       message: "Group created successfully",
+      data: group,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UpdateGroupController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const group = await updateGroup(
+      req.body.id,
+      req.body.name,
+    );
+    return res.status(201).json({
+      message: "Group updated successfully",
       data: group,
     });
   } catch (error) {

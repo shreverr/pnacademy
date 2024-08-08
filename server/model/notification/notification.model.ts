@@ -1,3 +1,4 @@
+import { UniqueConstraintError } from 'sequelize'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
@@ -117,6 +118,65 @@ export const getGroupByName = async (
   } catch (error) {
     throw new AppError(
       'error getting group',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const getGroupById = async (
+  id: string
+): Promise<GroupData | null> => {
+  try {
+    logger.info(`Getting group by id`)
+    const group = await Group.findOne({
+      where: {
+        id
+      },
+      raw: true
+    })
+    return group
+  } catch (error) {
+    throw new AppError(
+      'error getting group',
+      500,
+      'Something went wrong',
+      false
+    )
+  }
+}
+
+export const updateGroupInDB = async (
+  id: string,
+  name: string,
+): Promise<GroupData | null> => {
+  logger.info(`Updating group`)
+
+  try {
+    const [_, [updatedTag]] = await Group.update({
+      id: id,
+      name: name
+      }, {
+      where: {
+        id: id
+      },
+      returning: true
+    })
+
+    return updatedTag.dataValues as GroupData
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        'Group already exists',
+        409,
+        'A Group with this name or ID already exists',
+        false
+      );
+    }
+    
+    throw new AppError(
+      'Error updating tag',
       500,
       'Something went wrong',
       false

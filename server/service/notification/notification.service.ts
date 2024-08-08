@@ -6,8 +6,10 @@ import {
   createGroupInDB,
   createNotificationInDB,
   deleteNotificationInDB,
+  getGroupById,
   getGroupByName,
   getnotificationById,
+  updateGroupInDB,
 } from "../../model/notification/notification.model";
 import { NotificationData } from "../../types/notification.types";
 import { GroupData } from "../../types/group.types";
@@ -67,3 +69,24 @@ export const createGroup = async (group: {
     return groupData;
   }
 };
+
+export const updateGroup = async (
+  id: UUID,
+  name: string
+): Promise<GroupData | null> => {
+  const existingGroup = await getGroupById(id)
+  if (existingGroup == null) {
+    throw new AppError(
+      'Group not found',
+      404,
+      "Group with this id does not exist so Can't update group",
+      false
+    )
+  }
+  const updatedGroup = await updateGroupInDB(
+    id,
+    name
+  )
+  
+  return updatedGroup
+}

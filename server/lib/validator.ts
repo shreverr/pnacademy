@@ -603,3 +603,18 @@ export const validateAddTag = [
     .isUUID(4)
     .withMessage("tagId should be a valid UUID v4"),
 ];
+
+export const validateGroupUpdate = [
+  check("id")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+
+  check("name")
+    .optional()
+    .isLength({ min: 2 })
+    .escape()
+    .withMessage("Group name must be more than 2 characters long")
+];

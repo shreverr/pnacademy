@@ -3,6 +3,7 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import {
   validateGroup,
+  validateGroupUpdate,
   validateNotification,
   validateNotificationDelete,
 } from "../lib/validator";
@@ -11,6 +12,7 @@ import {
   CreateGroupController,
   CreateNotificationController,
   DeleteNotificationController,
+  UpdateGroupController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
 
@@ -18,7 +20,7 @@ const router: Router = express.Router();
 
 /**
  * @openapi
- * /notification/create-notification:
+ * v1/notification/create-notification:
  *   post:
  *     tags:
  *       - Notification
@@ -69,7 +71,7 @@ router.post(
 
 /**
  * @openapi
- * /notification/delete-notification:
+ * v1/notification/delete-notification:
  *   delete:
  *     tags:
  *       - Notification
@@ -102,7 +104,7 @@ router.delete(
 
 /**
  * @openapi
- * /notification/create-group:
+ * v1/notification/create-group:
  *   post:
  *     tags:
  *       - Notification
@@ -132,6 +134,78 @@ router.post(
   validateGroup,
   validateRequest,
   CreateGroupController
+);
+
+/**
+ * @openapi
+ * /v1/notification/group:
+ *   patch:
+ *     tags:
+ *       - Notification
+ *     summary: Update an existing notification group
+ *     description: Endpoint to update an existing notification group.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 format: uuid
+ *                 description: The UUID of the notification group to be updated.
+ *               name:
+ *                 type: string
+ *                 description: The new name of the notification group.
+ *             required:
+ *               - id
+ *               - name
+ *             example:
+ *               id: "82802632-1226-4a40-aecf-073a05c7272b"
+ *               name: "hello world"
+ *     responses:
+ *       '200':
+ *         description: Group updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Group updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       example: "dfb939ef-2cc4-43aa-ac08-7052d5a76e50"
+ *                     name:
+ *                       type: string
+ *                       example: "hello world"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-08-08T08:25:01.258Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-08-08T08:25:11.727Z"
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Notification group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.patch(
+  "/group",
+  authenticateUser(["canManageLocalGroup"]),
+  validateGroupUpdate,
+  validateRequest,
+  UpdateGroupController
 );
 
 export default router;
