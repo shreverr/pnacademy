@@ -649,3 +649,31 @@ export const addTagToQuestion = async (
     )
   }
 }
+
+export const removeTagFromQuestionById = async (
+  tagId: string,
+  questionId: string
+): Promise<boolean> => {
+  logger.info(`Removing tag from question`)
+  try {
+    const result = await QuestionTag.destroy({
+      where: {
+        question_id: questionId,
+        tag_id: tagId
+      },
+    })
+
+    if (result === 0) {
+      return false;
+    };
+
+    return true
+  } catch (error: any) {
+    throw new AppError(
+      'Error adding tag to question',
+      500,
+      error,
+      true
+    )
+  }
+} 

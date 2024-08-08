@@ -736,3 +736,19 @@ export const validateGetUsersByGroup = [
     .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
+
+export const validateRemoveTagFromQuestion = [
+  check("questionId")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+
+  check("tagId")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];

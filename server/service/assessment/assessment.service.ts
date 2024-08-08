@@ -16,6 +16,7 @@ import {
   getOptionById,
   getQuestionById,
   getTagById,
+  removeTagFromQuestionById,
   updateAssessmentInDB,
   updateOptionInDB,
   updateQuestionInDB,
@@ -384,3 +385,12 @@ export const addTag = async (
 
   return isTagAdded
 }
+
+export const removeTagFromQuestion = async (
+  tagId: string,
+  questionId: string
+): Promise<boolean> => {
+  const result = await removeTagFromQuestionById(tagId ,questionId);
+
+  return result;
+};

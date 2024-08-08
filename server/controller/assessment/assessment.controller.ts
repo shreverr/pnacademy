@@ -9,6 +9,7 @@ import {
   deleteOption,
   deleteQuestion,
   deleteTag,
+  removeTagFromQuestion,
   updateAssessment,
   updateOption,
   updateQuestion,
@@ -365,3 +366,23 @@ export const addTagController: RequestHandler = async (
     next(error);
   }
 };
+
+export const removeTagFromQuestionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await removeTagFromQuestion(
+      req.body.tagId,
+      req.body.questionId
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Tag removed successfully" 
+    });
+  } catch (error) {
+    next(error);
+  }
+}

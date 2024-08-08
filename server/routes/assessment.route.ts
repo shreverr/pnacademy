@@ -10,6 +10,7 @@ import {
   DeleteOptionController,
   DeleteQuestionController,
   DeleteTagController,
+  removeTagFromQuestionController,
   UpdateAssessmentController,
   UpdateOptionController,
   UpdateQuestionController,
@@ -34,6 +35,7 @@ import {
   validateQuestionGetId,
   validateQuestionId,
   validateQuestionUpdate,
+  validateRemoveTagFromQuestion,
   validateTag,
   validateTagId,
   validateTagUpdate,
@@ -829,5 +831,13 @@ router.post(
   validateRequest,
   addTagController
 );
+
+router.delete(
+  '/question/remove-tag',
+  authenticateUser(['canManageAssessment']),
+  validateRemoveTagFromQuestion,
+  validateRequest,
+  removeTagFromQuestionController,
+)
 
 export default router;
