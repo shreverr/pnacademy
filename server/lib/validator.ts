@@ -618,3 +618,12 @@ export const validateGroupUpdate = [
     .escape()
     .withMessage("Group name must be more than 2 characters long")
 ];
+
+export const validateGroupsId = [
+  check("groupIds.*")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];

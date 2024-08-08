@@ -5,6 +5,7 @@ import { type UUID } from "crypto";
 import {
   createGroupInDB,
   createNotificationInDB,
+  deleteGroupsById,
   deleteNotificationInDB,
   getGroupById,
   getGroupByName,
@@ -87,6 +88,11 @@ export const updateGroup = async (
     id,
     name
   )
-  
+
   return updatedGroup
 }
+
+export const deleteGroups = async (groupIds: string[]): Promise<boolean> => {
+  const result = await deleteGroupsById(groupIds);
+  return result;
+};

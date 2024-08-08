@@ -3,6 +3,7 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import {
   validateGroup,
+  validateGroupsId,
   validateGroupUpdate,
   validateNotification,
   validateNotificationDelete,
@@ -11,6 +12,7 @@ import { validateRequest } from "../utils/validateRequest";
 import {
   CreateGroupController,
   CreateNotificationController,
+  deleteGroupController,
   DeleteNotificationController,
   UpdateGroupController,
 } from "../controller/notification,/notification.controller";
@@ -206,6 +208,57 @@ router.patch(
   validateGroupUpdate,
   validateRequest,
   UpdateGroupController
+);
+
+/**
+ * @openapi
+ * /v1/notification/groups:
+ *   delete:
+ *     tags:
+ *       - Notification
+ *     summary: Delete notification groups
+ *     description: Endpoint to delete one or more notification groups by their IDs.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               groupIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: uuid
+ *                 description: An array of UUIDs representing the notification groups to be deleted.
+ *             example:
+ *               groupIds:
+ *                 - "d5eca6c5-e6c2-412d-975a-c0bcb4848ef3"
+ *                 - "c88891c7-58a1-4d5f-96b7-252f8d5f05a8"
+ *     responses:
+ *       '200':
+ *         description: Groups deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Groups Deleted successfully
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: One or more groups not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.delete(
+  "/groups",
+  authenticateUser(["canManageLocalGroup"]),
+  validateGroupsId,
+  validateRequest,
+  deleteGroupController
 );
 
 export default router;

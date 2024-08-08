@@ -183,3 +183,27 @@ export const updateGroupInDB = async (
     )
   }
 }
+
+export const deleteGroupsById = async (groupIds: string[]): Promise<boolean> => {
+  logger.debug(`Deleting groups`);
+  try {
+    const result = await Group.destroy({
+      where: {
+        id: groupIds,
+      },
+    })
+
+    if (result === 0) {
+      return false;
+    };
+
+    return true
+  } catch (error: any) {
+    throw new AppError(
+      "error deleting group",
+      500,
+      error,
+      true
+    );
+  }
+};
