@@ -9,6 +9,7 @@ import {
   loginUserController,
   newAccessTokenController,
   registerUserController,
+  removeUsersFromGroupController,
   UpdateUserController,
   UserAddToGroupController,
   viewAllRolesController,
@@ -19,6 +20,7 @@ import {
   validateGetAllRoles,
   validateGetAllUsers,
   validateNewAccessToken,
+  validateRemoveUserFromGroup,
   validateUserAddToGroup,
   validateUserDelete,
   validateUserLogin,
@@ -1096,10 +1098,63 @@ router.delete(
  */
 router.post(
   '/add-to-group',
-  authenticateUser(['canManageUser']),
+  authenticateUser(['canManageUser', "canManageLocalGroup"]),
   validateUserAddToGroup,
   validateRequest,
   UserAddToGroupController,
 )
 
+/**
+ * @swagger
+ * /v1/user/remove-from-group:
+ *   delete:
+ *     summary: Remove users from a group
+ *     tags: [User Controller]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: An array of user IDs to be removed from the group.
+ *                 required: true
+ *               groupId:
+ *                 type: string
+ *                 description: The ID of the group from which users will be removed.
+ *                 required: true
+ *     responses:
+ *       '200':
+ *         description: Users removed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation (e.g., "success").
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the outcome of the operation (e.g., "Users removed successfully").
+ *       '400':
+ *         description: Bad Request - Invalid request body or parameters.
+ *       '401':
+ *         description: Unauthorized - User is not authorized to perform this action.
+ *       '404':
+ *         description: Not Found - Group or user(s) not found.
+ *       '500':
+ *         description: Internal Server Error - Unexpected server error occurred.
+ */
+router.delete(
+  '/remove-from-group',
+  authenticateUser(['canManageUser', 'canManageLocalGroup']),
+  validateRemoveUserFromGroup,
+  validateRequest,
+  removeUsersFromGroupController,
+)
 export default router;

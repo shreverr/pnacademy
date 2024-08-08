@@ -14,6 +14,7 @@ import {
   loginUser,
   newAccessToken,
   registerUser,
+  removeUsersFromGroup,
   updateUser,
   viewAllRoles,
   viewAllUsers,
@@ -283,6 +284,26 @@ export const UserAddToGroupController: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       message: "Users Added successfully" 
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const removeUsersFromGroupController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await removeUsersFromGroup(
+      req.body.userIds,
+      req.body.groupId
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Users removed successfully" 
     });
   } catch (error) {
     next(error);

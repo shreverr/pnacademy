@@ -13,6 +13,7 @@ import {
   updateUserInDb,
   deleteUsersById,
   addUsersToGroupById,
+  removeUsersFromGroupById,
 } from "../../model/user/user.model";
 import { RoleData, UserData, authTokens, device, roleAttributes, userAttributes } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
@@ -445,6 +446,20 @@ export const addUsersToGroup = async (
   }));
 
   const result = await addUsersToGroupById(data);
+
+  return result;
+};
+
+export const removeUsersFromGroup = async (
+  userIds: string[],
+  groupId: string
+): Promise<boolean> => {
+  const data = userIds.map((userId) => ({
+    user_id: userId,
+    group_id: groupId,
+  }));
+
+  const result = await removeUsersFromGroupById(data);
 
   return result;
 };

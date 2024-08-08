@@ -416,3 +416,28 @@ export const addUsersToGroupById = async (data: {
     }
   }
 }
+
+export const removeUsersFromGroupById = async (data: {
+  user_id: string,
+  group_id: string
+}[]): Promise<boolean> => {
+  logger.info(`Removing usersIds to groups`)
+  try {
+    const result = await UserGroup.destroy({
+      where: data,
+    })
+
+    if (result === 0) {
+      return false;
+    };
+
+    return true
+  } catch (error: any) {
+    throw new AppError(
+      'Error adding tag to question',
+      500,
+      error,
+      true
+    )
+  }
+} 
