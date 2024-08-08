@@ -14,7 +14,7 @@ import Assessment from '../../schema/assessment/assessment.schema'
 import Question from '../../schema/assessment/question.schema'
 import Option from '../../schema/assessment/options.schema'
 import Tag from '../../schema/assessment/tag.schema'
-import { FindAndCountOptions } from 'sequelize'
+import { FindAndCountOptions, UniqueConstraintError } from 'sequelize'
 import QuestionTag from '../../schema/junction/questionTag.schema'
 import { sequelize } from '../../config/database'
 
@@ -292,6 +292,14 @@ export const createTagInDB = async (tag: {
     )
     return createdTag
   } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        'Tag already exists',
+        409,
+        'A tag with this name or ID already exists',
+        false
+      );
+    }
     throw new AppError(
       'Error creating tag',
       500,
@@ -454,6 +462,14 @@ export const updateTagInDB = async (tag: {
     })
     return updatedTag.dataValues as TagData
   } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        'Tag already exists',
+        409,
+        'A tag with this name or ID already exists',
+        false
+      );
+    }
     throw new AppError(
       'Error updating tag',
       500,

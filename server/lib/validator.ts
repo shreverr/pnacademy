@@ -133,7 +133,7 @@ export const validateUserLogin = [
   check("deviceType")
     .notEmpty()
     .matches("^(mobile|web)$")
-    .withMessage('deviceType can only be mobile or web'),
+    .withMessage("deviceType can only be mobile or web"),
 
   check("password").notEmpty().isStrongPassword({
     minLength: 8,
@@ -328,7 +328,8 @@ export const validateTag = [
     .isEmpty()
     .isLength({ min: 2 })
     .escape()
-    .withMessage("Tag name must be more than 2 characters long"),
+    .withMessage("Tag name must be more than 2 characters long")
+    .isLowercase(),
 ];
 
 export const validateAssessmentUpdate = [
@@ -424,7 +425,8 @@ export const validateTagUpdate = [
     .optional()
     .isLength({ min: 2 })
     .escape()
-    .withMessage("Tag name must be more than 2 characters long"),
+    .withMessage("Tag name must be more than 2 characters long")
+    .isLowercase(),
 ];
 
 export const validateAssessmentId = [
@@ -520,21 +522,21 @@ export const validateGroup = [
 ];
 
 export const validateUsersImport = [
-  check('users')
+  check("users")
     .custom((value, { req }) => {
       // Checks if mime type is csv
-      if (req!.file.mimetype === 'text/csv') {
-        return '.csv';
+      if (req!.file.mimetype === "text/csv") {
+        return ".csv";
       } else {
         return false;
       }
     })
-    .withMessage('Please only upload CSV file'),
+    .withMessage("Please only upload CSV file"),
 
-  check('updateExisting')
+  check("updateExisting")
     .isBoolean()
-    .withMessage('updateExisting must be a boolean'),
-]
+    .withMessage("updateExisting must be a boolean"),
+];
 
 export const validateUserDelete = [
   check("userIds.*")
@@ -571,9 +573,7 @@ export const validateGetAllTags = [
 
   query("sortBy")
     .optional()
-    .matches(
-      "^(id|name|createdAt|updatedAt)$"
-    )
+    .matches("^(id|name|createdAt|updatedAt)$")
     .withMessage(
       `Must match one of the specified options:
      "id", "name", "createdAt", or "updatedAt"`
@@ -596,7 +596,7 @@ export const validateAddTag = [
     .isUUID(4)
     .withMessage("questionId should be a valid UUID v4"),
 
-  check('tagId')
+  check("tagId")
     .not()
     .isEmpty()
     .withMessage("tagId cannot be empty")

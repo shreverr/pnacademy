@@ -540,7 +540,13 @@ router.delete(
  *         description: Internal server error.
  */
 
-router.delete("/tag", validateTagId, validateRequest, DeleteTagController);
+router.delete(
+  "/tag",
+  authenticateUser(["canManageAssessment"]),
+  validateTagId,
+  validateRequest,
+  DeleteTagController
+);
 
 /**
  * @openapi
@@ -682,7 +688,7 @@ router.get(
   validateGetTag,
   validateRequest,
   viewTagController
-)
+);
 
 /**
  * @swagger
@@ -768,12 +774,12 @@ router.get(
  *         description: Internal server error.
  */
 router.get(
-  '/tags',
+  "/tags",
   authenticateUser(["canManageAssessment"]),
   validateGetAllTags,
   validateRequest,
   viewAllTagsController
-)
+);
 
 /**
  * @swagger
@@ -817,11 +823,11 @@ router.get(
  *         description: Internal server error.
  */
 router.post(
-  '/question/addTag',
+  "/question/addTag",
   authenticateUser(["canManageAssessment"]),
   validateAddTag,
   validateRequest,
   addTagController
-)
+);
 
 export default router;
