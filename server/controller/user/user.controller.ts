@@ -5,6 +5,7 @@ import {
   type Response,
 } from "express";
 import {
+  addUsersToGroup,
   createRole,
   deleteRole,
   deleteUsers,
@@ -262,6 +263,26 @@ export const deleteUserController: RequestHandler = async (
 
     return res.status(200).json({
       message: allUsersDeleted ? "Users Deleted successfully" :  "Some users deleted"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const UserAddToGroupController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await addUsersToGroup(
+      req.body.userIds,
+      req.body.groupId
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Users Added successfully" 
     });
   } catch (error) {
     next(error);

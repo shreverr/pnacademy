@@ -12,6 +12,7 @@ import {
   updateOrSaveRefreshToken,
   updateUserInDb,
   deleteUsersById,
+  addUsersToGroupById,
 } from "../../model/user/user.model";
 import { RoleData, UserData, authTokens, device, roleAttributes, userAttributes } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
@@ -431,5 +432,19 @@ export const exportUsers = async (): Promise<string> => {
 
 export const deleteUsers = async (userIds: string[]): Promise<boolean> => {
   const result = await deleteUsersById(userIds);
+  return result;
+};
+
+export const addUsersToGroup = async (
+  userIds: string[],
+  groupId: string
+): Promise<boolean> => {
+  const data = userIds.map((userId) => ({
+    user_id: userId,
+    group_id: groupId,
+  }));
+
+  const result = await addUsersToGroupById(data);
+
   return result;
 };

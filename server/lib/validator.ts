@@ -662,3 +662,19 @@ export const validateGetAllGroups = [
      "ASC", "DESC",`
     ),
 ];
+
+export const validateUserAddToGroup = [
+  check("userIds.*")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+
+  check("groupId")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should   be a valid uuid v4"),
+];

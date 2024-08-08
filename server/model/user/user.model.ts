@@ -1,4 +1,4 @@
-import { FindAndCountOptions } from "sequelize";
+import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from "sequelize";
 import { sequelize } from "../../config/database";
 import logger from "../../config/logger";
 import { AppError } from "../../lib/appError";
@@ -13,6 +13,7 @@ import {
   type RoleData,
   type UserData,
 } from "../../types/user.types";
+import UserGroup from "../../schema/junction/userGroup.schema";
 
 export const getUserByEmail = async (
   email: string
@@ -65,7 +66,7 @@ export const getAllUsers = async (
   count: number
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
       order: [[sortBy, order]]
@@ -378,3 +379,40 @@ export const deleteUsersById = async (userIds: string[]): Promise<boolean> => {
     );
   }
 };
+
+export const addUsersToGroupById = async (data: {
+  user_id: string,
+  group_id: string
+}[]): Promise<boolean> => {
+  logger.info(`Adding usersIds to groups`)
+  try {
+    const questionTag = await UserGroup.bulkCreate(
+      data
+    );
+
+    return !!questionTag;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        'User already added to group',
+        409,
+        'User already added to group',
+        false
+      )
+    } else if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        'Either user or group does not exist',
+        404,
+        'Either user or group does not exist',
+        false
+      )
+    } else {
+      throw new AppError(
+        'Error adding tag to question',
+        500,
+        error,
+        true
+      )
+    }
+  }
+}

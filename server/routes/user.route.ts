@@ -10,6 +10,7 @@ import {
   newAccessTokenController,
   registerUserController,
   UpdateUserController,
+  UserAddToGroupController,
   viewAllRolesController,
   viewAllUsersController,
   viewUserDetailsController,
@@ -18,6 +19,7 @@ import {
   validateGetAllRoles,
   validateGetAllUsers,
   validateNewAccessToken,
+  validateUserAddToGroup,
   validateUserDelete,
   validateUserLogin,
   validateUserRegister,
@@ -29,6 +31,7 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";
+import User from "../schema/user/user.schema";
 
 const router: Router = express.Router();
 
@@ -1038,6 +1041,65 @@ router.delete(
   validateUserDelete,
   validateRequest,
   deleteUserController
+)
+
+/**
+ * @swagger
+ * /v1/user/add-to-group:
+ *   post:
+ *     summary: Add users to a group
+ *     tags: [User Controller]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: uuid
+ *                 example: ["ca7f9a83-b0d8-41a8-9b4a-1e1ffe9660e2", "ca7f9a83-b0d8-41a8-9b4a-1e1ffe9660e1"]
+ *                 description: Array of user IDs to add to the group.
+ *               groupId:
+ *                 type: string
+ *                 format: uuid
+ *                 example: "ca7f9a83-b0d8-41a8-9b4a-1e1ffe9660e1"
+ *                 description: The ID of the group to which users will be added.
+ *             required:
+ *               - userIds
+ *               - groupId
+ *     responses:
+ *       '200':
+ *         description: Users added to the group successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                   description: Status of the request.
+ *                 message:
+ *                   type: string
+ *                   example: Users added successfully
+ *                   description: Message indicating the result of the operation.
+ *       '400':
+ *         description: Bad Request
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
+router.post(
+  '/add-to-group',
+  authenticateUser(['canManageUser']),
+  validateUserAddToGroup,
+  validateRequest,
+  UserAddToGroupController,
 )
 
 export default router;
