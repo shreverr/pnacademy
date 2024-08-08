@@ -19,6 +19,7 @@ import {
   UpdateTagController,
   viewAllTagsController,
   viewAssessmentController,
+  viewAssignedAssessmentsController,
   viewQuestionController,
   viewTagController,
 } from "../controller/assessment/assessment.controller";
@@ -43,6 +44,7 @@ import {
   validateTag,
   validateTagId,
   validateTagUpdate,
+  validateViewAssignedAssessment,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
@@ -988,6 +990,128 @@ router.delete(
   validateRemoveGroupFromAssessment,
   validateRequest,
   removeGroupFromAssessmentController,
+)
+
+/**
+ * @swagger
+ * /v1/assessment/assigned:
+ *   get:
+ *     summary: Get assigned assessments with pagination and sorting
+ *     tags:
+ *       - Assessment View Controller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: true
+ *         description: The page number to retrieve.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: true
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           example: createdAt
+ *         required: true
+ *         description: The field to sort the results by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *         required: true
+ *         description: The sort order, either ascending (ASC) or descending (DESC).
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved the assigned assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     tags:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the assessment.
+ *                             example: aaf2cd85-0b42-4b2d-943a-575203e57744
+ *                           name:
+ *                             type: string
+ *                             description: The name of the assessment.
+ *                             example: Project X
+ *                           description:
+ *                             type: string
+ *                             description: A brief description of the assessment.
+ *                             example: A new project
+ *                           is_active:
+ *                             type: boolean
+ *                             description: The active status of the assessment.
+ *                             example: true
+ *                           start_at:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The start time of the assessment.
+ *                             example: 2024-04-16T08:00:00.000Z
+ *                           end_at:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The end time of the assessment.
+ *                             example: 2024-04-20T17:00:00.000Z
+ *                           duration:
+ *                             type: integer
+ *                             description: The duration of the assessment in milliseconds.
+ *                             example: 345600000
+ *                           created_by:
+ *                             type: string
+ *                             description: The unique identifier of the creator of the assessment.
+ *                             example: 1a77a8e2-6b6a-48f5-9251-c3adfb8c6f24
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp when the assessment was created.
+ *                             example: 2024-08-08T21:11:36.081Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp when the assessment was last updated.
+ *                             example: 2024-08-08T21:11:36.081Z
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '401':
+ *         description: Unauthorized. JWT token is missing or invalid.
+ *       '400':
+ *         description: Bad request. Invalid parameters.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  '/assigned',
+  authenticateUser(['canAttemptAssessment']),
+  validateViewAssignedAssessment,
+  validateRequest,
+  viewAssignedAssessmentsController
 )
 
 export default router;
