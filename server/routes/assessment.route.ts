@@ -1,6 +1,7 @@
 import express from "express";
 import type { Router } from "express";
 import {
+  addGroupToAssessmentController,
   addTagController,
   CreateAssessmentController,
   CreateOptionController,
@@ -21,6 +22,7 @@ import {
   viewTagController,
 } from "../controller/assessment/assessment.controller";
 import {
+  validateAddGroupToAssessment,
   validateAddTag,
   validateAssessment,
   validateAssessmentGetId,
@@ -884,5 +886,53 @@ router.delete(
   validateRequest,
   removeTagFromQuestionController,
 )
+/**
+ * @swagger
+ * /v1/assessment/add-group:
+ *   post:
+ *     summary: Add a group to an assessment
+ *     tags:
+ *       - Assessment Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: 37e1b6e0-5f8d-4999-ba76-c99b5b334f26
+ *               groupId:
+ *                 type: string
+ *                 description: The unique identifier of the group.
+ *                 example: ddadf246-ab7d-44d0-a635-8686c3ac533c
+ *     responses:
+ *       '200':
+ *         description: Group successfully added to the assessment.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Assessment or Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.post(
+  "/add-group",
+  authenticateUser(["canManageAssessment", "canManageLocalGroup"]),
+  validateAddGroupToAssessment,
+  validateRequest,
+  addGroupToAssessmentController
+);
 
 export default router;

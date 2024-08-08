@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import {
+  addGroupToAssessment,
   addTag,
   createAssessment,
   createOption,
@@ -386,3 +387,22 @@ export const removeTagFromQuestionController: RequestHandler = async (
     next(error);
   }
 }
+
+export const addGroupToAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await addGroupToAssessment(
+      req.body.assessmentId,
+      req.body.groupId,
+    );
+
+    return res.status(201).json({
+      status: "success",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

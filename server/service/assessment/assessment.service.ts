@@ -1,5 +1,6 @@
 import { type UUID } from 'crypto'
 import {
+  addGroupToAssessmentById,
   addTagToQuestion,
   checkAssessmentExists,
   checkQuestionExists,
@@ -394,3 +395,12 @@ export const removeTagFromQuestion = async (
 
   return result;
 };
+
+export const addGroupToAssessment = async (
+  assessmentId: string,
+  groupId: string
+): Promise<boolean> => {
+  const isGroupAddedToAssessment = await addGroupToAssessmentById(assessmentId, groupId)
+
+  return isGroupAddedToAssessment
+}

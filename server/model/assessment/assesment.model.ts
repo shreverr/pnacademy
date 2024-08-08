@@ -14,9 +14,10 @@ import Assessment from '../../schema/assessment/assessment.schema'
 import Question from '../../schema/assessment/question.schema'
 import Option from '../../schema/assessment/options.schema'
 import Tag from '../../schema/assessment/tag.schema'
-import { FindAndCountOptions, UniqueConstraintError } from 'sequelize'
+import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from 'sequelize'
 import QuestionTag from '../../schema/junction/questionTag.schema'
 import { sequelize } from '../../config/database'
+import AssessmentGroup from '../../schema/junction/assessmentGroup.schema'
 
 export const createAssementInDB = async (assessment: {
   id: string
@@ -677,3 +678,41 @@ export const removeTagFromQuestionById = async (
     )
   }
 } 
+
+export const addGroupToAssessmentById = async (
+  assessmentId: string,
+  groupId: string
+): Promise<boolean> => {
+  logger.info(`Adding group to assessment`)
+  try {
+    const assessmentGroup = await AssessmentGroup.create({
+      assessment_id: assessmentId,
+      group_id: groupId
+    });
+
+    return !!assessmentGroup;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        'Assessment already added to group',
+        409,
+        'Assessment already added to group',
+        false
+      )
+    } else if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        'Either assessment or group does not exist',
+        404,
+        'Either assessment or group does not exist',
+        false
+      )
+    } else {
+      throw new AppError(
+        'Error adding assessment to group',
+        500,
+        error,
+        true
+      )
+    }
+  }
+}

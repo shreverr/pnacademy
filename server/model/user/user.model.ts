@@ -388,11 +388,11 @@ export const addUsersToGroupById = async (data: {
 }[]): Promise<boolean> => {
   logger.info(`Adding usersIds to groups`)
   try {
-    const questionTag = await UserGroup.bulkCreate(
+    const userGroup = await UserGroup.bulkCreate(
       data
     );
 
-    return !!questionTag;
+    return !!userGroup;
   } catch (error: any) {
     if (error instanceof UniqueConstraintError) {
       throw new AppError(
@@ -410,7 +410,7 @@ export const addUsersToGroupById = async (data: {
       )
     } else {
       throw new AppError(
-        'Error adding tag to question',
+        'Error adding users to group',
         500,
         error,
         true
@@ -436,7 +436,7 @@ export const removeUsersFromGroupById = async (data: {
     return true
   } catch (error: any) {
     throw new AppError(
-      'Error adding tag to question',
+      'Error removing users from group',
       500,
       error,
       true
