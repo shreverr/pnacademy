@@ -17,6 +17,7 @@ import {
   getOptionById,
   getQuestionById,
   getTagById,
+  removeGroupFromAssessmentById,
   removeTagFromQuestionById,
   updateAssessmentInDB,
   updateOptionInDB,
@@ -404,3 +405,12 @@ export const addGroupToAssessment = async (
 
   return isGroupAddedToAssessment
 }
+
+export const removeGroupFromAssessment = async (
+  assessmentId: string,
+  groupId: string
+): Promise<boolean> => {
+  const result = await removeGroupFromAssessmentById(assessmentId, groupId);
+
+  return result;
+};

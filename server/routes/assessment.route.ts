@@ -11,6 +11,7 @@ import {
   DeleteOptionController,
   DeleteQuestionController,
   DeleteTagController,
+  removeGroupFromAssessmentController,
   removeTagFromQuestionController,
   UpdateAssessmentController,
   UpdateOptionController,
@@ -37,6 +38,7 @@ import {
   validateQuestionGetId,
   validateQuestionId,
   validateQuestionUpdate,
+  validateRemoveGroupFromAssessment,
   validateRemoveTagFromQuestion,
   validateTag,
   validateTagId,
@@ -934,5 +936,58 @@ router.post(
   validateRequest,
   addGroupToAssessmentController
 );
+
+/**
+ * @swagger
+ * /v1/assessment/remove-group:
+ *   delete:
+ *     summary: Remove a group from an assessment
+ *     tags:
+ *      - Assessment Delete Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: 37e1b6e0-5f8d-4999-ba76-c99b5b334f26
+ *               groupId:
+ *                 type: string
+ *                 description: The unique identifier of the group to be removed.
+ *                 example: ddadf246-ab7d-44d0-a635-8686c3ac533c
+ *     responses:
+ *       '200':
+ *         description: Group removed successfully from the assessment.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: Detailed message about the operation.
+ *                   example: Group removed successfully
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Assessment or Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.delete(
+  '/remove-group',
+  authenticateUser(['canManageAssessment']),
+  validateRemoveGroupFromAssessment,
+  validateRequest,
+  removeGroupFromAssessmentController,
+)
 
 export default router;

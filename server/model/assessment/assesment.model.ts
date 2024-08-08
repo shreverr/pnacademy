@@ -671,7 +671,7 @@ export const removeTagFromQuestionById = async (
     return true
   } catch (error: any) {
     throw new AppError(
-      'Error adding tag to question',
+      'Error removing tag from question',
       500,
       error,
       true
@@ -716,3 +716,31 @@ export const addGroupToAssessmentById = async (
     }
   }
 }
+
+export const removeGroupFromAssessmentById = async (
+  assessmentId: string,
+  groupId: string
+): Promise<boolean> => {
+  logger.info(`Removing group from assessment`)
+  try {
+    const result = await AssessmentGroup.destroy({
+      where: {
+        assessment_id: assessmentId,
+        group_id: groupId
+      },
+    })
+
+    if (result === 0) {
+      return false;
+    };
+
+    return true
+  } catch (error: any) {
+    throw new AppError(
+      'Error removing group from assessment',
+      500,
+      error,
+      true
+    )
+  }
+} 

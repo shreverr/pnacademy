@@ -10,6 +10,7 @@ import {
   deleteOption,
   deleteQuestion,
   deleteTag,
+  removeGroupFromAssessment,
   removeTagFromQuestion,
   updateAssessment,
   updateOption,
@@ -381,7 +382,7 @@ export const removeTagFromQuestionController: RequestHandler = async (
 
     return res.status(200).json({
       status: "success",
-      message: "Tag removed successfully" 
+      message: "Tag removed successfully"
     });
   } catch (error) {
     next(error);
@@ -406,3 +407,23 @@ export const addGroupToAssessmentController: RequestHandler = async (
     next(error);
   }
 };
+
+export const removeGroupFromAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await removeGroupFromAssessment(
+      req.body.assessmentId,
+      req.body.groupId,
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Group removed successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
