@@ -425,7 +425,7 @@ export const viewAssignedAssessments = async (
   sortBy?: Exclude<AssessmentAttribute, 'created_by'>,
   order?: "ASC" | "DESC",
 ): Promise<{
-  tags: Omit<AssessmentAttributes, 'created_by'>[],
+  assessments: Omit<AssessmentAttributes, 'created_by'>[],
   totalPages: number,
 }> => {
   const page = parseInt(pageStr ?? '1');
@@ -455,7 +455,7 @@ export const viewAssignedAssessments = async (
   const totalPages = Math.ceil(assignedAssessmentsCount / pageSize);
 
   return {
-    tags: assignedAssessments,
+    assessments: assignedAssessments,
     totalPages: totalPages
   };
 };

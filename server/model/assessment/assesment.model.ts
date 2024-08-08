@@ -587,7 +587,7 @@ export const getAllTags = async (
   count: number
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
       order: [[sortBy, order]]
@@ -644,7 +644,7 @@ export const addTagToQuestion = async (
         false
       );
     }
-  } catch (error:any) {
+  } catch (error: any) {
     throw new AppError(
       'Error adding tag to question',
       500,
@@ -680,7 +680,7 @@ export const removeTagFromQuestionById = async (
       true
     )
   }
-} 
+}
 
 export const addGroupToAssessmentById = async (
   assessmentId: string,
@@ -746,7 +746,7 @@ export const removeGroupFromAssessmentById = async (
       true
     )
   }
-} 
+}
 
 export const viewAssignedAssessmentsByUserId = async (
   userId: string,
@@ -759,7 +759,7 @@ export const viewAssignedAssessmentsByUserId = async (
   count: number
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
       order: [[sortBy, order]]
@@ -775,10 +775,12 @@ export const viewAssignedAssessmentsByUserId = async (
               where: {
                 id: userId
               },
-              attributes: []
+              attributes: [],
+              required: true
             }
           ],
-          attributes: []
+          attributes: [],
+          required: true
         }
       ],
       ...findOptions
@@ -794,8 +796,8 @@ export const viewAssignedAssessmentsByUserId = async (
     }
 
     return plainData;
-  } catch (error) {
-    if(error instanceof ForeignKeyConstraintError) {
+  } catch (error: any) {
+    if (error instanceof ForeignKeyConstraintError) {
       throw new AppError(
         'User does not exists',
         404,
@@ -807,7 +809,7 @@ export const viewAssignedAssessmentsByUserId = async (
     throw new AppError(
       "error getting all tags",
       500,
-      "Something went wrong",
+      error,
       true
     );
   }

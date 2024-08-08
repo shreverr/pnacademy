@@ -1046,7 +1046,7 @@ router.delete(
  *                 data:
  *                   type: object
  *                   properties:
- *                     tags:
+ *                     assessments:
  *                       type: array
  *                       items:
  *                         type: object

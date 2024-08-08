@@ -803,11 +803,11 @@ export const validateViewAssignedAssessment = [
   query("sortBy")
     .optional()
     .matches(
-      "^(id|name|description|is_active|start_at|end_at|duration)$"
+      "^(id|name|description|is_active|start_at|end_at|duration|createdAt|updatedAt)$"
     )
     .withMessage(
       `Column names must match one of the specified options:
-      id|name|description|is_active|start_at|end_at|duration.`
+      id|name|description|is_active|start_at|end_at|duration|createdAt|updatedAt.`
     ),
 
   query("order")
