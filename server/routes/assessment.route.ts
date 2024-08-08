@@ -832,6 +832,51 @@ router.post(
   addTagController
 );
 
+/**
+ * @swagger
+ * /v1/assessment/question/remove-tag:
+ *   delete:
+ *     summary: Remove a tag from a question
+ *     tags:
+ *      - Assessment Delete Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               questionId:
+ *                 type: string
+ *                 description: The ID of the question from which the tag will be removed.
+ *                 example: "c3da5dd8-12aa-460d-bfeb-dd3cf62edd07"
+ *               tagId:
+ *                 type: string
+ *                 description: The ID of the tag to be removed.
+ *                 example: "5c6eab3a-2561-492a-a38b-db38c26c4037"
+ *     responses:
+ *       '200':
+ *         description: Tag removed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the tag was removed successfully.
+ *                   example: "Tag removed successfully"
+ *       '400':
+ *         description: Bad Request - Invalid ID format or missing parameters
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
 router.delete(
   '/question/remove-tag',
   authenticateUser(['canManageAssessment']),
