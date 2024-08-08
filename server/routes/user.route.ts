@@ -5,6 +5,7 @@ import {
   deleteRoleController,
   deleteUserController,
   exportUserController,
+  getUsersByGroupController,
   importUserController,
   loginUserController,
   newAccessTokenController,
@@ -19,6 +20,7 @@ import {
 import {
   validateGetAllRoles,
   validateGetAllUsers,
+  validateGetUsersByGroup,
   validateNewAccessToken,
   validateRemoveUserFromGroup,
   validateUserAddToGroup,
@@ -1157,4 +1159,120 @@ router.delete(
   validateRequest,
   removeUsersFromGroupController,
 )
+
+/**
+ * @swagger
+ * /v1/user/by-group:
+ *   get:
+ *     summary: Get users by group ID with pagination and sorting.
+ *     tags: [User Controller]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Number of items per page for pagination.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [id, role_id, first_name, last_name, email, phone, createdAt, updatedAt]
+ *         required: false
+ *         description: Field to sort by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         required: false
+ *         description: Sort order (ASC or DESC).
+ *       - in: query
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group to filter users by.
+ *     responses:
+ *       '200':
+ *         description: Users retrieved successfully by group ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Response status.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the user.
+ *                           role_id:
+ *                             type: string
+ *                             nullable: true
+ *                             description: The role ID of the user.
+ *                           first_name:
+ *                             type: string
+ *                             description: The first name of the user.
+ *                           last_name:
+ *                             type: string
+ *                             description: The last name of the user.
+ *                           email:
+ *                             type: string
+ *                             description: The email address of the user.
+ *                           phone:
+ *                             type: string
+ *                             nullable: true
+ *                             description: The phone number of the user.
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the user was created.
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp of when the user was last updated.
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages for pagination.
+ *             example:
+ *               status: success
+ *               data:
+ *                 users:
+ *                   - id: "1a77a8e2-6b6a-48f5-9251-c3adfb8c6f24"
+ *                     role_id: null
+ *                     first_name: "admin"
+ *                     last_name: "  "
+ *                     email: "din1@pnasss.com"
+ *                     phone: "9876543210"
+ *                     createdAt: "2024-08-08T13:54:50.447Z"
+ *                     updatedAt: "2024-08-08T13:54:50.447Z"
+ *                 totalPages: 1
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
+router.get(
+  '/by-group',
+  authenticateUser(['canManageUser', 'canManageLocalGroup']),
+  validateGetUsersByGroup,
+  validateRequest,
+  getUsersByGroupController,
+)
+
 export default router;

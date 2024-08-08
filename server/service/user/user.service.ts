@@ -14,6 +14,7 @@ import {
   deleteUsersById,
   addUsersToGroupById,
   removeUsersFromGroupById,
+  getAllUsersByGroupId,
 } from "../../model/user/user.model";
 import { RoleData, UserData, authTokens, device, roleAttributes, userAttributes } from "../../types/user.types";
 import { v4 as uuid } from "uuid";
@@ -462,4 +463,46 @@ export const removeUsersFromGroup = async (
   const result = await removeUsersFromGroupById(data);
 
   return result;
+};
+
+export const getUsersInGroup = async (
+  groupId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: userAttributes,
+  order?: "ASC" | "DESC",
+): Promise<{
+  users: UserData[],
+  totalPages: number,
+}> => {
+  const page = parseInt(pageStr ?? '1');
+  const pageSize = parseInt(pageSizeStr ?? '10');
+  sortBy = sortBy ?? 'first_name';
+  order = order ?? 'ASC';
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: allUsersData, count: allUsersCount } = await getAllUsersByGroupId(
+    groupId,
+    offset,
+    pageSize,
+    sortBy,
+    order
+  )
+
+  if (!allUsersData) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  const totalPages = Math.ceil(allUsersCount / pageSize);
+
+  return {
+    users: allUsersData,
+    totalPages: totalPages
+  };
 };

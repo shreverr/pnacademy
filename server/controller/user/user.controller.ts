@@ -10,6 +10,7 @@ import {
   deleteRole,
   deleteUsers,
   exportUsers,
+  getUsersInGroup,
   importUsers,
   loginUser,
   newAccessToken,
@@ -309,3 +310,26 @@ export const removeUsersFromGroupController: RequestHandler = async (
     next(error);
   }
 }
+
+export const getUsersByGroupController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const users = await getUsersInGroup(
+      req.query.groupId as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as userAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: users 
+    });
+  } catch (error) {
+    next(error);
+  }
+} 

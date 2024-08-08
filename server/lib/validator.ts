@@ -694,3 +694,45 @@ export const validateRemoveUserFromGroup = [
     .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
+
+export const validateGetUsersByGroup = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(id|role_id|first_name|last_name|email|phone|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Column names must match one of the specified options:
+      "id", "name", "createdAt",
+      or "updatedAt".`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+     "ASC", "DESC",`
+    ),
+
+  query("groupId")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("Should be a valid uuid v4"),
+];

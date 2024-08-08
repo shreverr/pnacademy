@@ -14,6 +14,8 @@ import {
   type UserData,
 } from "../../types/user.types";
 import UserGroup from "../../schema/junction/userGroup.schema";
+import { group } from "console";
+import Group from "../../schema/group/group.schema";
 
 export const getUserByEmail = async (
   email: string
@@ -441,3 +443,49 @@ export const removeUsersFromGroupById = async (data: {
     )
   }
 } 
+
+export const getAllUsersByGroupId = async (
+  groupId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: userAttributes,
+  order?: "ASC" | "DESC",
+): Promise<{
+  rows: UserData[],
+  count: number
+}> => {
+  try {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
+      limit: pageSize,
+      offset: offset,
+      order: [[sortBy, order]]
+    } : {}
+
+    const allUsersData = await User.findAndCountAll({
+      include: [{
+        model: Group,
+        where: { id: groupId }, 
+        attributes: []  // Exclude `UserGroup` attributes from the result
+      }],
+      ...findOptions
+    });
+
+    // Converting the data to plain object
+    let plainData: {
+      rows: UserData[]
+      count: number
+    } = {
+      rows: allUsersData.rows.map((user) => user.get({ plain: true })),
+      count: allUsersData.count
+    }
+
+    return plainData;
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting all users by groupid",
+      500,
+      error,
+      true
+    );
+  }
+};
