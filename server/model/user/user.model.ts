@@ -65,7 +65,7 @@ export const getAllUsers = async (
   count: number
 }> => {
   try {
-    const findOptions: FindAndCountOptions = offset && pageSize && sortBy && order ? {
+    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
       order: [[sortBy, order]]

@@ -4,7 +4,8 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { createGroup, createNotification, deleteGroups, deleteNotification, updateGroup } from "../../service/notification/notification.service";
+import { createGroup, createNotification, deleteGroups, deleteNotification, updateGroup, viewAllGroups } from "../../service/notification/notification.service";
+import { groupAttributes } from "../../types/notification.types";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -96,6 +97,28 @@ export const deleteGroupController: RequestHandler = async (
 
     return res.status(200).json({
       message: allGroupssDeleted ? "Groups Deleted successfully" : "Some groups deleted"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getAllGroupsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const groupsData = await viewAllGroups(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as groupAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(201).json({
+      message: "success",
+      data: groupsData,
     });
   } catch (error) {
     next(error);

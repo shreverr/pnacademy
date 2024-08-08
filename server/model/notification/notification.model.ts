@@ -1,10 +1,10 @@
-import { UniqueConstraintError } from 'sequelize'
+import { FindAndCountOptions, UniqueConstraintError } from 'sequelize'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
 import Notification from '../../schema/group/notification.schema'
 import { type GroupData } from '../../types/group.types'
-import { type NotificationData } from '../../types/notification.types'
+import { groupAttributes, type NotificationData } from '../../types/notification.types'
 
 export const createNotificationInDB = async (notification: {
   id: string
@@ -203,6 +203,46 @@ export const deleteGroupsById = async (groupIds: string[]): Promise<boolean> => 
       "error deleting group",
       500,
       error,
+      true
+    );
+  }
+};
+
+export const getAllGroups = async (
+  offset?: number,
+  pageSize?: number,
+  sortBy?: groupAttributes,
+  order?: "ASC" | "DESC",
+): Promise<{
+  rows: GroupData[],
+  count: number
+}> => {
+  try {
+    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
+      limit: pageSize,
+      offset: offset,
+      order: [[sortBy, order]]
+    } : {}
+
+    logger.info(findOptions)
+
+    const allGroupsData = await Group.findAndCountAll(findOptions);
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: GroupData[]
+      count: number
+    } = {
+      rows: allGroupsData.rows.map((group) => group.get({ plain: true })),
+      count: allGroupsData.count
+    }
+
+    return plainData;
+  } catch (error) {
+    throw new AppError(
+      "error getting all groups",
+      500,
+      "Something went wrong",
       true
     );
   }

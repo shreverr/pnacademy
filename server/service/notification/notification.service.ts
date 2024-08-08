@@ -7,13 +7,15 @@ import {
   createNotificationInDB,
   deleteGroupsById,
   deleteNotificationInDB,
+  getAllGroups,
   getGroupById,
   getGroupByName,
   getnotificationById,
   updateGroupInDB,
 } from "../../model/notification/notification.model";
-import { NotificationData } from "../../types/notification.types";
+import { groupAttributes, NotificationData } from "../../types/notification.types";
 import { GroupData } from "../../types/group.types";
+import commonErrorsDictionary from "../../utils/error/commonErrors";
 
 export const createNotification = async (notification: {
   description: string;
@@ -95,4 +97,44 @@ export const updateGroup = async (
 export const deleteGroups = async (groupIds: string[]): Promise<boolean> => {
   const result = await deleteGroupsById(groupIds);
   return result;
+};
+
+export const viewAllGroups = async (
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: groupAttributes,
+  order?: "ASC" | "DESC",
+): Promise<{
+  groups: GroupData[],
+  totalPages: number,
+}> => {
+  const page = parseInt(pageStr ?? '1');
+  const pageSize = parseInt(pageSizeStr ?? '10');
+  sortBy = sortBy ?? 'name';
+  order = order ?? 'ASC';
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: allGroupsData, count: allGroupsCount } = await getAllGroups(
+    offset,
+    pageSize,
+    sortBy,
+    order
+  )
+
+  if (!allGroupsData) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  const totalPages = Math.ceil(allGroupsCount / pageSize);
+
+  return {
+    groups: allGroupsData,
+    totalPages: totalPages
+  };
 };
