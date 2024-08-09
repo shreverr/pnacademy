@@ -1,10 +1,7 @@
 import express from "express";
 import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
-import {
-  validateNotification,
-  validateNotificationDelete,
-} from "../lib/validator";
+
 import { validateRequest } from "../utils/validateRequest";
 import {
   addGroupToNotificationController,
@@ -13,6 +10,10 @@ import {
   getAllNotificationsController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
+import {
+  validateNotification,
+  validateNotificationDelete,
+} from "../lib/validator/index";
 import { validateAddGroupToNotification, validateGetAllNotifications } from "../lib/validator/notification/validator";
 
 const router: Router = express.Router();
@@ -241,7 +242,7 @@ router.delete(
  *         description: Internal server error.
  */
 router.get(
-  '/all',
+  "/all",
   authenticateUser(["canManageNotification"]),
   validateGetAllNotifications,
   validateRequest,

@@ -47,7 +47,7 @@ import {
   validateTagId,
   validateTagUpdate,
   validateViewAssignedAssessment,
-} from "../lib/validator";
+} from "../lib/validator/index";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import {
