@@ -9,8 +9,10 @@ import { validateRequest } from "../utils/validateRequest";
 import {
   CreateNotificationController,
   DeleteNotificationController,
+  getAllNotificationsController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
+import { validateGetAllNotifications } from "../lib/validator/notification/validator";
 
 const router: Router = express.Router();
 
@@ -143,6 +145,106 @@ router.delete(
   validateNotificationDelete,
   validateRequest,
   DeleteNotificationController
+);
+
+/**
+ * @swagger
+ * /v1/notification/all:
+ *   get:
+ *     summary: Retrieve all notifications with pagination and sorting options
+ *     tags:
+ *       - Notification
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 3
+ *         description: The page number to retrieve.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 3
+ *         description: The number of notifications per page.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           example: createdAt
+ *         description: The field to sort the results by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *         description: The order of sorting (ascending or descending).
+ *     responses:
+ *       '200':
+ *         description: A list of notifications.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     notifications:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the notification.
+ *                             example: 59cfd460-6ded-46e6-a269-b2747065f76c
+ *                           title:
+ *                             type: string
+ *                             description: The title of the notification.
+ *                             example: foo
+ *                           description:
+ *                             type: string
+ *                             description: The description of the notification.
+ *                             example: bar
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The creation timestamp of the notification.
+ *                             example: 2024-08-09T17:27:50.700Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The last update timestamp of the notification.
+ *                             example: 2024-08-09T17:27:50.700Z
+ *                           image_url:
+ *                             type: string
+ *                             description: The URL of the notification's image.
+ *                             example: https://example.com/notification-images/image.png
+ *                           file_url:
+ *                             type: string
+ *                             description: The URL of the notification's file.
+ *                             example: https://example.com/notification-files/file.pdf
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 8
+ *       '400':
+ *         description: Bad request. Invalid query parameters.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  '/all',
+  authenticateUser(["canManageNotification"]),
+  validateGetAllNotifications,
+  validateRequest,
+  getAllNotificationsController
 );
 
 export default router;

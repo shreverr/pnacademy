@@ -4,7 +4,7 @@ import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
 import Notification, { NotificationAttributes } from '../../schema/group/notification.schema'
 import { type GroupData } from '../../types/group.types'
-import { groupAttributes } from '../../types/notification.types'
+import { groupAttributes, NotificationSortBy } from '../../types/notification.types'
 
 export const createNotificationInDB = async (notification: {
   id: string
@@ -242,6 +242,44 @@ export const getAllGroups = async (
   } catch (error) {
     throw new AppError(
       "error getting all groups",
+      500,
+      "Something went wrong",
+      true
+    );
+  }
+};
+
+export const getAllNotifications = async (
+  offset?: number,
+  pageSize?: number,
+  sortBy?: NotificationSortBy,
+  order?: "ASC" | "DESC"
+): Promise<{ rows: NotificationAttributes[]; count: number }> => {
+  try {
+    const findOptions: FindAndCountOptions =
+      (offset !== null || offset !== undefined) && pageSize && sortBy && order
+        ? {
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
+        : {};
+
+    const allNotifications = await Notification.findAndCountAll(findOptions);
+    // Convert the data to plain object
+    let plainData: {
+      rows: NotificationAttributes[];
+      count: number;
+    } = {
+      rows: allNotifications.rows.map((assessment) =>
+        assessment.get({ plain: true })
+      ),
+      count: allNotifications.count,
+    };
+    return plainData;
+  } catch (error) {
+    throw new AppError(
+      "error getting all assessments",
       500,
       "Something went wrong",
       true

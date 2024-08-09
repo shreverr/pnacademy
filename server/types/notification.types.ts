@@ -17,3 +17,5 @@ export type NotificationAttributesWithOptionalImageAndFileUrl = Omit<
   image_url?: string;
   file_url?: string;
 }
+
+export type NotificationSortBy = 'id' | 'description' | 'title' | 'createdAt' | 'updatedAt';

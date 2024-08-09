@@ -4,8 +4,8 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { createGroup, createNotification, deleteGroups, deleteNotification, updateGroup, viewAllGroups } from "../../service/notification/notification.service";
-import { groupAttributes } from "../../types/notification.types";
+import { createGroup, createNotification, deleteGroups, deleteNotification, updateGroup, viewAllGroups, viewAllNotifications } from "../../service/notification/notification.service";
+import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -139,5 +139,27 @@ export const getAllGroupsController: RequestHandler = async (
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export const getAllNotificationsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const notifications = await viewAllNotifications(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as NotificationSortBy,
+      req.query.order as 'ASC' | 'DESC'
+    )
+
+    return res.status(201).json({
+      message: 'success',
+      data: notifications
+    })
+  } catch (error) {
+    next(error)
   }
 }
