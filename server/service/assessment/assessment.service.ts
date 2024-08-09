@@ -22,7 +22,8 @@ import {
   updateAssessmentInDB,
   updateOptionInDB,
   updateQuestionInDB,
-  updateTagInDB
+  updateTagInDB,
+  viewAssignedAssessmentsByUserId
 } from '../../model/assessment/assesment.model'
 import {
   type OptionData,
@@ -31,13 +32,15 @@ import {
   type TagData,
   type AssementDetailedData,
   type QuestionDetailedData,
-  TagAttribute
+  TagAttribute,
+  AssessmentAttribute
 } from '../../types/assessment.types'
 import { v4 as uuid } from 'uuid'
 import { getUserById } from '../../model/user/user.model'
 import { AppError } from '../../lib/appError'
 import commonErrorsDictionary from '../../utils/error/commonErrors'
 import { TagAttributes } from '../../schema/assessment/tag.schema'
+import { AssessmentAttributes } from '../../schema/assessment/assessment.schema'
 
 export const createAssessment = async (assement: {
   name: string
@@ -413,4 +416,46 @@ export const removeGroupFromAssessment = async (
   const result = await removeGroupFromAssessmentById(assessmentId, groupId);
 
   return result;
+};
+
+export const viewAssignedAssessments = async (
+  userId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: Exclude<AssessmentAttribute, 'created_by'>,
+  order?: "ASC" | "DESC",
+): Promise<{
+  assessments: Omit<AssessmentAttributes, 'created_by'>[],
+  totalPages: number,
+}> => {
+  const page = parseInt(pageStr ?? '1');
+  const pageSize = parseInt(pageSizeStr ?? '10');
+  sortBy = sortBy ?? 'name';
+  order = order ?? 'ASC';
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: assignedAssessments, count: assignedAssessmentsCount } = await viewAssignedAssessmentsByUserId(
+    userId,
+    offset,
+    pageSize,
+    sortBy,
+    order
+  )
+
+  if (!assignedAssessments) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  const totalPages = Math.ceil(assignedAssessmentsCount / pageSize);
+
+  return {
+    assessments: assignedAssessments,
+    totalPages: totalPages
+  };
 };

@@ -18,6 +18,7 @@ import {
   updateTag,
   viewAllTags,
   viewAssessmentDetails,
+  viewAssignedAssessments,
   viewQuestionDetails,
   viewTag,
 } from "../../service/assessment/assessment.service";
@@ -27,7 +28,8 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { TagAttribute } from "../../types/assessment.types";
+import { AssessmentAttribute, TagAttribute } from "../../types/assessment.types";
+import Assessment from "../../schema/assessment/assessment.schema";
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -422,6 +424,29 @@ export const removeGroupFromAssessmentController: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       message: "Group removed successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const viewAssignedAssessmentsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assignedAssessments = await viewAssignedAssessments(
+      req.user.userId as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as Exclude<AssessmentAttribute, 'created_by'>,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(201).json({
+      message: "success",
+      data: assignedAssessments,
     });
   } catch (error) {
     next(error);

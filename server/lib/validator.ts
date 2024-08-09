@@ -845,3 +845,37 @@ export const validateRemoveGroupFromAssessment = [
     .isUUID(4)
     .withMessage("groupId should be a valid UUID v4"),
 ];
+
+export const validateViewAssignedAssessment = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(id|name|description|is_active|start_at|end_at|duration|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Column names must match one of the specified options:
+      id|name|description|is_active|start_at|end_at|duration|createdAt|updatedAt.`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+     "ASC", "DESC",`
+    ),
+];

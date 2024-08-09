@@ -6,11 +6,12 @@ import {
   type TagData,
   type AssementDetailedData,
   type QuestionDetailedData,
-  TagAttribute
+  TagAttribute,
+  AssessmentAttribute
 } from '../../types/assessment.types'
 import { AppError } from '../../lib/appError'
 import logger from '../../config/logger'
-import Assessment from '../../schema/assessment/assessment.schema'
+import Assessment, { AssessmentAttributes } from '../../schema/assessment/assessment.schema'
 import Question from '../../schema/assessment/question.schema'
 import Option from '../../schema/assessment/options.schema'
 import Tag from '../../schema/assessment/tag.schema'
@@ -18,6 +19,8 @@ import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError }
 import QuestionTag from '../../schema/junction/questionTag.schema'
 import { sequelize } from '../../config/database'
 import AssessmentGroup from '../../schema/junction/assessmentGroup.schema'
+import Group from '../../schema/group/group.schema'
+import User from '../../schema/user/user.schema'
 
 export const createAssementInDB = async (assessment: {
   id: string
@@ -584,7 +587,7 @@ export const getAllTags = async (
   count: number
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
       order: [[sortBy, order]]
@@ -641,7 +644,7 @@ export const addTagToQuestion = async (
         false
       );
     }
-  } catch (error:any) {
+  } catch (error: any) {
     throw new AppError(
       'Error adding tag to question',
       500,
@@ -677,7 +680,7 @@ export const removeTagFromQuestionById = async (
       true
     )
   }
-} 
+}
 
 export const addGroupToAssessmentById = async (
   assessmentId: string,
@@ -743,4 +746,71 @@ export const removeGroupFromAssessmentById = async (
       true
     )
   }
-} 
+}
+
+export const viewAssignedAssessmentsByUserId = async (
+  userId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: Exclude<AssessmentAttribute, 'created_by'>,
+  order?: "ASC" | "DESC",
+): Promise<{
+  rows: Omit<AssessmentAttributes, 'created_by'>[],
+  count: number
+}> => {
+  try {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
+      limit: pageSize,
+      offset: offset,
+      order: [[sortBy, order]]
+    } : {}
+
+    const assignedAssessments = await Assessment.findAndCountAll({
+      include: [
+        {
+          model: Group,
+          include: [
+            {
+              model: User,
+              where: {
+                id: userId
+              },
+              attributes: [],
+              required: true
+            }
+          ],
+          attributes: [],
+          required: true
+        }
+      ],
+      ...findOptions
+    });
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: Omit<AssessmentAttributes, 'created_by'>[]
+      count: number
+    } = {
+      rows: assignedAssessments.rows.map((assessment) => assessment.get({ plain: true })),
+      count: assignedAssessments.count
+    }
+
+    return plainData;
+  } catch (error: any) {
+    if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        'User does not exists',
+        404,
+        'User does not exists',
+        false
+      )
+    }
+
+    throw new AppError(
+      "error getting all tags",
+      500,
+      error,
+      true
+    );
+  }
+};

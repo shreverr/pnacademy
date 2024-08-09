@@ -47,3 +47,5 @@ export interface AssementDetailedData {
 }
 
 export type TagAttribute = 'id' | 'name' | 'createdAt' | 'updatedAt'
+
+export type AssessmentAttribute = 'id' | 'name' | 'description' | 'is_active' | 'start_at' | 'end_at' | 'duration' | 'created_by' | 'createdAt' | 'updatedAt'
