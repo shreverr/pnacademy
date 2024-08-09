@@ -6,7 +6,7 @@ import {
   validateGroup,
   validateGroupsId,
   validateGroupUpdate,
-} from "../lib/validator";
+} from "../lib/validator/index";
 import { validateRequest } from "../utils/validateRequest";
 import {
   CreateGroupController,

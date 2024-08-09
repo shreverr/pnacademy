@@ -33,7 +33,7 @@ import {
   validateUserRoleUpdate,
   validateUsersImport,
   validateUserUpdate,
-} from "../lib/validator";
+} from "../lib/validator/index";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";

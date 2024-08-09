@@ -1,16 +1,17 @@
 import express from "express";
 import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
-import {
-  validateNotification,
-  validateNotificationDelete,
-} from "../lib/validator";
+
 import { validateRequest } from "../utils/validateRequest";
 import {
   CreateNotificationController,
   DeleteNotificationController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
+import {
+  validateNotification,
+  validateNotificationDelete,
+} from "../lib/validator/index";
 
 const router: Router = express.Router();
 
