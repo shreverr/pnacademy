@@ -1,4 +1,4 @@
-import { type UUID } from 'crypto'
+import { type UUID } from "crypto";
 import {
   type OptionData,
   type QuestionData,
@@ -7,32 +7,38 @@ import {
   type AssementDetailedData,
   type QuestionDetailedData,
   TagAttribute,
-  AssessmentAttribute
-} from '../../types/assessment.types'
-import { AppError } from '../../lib/appError'
-import logger from '../../config/logger'
-import Assessment, { AssessmentAttributes } from '../../schema/assessment/assessment.schema'
-import Question from '../../schema/assessment/question.schema'
-import Option from '../../schema/assessment/options.schema'
-import Tag from '../../schema/assessment/tag.schema'
-import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from 'sequelize'
-import QuestionTag from '../../schema/junction/questionTag.schema'
-import { sequelize } from '../../config/database'
-import AssessmentGroup from '../../schema/junction/assessmentGroup.schema'
-import Group from '../../schema/group/group.schema'
-import User from '../../schema/user/user.schema'
+  AssessmentAttribute,
+} from "../../types/assessment.types";
+import { AppError } from "../../lib/appError";
+import logger from "../../config/logger";
+import Assessment, {
+  AssessmentAttributes,
+} from "../../schema/assessment/assessment.schema";
+import Question from "../../schema/assessment/question.schema";
+import Option from "../../schema/assessment/options.schema";
+import Tag from "../../schema/assessment/tag.schema";
+import {
+  FindAndCountOptions,
+  ForeignKeyConstraintError,
+  UniqueConstraintError,
+} from "sequelize";
+import QuestionTag from "../../schema/junction/questionTag.schema";
+import { sequelize } from "../../config/database";
+import AssessmentGroup from "../../schema/junction/assessmentGroup.schema";
+import Group from "../../schema/group/group.schema";
+import User from "../../schema/user/user.schema";
 
 export const createAssementInDB = async (assessment: {
-  id: string
-  name: string
-  description: string
-  is_active: boolean
-  start_at: Date
-  end_at: Date
-  duration: number
-  created_by: UUID
+  id: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  start_at: Date;
+  end_at: Date;
+  duration: number;
+  created_by: UUID;
 }): Promise<AssementData | null> => {
-  logger.info(`Creating assessment: ${assessment.name}`)
+  logger.info(`Creating assessment: ${assessment.name}`);
 
   try {
     // Create the assessment
@@ -45,183 +51,221 @@ export const createAssementInDB = async (assessment: {
         start_at: assessment.start_at,
         end_at: assessment.end_at,
         duration: assessment.duration,
-        created_by: assessment.created_by
+        created_by: assessment.created_by,
       },
       {
-        raw: true
+        raw: true,
       }
-    )
-    return createdAssessment
+    );
+    return createdAssessment;
   } catch (error) {
     throw new AppError(
-      'Error creating assessment',
+      "Error creating assessment",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const getOptionById = async (id: UUID): Promise<OptionData | null> => {
-  logger.info(`Getting Option with id: ${id}`)
+  logger.info(`Getting Option with id: ${id}`);
 
   try {
     const option = await Option.findOne({
       where: {
-        id
+        id,
       },
-      raw: true
-    })
-    return option
+      raw: true,
+    });
+    return option;
   } catch (error) {
     throw new AppError(
-      'Error getting assessment',
+      "Error getting assessment",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
-export const checkAssessmentExists = async (id: UUID): Promise<boolean | null> => {
-  logger.info(`Checking if assessment exists with id: ${id}`)
+export const checkAssessmentExists = async (
+  id: UUID
+): Promise<boolean | null> => {
+  logger.info(`Checking if assessment exists with id: ${id}`);
 
   try {
     const assessment = await Assessment.findOne({
       where: {
-        id
+        id,
       },
-      raw: true
-    })
+      raw: true,
+    });
 
-    return assessment !== null
+    return assessment !== null;
   } catch (error) {
     throw new AppError(
-      'Error getting assessment',
+      "Error getting assessment",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
-
+};
 
 export const getAssessmentById = async (
   id: UUID
 ): Promise<AssementDetailedData | null> => {
-  logger.info(`Getting assessment with id: ${id}`)
+  logger.info(`Getting assessment with id: ${id}`);
 
   try {
     const assessment = await Assessment.findOne({
       where: {
-        id
+        id,
       },
       include: [
         {
           model: Question,
-          as: 'questions',
+          as: "questions",
           include: [
             {
               model: Option,
-              as: 'options'
-            }
-          ]
-        }
-      ]
-    })
+              as: "options",
+            },
+          ],
+        },
+      ],
+    });
 
     if (!assessment) {
-      return null
+      return null;
     }
 
-    return assessment.dataValues as AssementDetailedData
+    return assessment.dataValues as AssementDetailedData;
   } catch (error) {
     throw new AppError(
-      'Error getting assessment',
+      "Error getting assessment",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
+export const getAllAssessments = async (
+  offset?: number,
+  pageSize?: number,
+  sortBy?: AssessmentAttribute,
+  order?: "ASC" | "DESC"
+): Promise<{ rows: AssessmentAttributes[]; count: number }> => {
+  try {
+    const findOptions: FindAndCountOptions =
+      (offset !== null || offset !== undefined) && pageSize && sortBy && order
+        ? {
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
+        : {};
+    const allAssessments = await Assessment.findAndCountAll(findOptions);
+    // Convert the data to plain object
+    let plainData: {
+      rows: AssessmentAttributes[];
+      count: number;
+    } = {
+      rows: allAssessments.rows.map((assessment) =>
+        assessment.get({ plain: true })
+      ),
+      count: allAssessments.count,
+    };
+    return plainData;
+  } catch (error) {
+    throw new AppError(
+      "error getting all assessments",
+      500,
+      "Something went wrong",
+      true
+    );
+  }
+};
 
-export const checkQuestionExists = async (id: UUID): Promise<boolean | null> => {
-  logger.info(`Checking if question exists with id: ${id}`)
+export const checkQuestionExists = async (
+  id: UUID
+): Promise<boolean | null> => {
+  logger.info(`Checking if question exists with id: ${id}`);
 
   try {
     const question = await Question.findOne({
       where: {
-        id
-      }
-    })
+        id,
+      },
+    });
 
-    return question !== null
+    return question !== null;
   } catch (error) {
     throw new AppError(
-      'Error getting question',
+      "Error getting question",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const getQuestionById = async (
   id: UUID
 ): Promise<QuestionDetailedData | null> => {
-  logger.info(`Getting question with id: ${id}`)
+  logger.info(`Getting question with id: ${id}`);
   try {
     // Find the question
     const question = await Question.findOne({
       where: {
-        id
+        id,
       },
       include: [
         {
           model: Option,
-          as: 'options'
-        }
+          as: "options",
+        },
       ],
-
-    })
+    });
     if (!question) {
-      return null
+      return null;
     }
-    return question.dataValues as QuestionDetailedData
+    return question.dataValues as QuestionDetailedData;
   } catch (error) {
     throw new AppError(
-      'Error getting question',
+      "Error getting question",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const getTagById = async (id: UUID): Promise<TagData | null> => {
-  logger.info(`Getting tag with id: ${id}`)
+  logger.info(`Getting tag with id: ${id}`);
 
   try {
     const tag = await Tag.findOne({
       where: {
-        id
+        id,
       },
-      raw: true
-    })
-    return tag
+      raw: true,
+    });
+    return tag;
   } catch (error) {
-    throw new AppError('Error getting tag', 500, 'Something went wrong', false)
+    throw new AppError("Error getting tag", 500, "Something went wrong", false);
   }
-}
+};
 
 export const createQuestionInDB = async (question: {
-  id: string
-  assessment_id: UUID
-  description: string
-  marks: number
-  section: number
+  id: string;
+  assessment_id: UUID;
+  description: string;
+  marks: number;
+  section: number;
 }): Promise<QuestionData | null> => {
-  logger.info(`Creating question for assessment: ${question.assessment_id}`)
+  logger.info(`Creating question for assessment: ${question.assessment_id}`);
 
   try {
     const createdQuestion = await Question.create(
@@ -230,30 +274,30 @@ export const createQuestionInDB = async (question: {
         assessment_id: question.assessment_id,
         description: question.description,
         marks: question.marks,
-        section: question.section
+        section: question.section,
       },
       {
-        raw: true
+        raw: true,
       }
-    )
-    return createdQuestion
+    );
+    return createdQuestion;
   } catch (error) {
     throw new AppError(
-      'Error creating question',
+      "Error creating question",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const createOptionInDB = async (option: {
-  id: string
-  question_id: UUID
-  description: string
-  is_correct: boolean
+  id: string;
+  question_id: UUID;
+  description: string;
+  is_correct: boolean;
 }): Promise<OptionData | null> => {
-  logger.info(`Creating option for question: ${option.question_id}`)
+  logger.info(`Creating option for question: ${option.question_id}`);
 
   try {
     const createdOption = await Option.create(
@@ -261,68 +305,68 @@ export const createOptionInDB = async (option: {
         id: option.id,
         question_id: option.question_id,
         description: option.description,
-        is_correct: option.is_correct
+        is_correct: option.is_correct,
       },
       {
-        raw: true
+        raw: true,
       }
-    )
-    return createdOption
+    );
+    return createdOption;
   } catch (error) {
     throw new AppError(
-      'Error creating option',
+      "Error creating option",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const createTagInDB = async (tag: {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }): Promise<TagData | null> => {
-  logger.info(`Creating tag: ${tag.name}`)
+  logger.info(`Creating tag: ${tag.name}`);
 
   try {
     const createdTag = await Tag.create(
       {
         id: tag.id,
-        name: tag.name
+        name: tag.name,
       },
       {
-        raw: true
+        raw: true,
       }
-    )
-    return createdTag
+    );
+    return createdTag;
   } catch (error) {
     if (error instanceof UniqueConstraintError) {
       throw new AppError(
-        'Tag already exists',
+        "Tag already exists",
         409,
-        'A tag with this name or ID already exists',
+        "A tag with this name or ID already exists",
         false
       );
     }
     throw new AppError(
-      'Error creating tag',
+      "Error creating tag",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const updateAssessmentInDB = async (assessment: {
-  id: UUID
-  name: string | null
-  description: string | null
-  is_active: boolean | null
-  start_at: Date | null
-  end_at: Date | null
-  duration: number | null
+  id: UUID;
+  name: string | null;
+  description: string | null;
+  is_active: boolean | null;
+  start_at: Date | null;
+  end_at: Date | null;
+  duration: number | null;
 }): Promise<AssementData | null> => {
-  logger.info(`Updating assessment with id: ${assessment.id}`)
+  logger.info(`Updating assessment with id: ${assessment.id}`);
 
   try {
     // Find the assessment
@@ -332,277 +376,280 @@ export const updateAssessmentInDB = async (assessment: {
       is_active: assessment.is_active ?? undefined,
       start_at: assessment.start_at ?? undefined,
       end_at: assessment.end_at ?? undefined,
-      duration: assessment.duration ?? undefined
-    }
+      duration: assessment.duration ?? undefined,
+    };
     Object.keys(updatedAssessmentDate).forEach(
       (key) =>
         updatedAssessmentDate[key] === undefined &&
         delete updatedAssessmentDate[key]
-    )
+    );
     if (Object.keys(updatedAssessmentDate).length === 0) {
-      return null
+      return null;
     }
 
     const [_, [updatedAssessment]] = await Assessment.update(
       updatedAssessmentDate,
       {
         where: {
-          id: assessment.id
+          id: assessment.id,
         },
-        returning: true
+        returning: true,
       }
-    )
+    );
 
-    return updatedAssessment.dataValues as AssementData
+    return updatedAssessment.dataValues as AssementData;
   } catch (error) {
     throw new AppError(
-      'Error updating assessment',
+      "Error updating assessment",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const updateQuestionInDB = async (question: {
-  id: UUID
-  description: string | null
-  marks: number | null
-  section: number | null
+  id: UUID;
+  description: string | null;
+  marks: number | null;
+  section: number | null;
 }): Promise<QuestionData | null> => {
-  logger.info(`Updating question with id: ${question.id}`)
+  logger.info(`Updating question with id: ${question.id}`);
 
   try {
     const updatedQuestionDate: any = {
       description: question.description ?? undefined,
       marks: question.marks ?? undefined,
-      section: question.section ?? undefined
-    }
+      section: question.section ?? undefined,
+    };
     Object.keys(updatedQuestionDate).forEach(
       (key) =>
         updatedQuestionDate[key] === undefined &&
         delete updatedQuestionDate[key]
-    )
+    );
     if (Object.keys(updatedQuestionDate).length === 0) {
-      return null
+      return null;
     }
 
     const [_, [updatedQuestion]] = await Question.update(updatedQuestionDate, {
       where: {
-        id: question.id
+        id: question.id,
       },
-      returning: true
-    })
-    return updatedQuestion.dataValues as QuestionData
+      returning: true,
+    });
+    return updatedQuestion.dataValues as QuestionData;
   } catch (error) {
     throw new AppError(
-      'Error updating question',
+      "Error updating question",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const updateOptionInDB = async (option: {
-  id: UUID
-  description: string | null
-  is_correct: boolean | null
+  id: UUID;
+  description: string | null;
+  is_correct: boolean | null;
 }): Promise<OptionData | null> => {
-  logger.info(`Updating option with id: ${option.id}`)
+  logger.info(`Updating option with id: ${option.id}`);
 
   try {
     const updatedOptionDate: any = {
       description: option.description ?? undefined,
-      is_correct: option.is_correct ?? undefined
-    }
+      is_correct: option.is_correct ?? undefined,
+    };
     Object.keys(updatedOptionDate).forEach(
       (key) =>
         updatedOptionDate[key] === undefined && delete updatedOptionDate[key]
-    )
+    );
     if (Object.keys(updatedOptionDate).length === 0) {
-      return null
+      return null;
     }
 
     const [_, [updatedOption]] = await Option.update(updatedOptionDate, {
       where: {
-        id: option.id
+        id: option.id,
       },
-      returning: true
-    })
-    return updatedOption.dataValues as OptionData
+      returning: true,
+    });
+    return updatedOption.dataValues as OptionData;
   } catch (error) {
     throw new AppError(
-      'Error updating option',
+      "Error updating option",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const updateTagInDB = async (tag: {
-  id: UUID
-  name: string | null
+  id: UUID;
+  name: string | null;
 }): Promise<TagData | null> => {
-  logger.info(`Updating tag with id: ${tag.id}`)
+  logger.info(`Updating tag with id: ${tag.id}`);
 
   try {
     const updatedTagDate: any = {
-      name: tag.name ?? undefined
-    }
+      name: tag.name ?? undefined,
+    };
     Object.keys(updatedTagDate).forEach(
       (key) => updatedTagDate[key] === undefined && delete updatedTagDate[key]
-    )
+    );
     if (Object.keys(updatedTagDate).length === 0) {
-      return null
+      return null;
     }
 
     const [_, [updatedTag]] = await Tag.update(updatedTagDate, {
       where: {
-        id: tag.id
+        id: tag.id,
       },
-      returning: true
-    })
-    return updatedTag.dataValues as TagData
+      returning: true,
+    });
+    return updatedTag.dataValues as TagData;
   } catch (error) {
     if (error instanceof UniqueConstraintError) {
       throw new AppError(
-        'Tag already exists',
+        "Tag already exists",
         409,
-        'A tag with this name or ID already exists',
+        "A tag with this name or ID already exists",
         false
       );
     }
     throw new AppError(
-      'Error updating tag',
+      "Error updating tag",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const deleteAssessmentInDB = async (assessment: {
-  id: UUID
+  id: UUID;
 }): Promise<boolean> => {
-  logger.info(`Deleting assessment with id: ${assessment.id}`)
+  logger.info(`Deleting assessment with id: ${assessment.id}`);
 
   try {
     // Find the assessment
     const deletedAssessment = await Assessment.destroy({
       where: {
-        id: assessment.id
-      }
-    })
+        id: assessment.id,
+      },
+    });
 
-    return deletedAssessment === 1
+    return deletedAssessment === 1;
   } catch (error) {
     throw new AppError(
-      'Error deleting assessment',
+      "Error deleting assessment",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const deleteQuestionInDB = async (question: {
-  id: UUID
+  id: UUID;
 }): Promise<boolean> => {
-  logger.info(`Deleting question with id: ${question.id}`)
+  logger.info(`Deleting question with id: ${question.id}`);
 
   try {
     // Find the question
     const deletedQuestion = await Question.destroy({
       where: {
-        id: question.id
-      }
-    })
+        id: question.id,
+      },
+    });
 
-    return deletedQuestion === 1
+    return deletedQuestion === 1;
   } catch (error) {
     throw new AppError(
-      'Error deleting question',
+      "Error deleting question",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const deleteOptionInDB = async (option: {
-  id: UUID
+  id: UUID;
 }): Promise<boolean> => {
-  logger.info(`Deleting option with id: ${option.id}`)
+  logger.info(`Deleting option with id: ${option.id}`);
 
   try {
     // Find the option
     const deletedOption = await Option.destroy({
       where: {
-        id: option.id
-      }
-    })
+        id: option.id,
+      },
+    });
 
-    return deletedOption === 1
+    return deletedOption === 1;
   } catch (error) {
     throw new AppError(
-      'Error deleting option',
+      "Error deleting option",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const deleteTagInDB = async (tag: { id: UUID }): Promise<boolean> => {
-  logger.info(`Deleting tag with id: ${tag.id}`)
+  logger.info(`Deleting tag with id: ${tag.id}`);
 
   try {
     // Find the tag
     const deletedTag = await Tag.destroy({
       where: {
-        id: tag.id
-      }
-    })
+        id: tag.id,
+      },
+    });
 
-    return deletedTag === 1
+    return deletedTag === 1;
   } catch (error) {
     throw new AppError(
-      'Error deleting tag',
+      "Error deleting tag",
       500,
-      'Something went wrong',
+      "Something went wrong",
       false
-    )
+    );
   }
-}
+};
 
 export const getAllTags = async (
   offset?: number,
   pageSize?: number,
   sortBy?: TagAttribute,
-  order?: "ASC" | "DESC",
+  order?: "ASC" | "DESC"
 ): Promise<{
-  rows: TagData[],
-  count: number
+  rows: TagData[];
+  count: number;
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
-      limit: pageSize,
-      offset: offset,
-      order: [[sortBy, order]]
-    } : {}
+    const findOptions: FindAndCountOptions =
+      (offset !== null || offset !== undefined) && pageSize && sortBy && order
+        ? {
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
+        : {};
 
     const allTagsData = await Tag.findAndCountAll(findOptions);
 
     // Convert the data to plain object
     let plainData: {
-      rows: TagData[]
-      count: number
+      rows: TagData[];
+      count: number;
     } = {
       rows: allTagsData.rows.map((tag) => tag.get({ plain: true })),
-      count: allTagsData.count
-    }
+      count: allTagsData.count,
+    };
 
     return plainData;
   } catch (error) {
@@ -619,19 +666,25 @@ export const addTagToQuestion = async (
   tagId: string,
   questionId: string
 ): Promise<boolean> => {
-  logger.info(`Adding tag to question`)
+  logger.info(`Adding tag to question`);
   const transaction = await sequelize.transaction();
   try {
-    const questionExists = await Question.findOne({ where: { id: questionId }, transaction });
+    const questionExists = await Question.findOne({
+      where: { id: questionId },
+      transaction,
+    });
     const tagExists = await Tag.findOne({ where: { id: tagId }, transaction });
 
     if (questionExists && tagExists) {
-      const questionTag = await QuestionTag.create({
-        question_id: questionId,
-        tag_id: tagId
-      }, {
-        transaction
-      });
+      const questionTag = await QuestionTag.create(
+        {
+          question_id: questionId,
+          tag_id: tagId,
+        },
+        {
+          transaction,
+        }
+      );
       await transaction.commit();
 
       return !!questionTag;
@@ -640,130 +693,118 @@ export const addTagToQuestion = async (
       throw new AppError(
         "question or tag not found",
         500,
-        'Either question or tag does not exist',
+        "Either question or tag does not exist",
         false
       );
     }
   } catch (error: any) {
-    throw new AppError(
-      'Error adding tag to question',
-      500,
-      error,
-      true
-    )
+    throw new AppError("Error adding tag to question", 500, error, true);
   }
-}
+};
 
 export const removeTagFromQuestionById = async (
   tagId: string,
   questionId: string
 ): Promise<boolean> => {
-  logger.info(`Removing tag from question`)
+  logger.info(`Removing tag from question`);
   try {
     const result = await QuestionTag.destroy({
       where: {
         question_id: questionId,
-        tag_id: tagId
+        tag_id: tagId,
       },
-    })
+    });
 
     if (result === 0) {
       return false;
-    };
+    }
 
-    return true
+    return true;
   } catch (error: any) {
-    throw new AppError(
-      'Error removing tag from question',
-      500,
-      error,
-      true
-    )
+    throw new AppError("Error removing tag from question", 500, error, true);
   }
-}
+};
 
 export const addGroupToAssessmentById = async (
   assessmentId: string,
   groupId: string
 ): Promise<boolean> => {
-  logger.info(`Adding group to assessment`)
+  logger.info(`Adding group to assessment`);
   try {
     const assessmentGroup = await AssessmentGroup.create({
       assessment_id: assessmentId,
-      group_id: groupId
+      group_id: groupId,
     });
 
     return !!assessmentGroup;
   } catch (error: any) {
     if (error instanceof UniqueConstraintError) {
       throw new AppError(
-        'Assessment already added to group',
+        "Assessment already added to group",
         409,
-        'Assessment already added to group',
+        "Assessment already added to group",
         false
-      )
+      );
     } else if (error instanceof ForeignKeyConstraintError) {
       throw new AppError(
-        'Either assessment or group does not exist',
+        "Either assessment or group does not exist",
         404,
-        'Either assessment or group does not exist',
+        "Either assessment or group does not exist",
         false
-      )
+      );
     } else {
-      throw new AppError(
-        'Error adding assessment to group',
-        500,
-        error,
-        true
-      )
+      throw new AppError("Error adding assessment to group", 500, error, true);
     }
   }
-}
+};
 
 export const removeGroupFromAssessmentById = async (
   assessmentId: string,
   groupId: string
 ): Promise<boolean> => {
-  logger.info(`Removing group from assessment`)
+  logger.info(`Removing group from assessment`);
   try {
     const result = await AssessmentGroup.destroy({
       where: {
         assessment_id: assessmentId,
-        group_id: groupId
+        group_id: groupId,
       },
-    })
+    });
 
     if (result === 0) {
       return false;
-    };
+    }
 
-    return true
+    return true;
   } catch (error: any) {
     throw new AppError(
-      'Error removing group from assessment',
+      "Error removing group from assessment",
       500,
       error,
       true
-    )
+    );
   }
-}
+};
 
 export const viewAssignedAssessmentsByUserId = async (
   userId: string,
   offset?: number,
   pageSize?: number,
-  sortBy?: Exclude<AssessmentAttribute, 'created_by'>,
-  order?: "ASC" | "DESC",
+  sortBy?: Exclude<AssessmentAttribute, "created_by">,
+  order?: "ASC" | "DESC"
 ): Promise<{
-  rows: Omit<AssessmentAttributes, 'created_by'>[],
-  count: number
+  rows: Omit<AssessmentAttributes, "created_by">[];
+  count: number;
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
-      limit: pageSize,
-      offset: offset,
-      order: [[sortBy, order]]
-    } : {}
+    const findOptions: FindAndCountOptions =
+      (offset !== null || offset !== undefined) && pageSize && sortBy && order
+        ? {
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
+        : {};
 
     const assignedAssessments = await Assessment.findAndCountAll({
       include: [
@@ -773,44 +814,41 @@ export const viewAssignedAssessmentsByUserId = async (
             {
               model: User,
               where: {
-                id: userId
+                id: userId,
               },
               attributes: [],
-              required: true
-            }
+              required: true,
+            },
           ],
           attributes: [],
-          required: true
-        }
+          required: true,
+        },
       ],
-      ...findOptions
+      ...findOptions,
     });
 
     // Convert the data to plain object
     let plainData: {
-      rows: Omit<AssessmentAttributes, 'created_by'>[]
-      count: number
+      rows: Omit<AssessmentAttributes, "created_by">[];
+      count: number;
     } = {
-      rows: assignedAssessments.rows.map((assessment) => assessment.get({ plain: true })),
-      count: assignedAssessments.count
-    }
+      rows: assignedAssessments.rows.map((assessment) =>
+        assessment.get({ plain: true })
+      ),
+      count: assignedAssessments.count,
+    };
 
     return plainData;
   } catch (error: any) {
     if (error instanceof ForeignKeyConstraintError) {
       throw new AppError(
-        'User does not exists',
+        "User does not exists",
         404,
-        'User does not exists',
+        "User does not exists",
         false
-      )
+      );
     }
 
-    throw new AppError(
-      "error getting all tags",
-      500,
-      error,
-      true
-    );
+    throw new AppError("error getting all tags", 500, error, true);
   }
 };

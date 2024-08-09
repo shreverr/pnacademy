@@ -18,6 +18,7 @@ import {
   UpdateQuestionController,
   UpdateTagController,
   viewAllTagsController,
+  viewAssessmentBulkController,
   viewAssessmentController,
   viewAssignedAssessmentsController,
   viewQuestionController,
@@ -48,6 +49,7 @@ import {
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
+import { validateBulkAssessment } from "../lib/validator/assessment/validator";
 
 const router: Router = express.Router();
 
@@ -358,7 +360,6 @@ router.patch(
  *       '500':
  *         description: Internal server error.
  */
-
 router.patch(
   "/option",
   authenticateUser(["canManageAssessment"]),
@@ -435,7 +436,6 @@ router.patch(
  */
 router.delete(
   "/delete",
-
   authenticateUser(["canManageAssessment"]),
   validateAssessmentId,
   validateRequest,
@@ -596,6 +596,14 @@ router.get(
   validateAssessmentGetId,
   validateRequest,
   viewAssessmentController
+);
+
+router.get(
+  "/bulk",
+  authenticateUser(["canManageAssessment"]),
+  validateBulkAssessment,
+  validateRequest,
+  viewAssessmentBulkController
 );
 
 /**
@@ -884,12 +892,13 @@ router.post(
  *         description: Server Error
  */
 router.delete(
-  '/question/remove-tag',
-  authenticateUser(['canManageAssessment']),
+  "/question/remove-tag",
+  authenticateUser(["canManageAssessment"]),
   validateRemoveTagFromQuestion,
   validateRequest,
-  removeTagFromQuestionController,
-)
+  removeTagFromQuestionController
+);
+
 /**
  * @swagger
  * /v1/assessment/add-group:
@@ -985,12 +994,12 @@ router.post(
  *         description: Internal server error.
  */
 router.delete(
-  '/remove-group',
-  authenticateUser(['canManageAssessment']),
+  "/remove-group",
+  authenticateUser(["canManageAssessment"]),
   validateRemoveGroupFromAssessment,
   validateRequest,
-  removeGroupFromAssessmentController,
-)
+  removeGroupFromAssessmentController
+);
 
 /**
  * @swagger
@@ -1107,11 +1116,11 @@ router.delete(
  *         description: Internal server error.
  */
 router.get(
-  '/assigned',
-  authenticateUser(['canAttemptAssessment']),
+  "/assigned",
+  authenticateUser(["canAttemptAssessment"]),
   validateViewAssignedAssessment,
   validateRequest,
   viewAssignedAssessmentsController
-)
+);
 
 export default router;

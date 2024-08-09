@@ -2,21 +2,13 @@ import express from "express";
 import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import {
-  validateGetAllGroups,
-  validateGroup,
-  validateGroupsId,
-  validateGroupUpdate,
   validateNotification,
   validateNotificationDelete,
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import {
-  CreateGroupController,
   CreateNotificationController,
-  deleteGroupController,
   DeleteNotificationController,
-  getAllGroupsController,
-  UpdateGroupController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
 
@@ -60,7 +52,6 @@ const router: Router = express.Router();
  *       '500':
  *         description: Internal server error
  */
-
 router.post(
   "/create-notification",
   authenticateUser(["canManageNotification"]),

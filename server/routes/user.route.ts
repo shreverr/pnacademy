@@ -37,7 +37,6 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";
-import User from "../schema/user/user.schema";
 
 const router: Router = express.Router();
 
@@ -421,7 +420,6 @@ router.post(
  *       '500':
  *         description: Server Error
  */
-
 router.patch(
   "/update",
   authenticateUser(["canManageUser"]),
@@ -614,7 +612,7 @@ router.post(
   authenticateUser(["canManageRole"]),
   validateUserRole,
   validateRequest,
-  updateRoleController,
+  createRoleController
 );
 
 router.patch(
@@ -622,10 +620,8 @@ router.patch(
   authenticateUser(["canManageRole"]),
   validateUserRoleUpdate,
   validateRequest,
-  createRoleController
+  updateRoleController
 );
-
-
 
 /**
  * @swagger
@@ -961,13 +957,13 @@ router.post(
  *               example: Internal server error.
  */
 router.post(
-  '/import',
+  "/import",
   authenticateUser(["canManageUser"]),
-  upload.single('users'),
+  upload.single("users"),
   validateUsersImport,
   validateRequest,
   importUserController
-)
+);
 
 /**
  * @swagger
@@ -1005,10 +1001,10 @@ router.post(
  *                   example: Internal server error occurred while generating the CSV file.
  */
 router.get(
-  '/export',
-  authenticateUser(['canManageUser']),
+  "/export",
+  authenticateUser(["canManageUser"]),
   exportUserController
-)
+);
 
 /**
  * @swagger
@@ -1052,12 +1048,12 @@ router.get(
  *         description: Server error
  */
 router.delete(
-  '/delete', 
-  authenticateUser(['canManageUser']),
+  "/delete",
+  authenticateUser(["canManageUser"]),
   validateUserDelete,
   validateRequest,
   deleteUserController
-)
+);
 
 /**
  * @swagger
@@ -1111,12 +1107,12 @@ router.delete(
  *         description: Server Error
  */
 router.post(
-  '/add-to-group',
-  authenticateUser(['canManageUser', "canManageLocalGroup"]),
+  "/add-to-group",
+  authenticateUser(["canManageUser", "canManageLocalGroup"]),
   validateUserAddToGroup,
   validateRequest,
-  UserAddToGroupController,
-)
+  UserAddToGroupController
+);
 
 /**
  * @swagger
@@ -1165,12 +1161,12 @@ router.post(
  *         description: Internal Server Error - Unexpected server error occurred.
  */
 router.delete(
-  '/remove-from-group',
-  authenticateUser(['canManageUser', 'canManageLocalGroup']),
+  "/remove-from-group",
+  authenticateUser(["canManageUser", "canManageLocalGroup"]),
   validateRemoveUserFromGroup,
   validateRequest,
-  removeUsersFromGroupController,
-)
+  removeUsersFromGroupController
+);
 
 /**
  * @swagger
@@ -1280,11 +1276,11 @@ router.delete(
  *         description: Server Error
  */
 router.get(
-  '/by-group',
-  authenticateUser(['canManageUser', 'canManageLocalGroup']),
+  "/by-group",
+  authenticateUser(["canManageUser", "canManageLocalGroup"]),
   validateGetUsersByGroup,
   validateRequest,
-  getUsersByGroupController,
-)
+  getUsersByGroupController
+);
 
 export default router;
