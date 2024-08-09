@@ -34,7 +34,7 @@ import jwt, { Jwt } from "jsonwebtoken";
 import { UUID } from "crypto";
 import logger from "../../config/logger";
 import { csvToObjectArray, objectArrayToCSV } from "../../utils/csvParser";
-import { deleteFileFromDisk } from "../../utils/file";
+import { deleteFileFromDisk } from "../../lib/file";
 
 export const viewUserDetails = async (
   userId: string

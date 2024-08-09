@@ -13,14 +13,31 @@ export const CreateNotificationController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const notification = await createNotification({
+    const notificationArgs: {
+      description: string;
+      title: string;
+      image?: Express.Multer.File;
+      file?: Express.Multer.File;
+    } = {
       description: req.body.description,
       title: req.body.title,
-      image_url: req.body.image_url,
-      file_url: req.body.file_url,
-    });
+    };
 
+    // Expicitly type the files object
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    
+    if (files  && (files['image'])) {
+      notificationArgs.image = files["image"][0];
+    }
+
+    if (files  && (files['file'])) {
+      notificationArgs.file = files["file"][0];
+    }
+    
+    const notification = await createNotification(notificationArgs);
+    
     return res.status(201).json({
+      status: "success",
       message: "Notification created successfully",
       data: notification,
     });

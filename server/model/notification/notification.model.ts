@@ -2,36 +2,37 @@ import { FindAndCountOptions, UniqueConstraintError } from 'sequelize'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
-import Notification from '../../schema/group/notification.schema'
+import Notification, { NotificationAttributes } from '../../schema/group/notification.schema'
 import { type GroupData } from '../../types/group.types'
-import { groupAttributes, type NotificationData } from '../../types/notification.types'
+import { groupAttributes } from '../../types/notification.types'
 
 export const createNotificationInDB = async (notification: {
   id: string
   description: string
   title: string
-  image_url: string | null
-  file_url: string | null
-}): Promise<NotificationData | null> => {
+  image_key: string | null
+  file_key: string | null
+}): Promise<NotificationAttributes> => {
   try {
     const notificationData = await Notification.create(
       {
         id: notification.id,
         description: notification.description,
         title: notification.title,
-        image_url: notification.image_url,
-        file_url: notification.file_url
+        image_key: notification.image_key,
+        file_key: notification.file_key
       },
       {
-        raw: true
+        raw: true,
       }
     )
-    return notificationData
-  } catch (error) {
+    
+    return notificationData.dataValues
+  } catch (error: any) {
     throw new AppError(
       'error creating notification',
       500,
-      'Something went wrong',
+      error,
       false
     )
   }
@@ -39,7 +40,7 @@ export const createNotificationInDB = async (notification: {
 
 export const getnotificationById = async (
   id: string
-): Promise<NotificationData | null> => {
+): Promise<NotificationAttributes | null> => {
   try {
     logger.info(`Getting notification by id ${id}`)
     const notification = await Notification.findOne({

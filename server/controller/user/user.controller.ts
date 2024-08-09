@@ -23,7 +23,7 @@ import {
   viewUserDetails,
 } from "../../service/user/user.service";
 import { roleAttributes, userAttributes } from "../../types/user.types";
-import { deleteFileFromDisk } from "../../utils/file";
+import { deleteFileFromDisk } from "../../lib/file";
 
 export const registerUserController: RequestHandler = async (
   req: Request,
