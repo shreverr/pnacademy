@@ -269,6 +269,64 @@ export const createRoleInDB = async (
   }
 };
 
+export const updateRoleInDB = async (role :{
+  id: string;
+  name: string | null;
+  canManageAssessment: boolean | null;
+  canManageUser: boolean | null;
+  canManageRole: boolean | null;
+  canManageNotification: boolean | null;
+  canManageLocalGroup: boolean | null;
+  canManageReports: boolean | null;
+  canAttemptAssessment: boolean | null;
+  canViewReport: boolean | null;
+  canManageMyAccount: boolean | null;
+  canViewNotification: boolean | null;
+}): Promise<RoleData | null> => {
+  logger.info(`Updating role: ${role.id}`);
+  try {
+    const updateData: any = {
+      name: role.name ?? undefined,
+      canManageAssessment: role.canManageAssessment ?? undefined,
+      canManageUser: role.canManageUser ?? undefined,
+      canManageRole: role.canManageRole ?? undefined,
+      canManageNotification: role.canManageNotification ?? undefined,
+      canManageLocalGroup: role.canManageLocalGroup ?? undefined,
+      canManageReports: role.canManageReports ?? undefined,
+      canAttemptAssessment: role.canAttemptAssessment ?? undefined,
+      canViewReport: role.canViewReport ?? undefined,
+      canManageMyAccount: role.canManageMyAccount ?? undefined,
+      canViewNotification: role.canViewNotification ?? undefined,
+    };
+
+    Object.keys(updateData).forEach(
+      (key) => updateData[key] === undefined && delete updateData[key]
+    );
+
+    if (Object.keys(updateData).length === 0) {
+      return null;
+    }
+
+    const [_, [updatedRole]] = await Role.update(updateData, {
+      where: {
+        id: role.id,
+      },
+      returning: true,
+    });
+
+    return updatedRole.dataValues as RoleData;
+  } catch (error) {
+    throw new AppError(
+      "error updating role",
+      500,
+      "Something went wrong",
+      false
+    );
+  }
+};
+
+
+
 export const getRoleById = async (id: string): Promise<RoleData | null> => {
   logger.info(`Fetching role by id: ${id}`);
   try {

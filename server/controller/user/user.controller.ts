@@ -16,6 +16,7 @@ import {
   newAccessToken,
   registerUser,
   removeUsersFromGroup,
+  updateRole,
   updateUser,
   viewAllRoles,
   viewAllUsers,
@@ -85,7 +86,7 @@ export const viewAllUsersController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const UpdateUserController: RequestHandler = async (
   req: Request,
@@ -163,6 +164,36 @@ export const createRoleController: RequestHandler = async (
   }
 };
 
+export const updateRoleController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const updatedRole = await updateRole({
+      id: req.body.id,
+      name: req.body.name,
+      canManageAssessment: req.body.permissions.canManageAssessment,
+      canManageUser: req.body.permissions.canManageUser,
+      canManageRole: req.body.permissions.canManageRole,
+      canManageNotification: req.body.permissions.canManageNotification,
+      canManageLocalGroup: req.body.permissions.canManageLocalGroup,
+      canManageReports: req.body.permissions.canManageReports,
+      canAttemptAssessment: req.body.permissions.canAttemptAssessment,
+      canViewReport: req.body.permissions.canViewReport,
+      canManageMyAccount: req.body.permissions.canManageMyAccount,
+      canViewNotification: req.body.permissions.canViewNotification,
+    });
+
+    return res.status(201).json({
+      message: "Role Updated successfully",
+      data: updatedRole,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const newAccessTokenController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -217,7 +248,7 @@ export const viewAllRolesController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const importUserController: RequestHandler = async (
   req: Request,
@@ -225,7 +256,10 @@ export const importUserController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const importResult = await importUsers(req.file!.path, req.body.updateExisting);
+    const importResult = await importUsers(
+      req.file!.path,
+      req.body.updateExisting
+    );
 
     return res.status(200).json({
       message: "success",
@@ -233,7 +267,7 @@ export const importUserController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-} 
+};
 
 export const exportUserController: RequestHandler = async (
   req: Request,
@@ -253,7 +287,7 @@ export const exportUserController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const deleteUserController: RequestHandler = async (
   req: Request,
@@ -264,12 +298,14 @@ export const deleteUserController: RequestHandler = async (
     const allUsersDeleted = await deleteUsers(req.body.userIds);
 
     return res.status(200).json({
-      message: allUsersDeleted ? "Users Deleted successfully" :  "Some users deleted"
+      message: allUsersDeleted
+        ? "Users Deleted successfully"
+        : "Some users deleted",
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const UserAddToGroupController: RequestHandler = async (
   req: Request,
@@ -277,19 +313,16 @@ export const UserAddToGroupController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await addUsersToGroup(
-      req.body.userIds,
-      req.body.groupId
-    );
+    await addUsersToGroup(req.body.userIds, req.body.groupId);
 
     return res.status(200).json({
       status: "success",
-      message: "Users Added successfully" 
+      message: "Users Added successfully",
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const removeUsersFromGroupController: RequestHandler = async (
   req: Request,
@@ -297,19 +330,16 @@ export const removeUsersFromGroupController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await removeUsersFromGroup(
-      req.body.userIds,
-      req.body.groupId
-    );
+    await removeUsersFromGroup(req.body.userIds, req.body.groupId);
 
     return res.status(200).json({
       status: "success",
-      message: "Users removed successfully" 
+      message: "Users removed successfully",
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const getUsersByGroupController: RequestHandler = async (
   req: Request,
@@ -327,9 +357,9 @@ export const getUsersByGroupController: RequestHandler = async (
 
     return res.status(200).json({
       status: "success",
-      data: users 
+      data: users,
     });
   } catch (error) {
     next(error);
   }
-} 
+};

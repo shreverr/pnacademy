@@ -11,6 +11,7 @@ import {
   newAccessTokenController,
   registerUserController,
   removeUsersFromGroupController,
+  updateRoleController,
   UpdateUserController,
   UserAddToGroupController,
   viewAllRolesController,
@@ -29,6 +30,7 @@ import {
   validateUserRegister,
   validateUserRole,
   validateUserRoleDelete,
+  validateUserRoleUpdate,
   validateUsersImport,
   validateUserUpdate,
 } from "../lib/validator";
@@ -612,8 +614,18 @@ router.post(
   authenticateUser(["canManageRole"]),
   validateUserRole,
   validateRequest,
+  updateRoleController,
+);
+
+router.patch(
+  "/role",
+  authenticateUser(["canManageRole"]),
+  validateUserRoleUpdate,
+  validateRequest,
   createRoleController
 );
+
+
 
 /**
  * @swagger

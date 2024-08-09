@@ -15,8 +15,16 @@ import {
   addUsersToGroupById,
   removeUsersFromGroupById,
   getAllUsersByGroupId,
+  updateRoleInDB,
 } from "../../model/user/user.model";
-import { RoleData, UserData, authTokens, device, roleAttributes, userAttributes } from "../../types/user.types";
+import {
+  RoleData,
+  UserData,
+  authTokens,
+  device,
+  roleAttributes,
+  userAttributes,
+} from "../../types/user.types";
 import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
@@ -28,7 +36,9 @@ import logger from "../../config/logger";
 import { csvToObjectArray, objectArrayToCSV } from "../../utils/csvParser";
 import { deleteFileFromDisk } from "../../utils/file";
 
-export const viewUserDetails = async (userId: string): Promise<UserData | null> => {
+export const viewUserDetails = async (
+  userId: string
+): Promise<UserData | null> => {
   const existingUserData = await getUserById(userId);
   if (!existingUserData)
     throw new AppError(
@@ -45,15 +55,15 @@ export const viewAllUsers = async (
   pageStr?: string,
   pageSizeStr?: string,
   sortBy?: userAttributes,
-  order?: "ASC" | "DESC",
+  order?: "ASC" | "DESC"
 ): Promise<{
-  users: UserData[],
-  totalPages: number,
+  users: UserData[];
+  totalPages: number;
 }> => {
-  const page = parseInt(pageStr ?? '1');
-  const pageSize = parseInt(pageSizeStr ?? '10');
-  sortBy = sortBy ?? 'first_name';
-  order = order ?? 'ASC';
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "first_name";
+  order = order ?? "ASC";
 
   const offset = (page - 1) * pageSize;
 
@@ -62,7 +72,7 @@ export const viewAllUsers = async (
     pageSize,
     sortBy,
     order
-  )
+  );
 
   if (!allUsersData) {
     throw new AppError(
@@ -77,7 +87,7 @@ export const viewAllUsers = async (
 
   return {
     users: allUsersData,
-    totalPages: totalPages
+    totalPages: totalPages,
   };
 };
 
@@ -206,17 +216,17 @@ export const loginUser = async (user: {
     );
 
   const grantedPermissions = [
-    userRole?.canManageAssessment ? 'canManageAssessment' : '',
-    userRole?.canManageUser ? 'canManageUser' : '',
-    userRole?.canManageRole ? 'canManageRole' : '',
-    userRole?.canManageNotification ? 'canManageNotification' : '',
-    userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
-    userRole?.canManageReports ? 'canManageReports' : '',
-    userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
-    userRole?.canViewReport ? 'canViewReport' : '',
-    userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
-    userRole?.canViewNotification ? 'canViewNotification' : '',
-  ].filter(permission => permission !== '')
+    userRole?.canManageAssessment ? "canManageAssessment" : "",
+    userRole?.canManageUser ? "canManageUser" : "",
+    userRole?.canManageRole ? "canManageRole" : "",
+    userRole?.canManageNotification ? "canManageNotification" : "",
+    userRole?.canManageLocalGroup ? "canManageLocalGroup" : "",
+    userRole?.canManageReports ? "canManageReports" : "",
+    userRole?.canAttemptAssessment ? "canAttemptAssessment" : "",
+    userRole?.canViewReport ? "canViewReport" : "",
+    userRole?.canManageMyAccount ? "canManageMyAccount" : "",
+    userRole?.canViewNotification ? "canViewNotification" : "",
+  ].filter((permission) => permission !== "");
 
   const accessToken = jwt.sign(
     {
@@ -240,7 +250,12 @@ export const loginUser = async (user: {
     }
   );
 
-  if (!(await updateOrSaveRefreshToken({ userId: existingUser.id, refreshToken }, user.deviceType)))
+  if (
+    !(await updateOrSaveRefreshToken(
+      { userId: existingUser.id, refreshToken },
+      user.deviceType
+    ))
+  )
     throw new AppError(
       "Internal server error",
       500,
@@ -250,80 +265,74 @@ export const loginUser = async (user: {
 
   return {
     accessToken,
-    refreshToken
-  }
-}
+    refreshToken,
+  };
+};
 
 export const newAccessToken = async (refreshToken: string): Promise<string> => {
-  let userId: string = ''
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, (err: any, user: any) => {
-    if (err) {
-      logger.error(`Error verifying accesss token: ${err}`)
-      throw new AppError(
-        "Token not valid",
-        commonErrorsDictionary.forbidden.httpCode,
-        "Token not valid",
-        false
-      )
+  let userId: string = "";
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET as string,
+    (err: any, user: any) => {
+      if (err) {
+        logger.error(`Error verifying accesss token: ${err}`);
+        throw new AppError(
+          "Token not valid",
+          commonErrorsDictionary.forbidden.httpCode,
+          "Token not valid",
+          false
+        );
+      }
+
+      userId = user.userId;
     }
+  );
 
-    userId = user.userId
-  })
-
-  const existingUser = await getUserById(userId)
+  const existingUser = await getUserById(userId);
   if (!existingUser)
-    throw new AppError(
-      "User not found",
-      401,
-      "User not found",
-      false
-    )
-
+    throw new AppError("User not found", 401, "User not found", false);
 
   if (!existingUser.role_id)
-    throw new AppError(
-      "Role not assigned",
-      401,
-      "Role not assigned",
-      false
-    )
+    throw new AppError("Role not assigned", 401, "Role not assigned", false);
 
-  const userRole = await getRoleById(existingUser.role_id)
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
+  const userRole = await getRoleById(existingUser.role_id);
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
   if (!accessTokenSecret)
     throw new AppError(
       "Internal server error",
       500,
       "Access token secret not found",
       false
-    )
+    );
 
   const grantedPermissions = [
-    userRole?.canManageAssessment ? 'canManageAssessment' : '',
-    userRole?.canManageUser ? 'canManageUser' : '',
-    userRole?.canManageRole ? 'canManageRole' : '',
-    userRole?.canManageNotification ? 'canManageNotification' : '',
-    userRole?.canManageLocalGroup ? 'canManageLocalGroup' : '',
-    userRole?.canManageReports ? 'canManageReports' : '',
-    userRole?.canAttemptAssessment ? 'canAttemptAssessment' : '',
-    userRole?.canViewReport ? 'canViewReport' : '',
-    userRole?.canManageMyAccount ? 'canManageMyAccount' : '',
-    userRole?.canViewNotification ? 'canViewNotification' : '',
-  ].filter(permission => permission !== '')
+    userRole?.canManageAssessment ? "canManageAssessment" : "",
+    userRole?.canManageUser ? "canManageUser" : "",
+    userRole?.canManageRole ? "canManageRole" : "",
+    userRole?.canManageNotification ? "canManageNotification" : "",
+    userRole?.canManageLocalGroup ? "canManageLocalGroup" : "",
+    userRole?.canManageReports ? "canManageReports" : "",
+    userRole?.canAttemptAssessment ? "canAttemptAssessment" : "",
+    userRole?.canViewReport ? "canViewReport" : "",
+    userRole?.canManageMyAccount ? "canManageMyAccount" : "",
+    userRole?.canViewNotification ? "canViewNotification" : "",
+  ].filter((permission) => permission !== "");
 
-  const accessToken = jwt.sign({
-    userId: existingUser.id,
-    roleId: existingUser.role_id,
-    permissions: grantedPermissions
-  },
+  const accessToken = jwt.sign(
+    {
+      userId: existingUser.id,
+      roleId: existingUser.role_id,
+      permissions: grantedPermissions,
+    },
     accessTokenSecret,
     {
-      expiresIn: '15m'
+      expiresIn: "15m",
     }
-  )
+  );
 
-  return accessToken
-}
+  return accessToken;
+};
 
 export const createRole = async (role: {
   name: string;
@@ -356,6 +365,47 @@ export const createRole = async (role: {
   return roleData;
 };
 
+export const updateRole = async (role: {
+  id: string;
+  name: string | null;
+  canManageAssessment: boolean | null;
+  canManageUser: boolean | null;
+  canManageRole: boolean | null;
+  canManageNotification: boolean | null;
+  canManageLocalGroup: boolean | null;
+  canManageReports: boolean | null;
+  canAttemptAssessment: boolean | null;
+  canViewReport: boolean | null;
+  canManageMyAccount: boolean | null;
+  canViewNotification: boolean | null;
+}): Promise<RoleData | null> => {
+  const existingRole = await getRoleById(role.id);
+  if (!existingRole)
+    throw new AppError(
+      "Role not found",
+      404,
+      "Role with this id does not exist",
+      false
+    );
+
+  const updatedRole = await updateRoleInDB({
+    id: role.id,
+    name: role.name,
+    canManageAssessment: role.canManageAssessment,
+    canManageUser: role.canManageUser,
+    canManageRole: role.canManageRole,
+    canManageNotification: role.canManageNotification,
+    canManageLocalGroup: role.canManageLocalGroup,
+    canManageReports: role.canManageReports,
+    canAttemptAssessment: role.canAttemptAssessment,
+    canViewReport: role.canViewReport,
+    canManageMyAccount: role.canManageMyAccount,
+    canViewNotification: role.canViewNotification,
+  });
+
+  return updatedRole;
+};
+
 export const deleteRole = async (
   roleIds: { roleId: string }[]
 ): Promise<boolean> => {
@@ -376,15 +426,15 @@ export const viewAllRoles = async (
   pageStr?: string,
   pageSizeStr?: string,
   sortBy?: roleAttributes,
-  order?: "ASC" | "DESC",
+  order?: "ASC" | "DESC"
 ): Promise<{
-  roles: RoleData[],
-  totalPages: number,
+  roles: RoleData[];
+  totalPages: number;
 }> => {
-  const page = parseInt(pageStr ?? '1');
-  const pageSize = parseInt(pageSizeStr ?? '10');
-  sortBy = sortBy ?? 'name';
-  order = order ?? 'ASC';
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "name";
+  order = order ?? "ASC";
 
   const offset = (page - 1) * pageSize;
 
@@ -393,7 +443,7 @@ export const viewAllRoles = async (
     pageSize,
     sortBy,
     order
-  )
+  );
 
   if (!allRolesData) {
     throw new AppError(
@@ -408,7 +458,7 @@ export const viewAllRoles = async (
 
   return {
     roles: allRolesData,
-    totalPages: totalPages
+    totalPages: totalPages,
   };
 };
 
@@ -416,8 +466,8 @@ export const importUsers = async (
   filePath: string,
   updateExisting: boolean = false
 ): Promise<boolean> => {
-  const parsedData = await csvToObjectArray<UserData>(filePath)
-  logger.debug(parsedData)
+  const parsedData = await csvToObjectArray<UserData>(filePath);
+  logger.debug(parsedData);
 
   const result = createBulkUsers(parsedData, updateExisting);
   deleteFileFromDisk(filePath);
@@ -428,7 +478,7 @@ export const importUsers = async (
 export const exportUsers = async (): Promise<string> => {
   const result = await getAllUsers();
   const convetedCSVPath = objectArrayToCSV<UserData>(result.rows);
-  
+
   return convetedCSVPath;
 };
 
@@ -470,25 +520,20 @@ export const getUsersInGroup = async (
   pageStr?: string,
   pageSizeStr?: string,
   sortBy?: userAttributes,
-  order?: "ASC" | "DESC",
+  order?: "ASC" | "DESC"
 ): Promise<{
-  users: UserData[],
-  totalPages: number,
+  users: UserData[];
+  totalPages: number;
 }> => {
-  const page = parseInt(pageStr ?? '1');
-  const pageSize = parseInt(pageSizeStr ?? '10');
-  sortBy = sortBy ?? 'first_name';
-  order = order ?? 'ASC';
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "first_name";
+  order = order ?? "ASC";
 
   const offset = (page - 1) * pageSize;
 
-  const { rows: allUsersData, count: allUsersCount } = await getAllUsersByGroupId(
-    groupId,
-    offset,
-    pageSize,
-    sortBy,
-    order
-  )
+  const { rows: allUsersData, count: allUsersCount } =
+    await getAllUsersByGroupId(groupId, offset, pageSize, sortBy, order);
 
   if (!allUsersData) {
     throw new AppError(
@@ -503,6 +548,6 @@ export const getUsersInGroup = async (
 
   return {
     users: allUsersData,
-    totalPages: totalPages
+    totalPages: totalPages,
   };
 };

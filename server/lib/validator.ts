@@ -243,6 +243,67 @@ export const validateUserRole = [
     .isBoolean()
     .withMessage("canViewNotification must be a boolean"),
 ];
+
+export const validateUserRoleUpdate = [
+  check("roleId")
+    .not()
+    .isEmpty()
+    .withMessage("RoleId cannot be empty")
+    .isUUID(4)
+    .withMessage("RoleId should be a valid UUID v4"),
+
+  check("name")
+    .optional()
+    .isLength({ min: 2 })
+    .escape()
+    .withMessage("Role name must be more than 2 characters long"),
+
+  check("permissions.canManageAssessment")
+    .optional()
+    .isBoolean()
+    .withMessage("canManageAssessment must be a boolean"),
+
+  check("permissions.canManageRole")
+    .optional()
+    .isBoolean()
+    .withMessage("canManageRole must be a boolean"),
+
+  check("permissions.canManageNotification")
+    .optional()
+    .isBoolean()
+    .withMessage("canManageNotification must be a boolean"),
+
+  check("permissions.canManageLocalGroup")
+    .optional()
+    .isBoolean()
+    .withMessage("canManageLocalGroup must be a boolean"),
+
+  check("permissions.canManageReports")
+    .optional()
+    .isBoolean()
+    .withMessage("canManageReports must be a boolean"),
+
+  check("permissions.canAttemptAssessment")
+    .optional()
+    .isBoolean()
+    .withMessage("canAttemptAssessment must be a boolean"),
+
+  check("permissions.canViewReport")
+    .optional()
+    .isBoolean()
+    .withMessage("canViewReport must be a boolean"),
+
+  check("permissions.canManageMyAccount")
+    .optional()
+    .isBoolean()
+    .withMessage("canManageMyAccount must be a boolean"),
+    
+  check("permissions.canViewNotification")
+    .optional()
+    .isBoolean()
+    .withMessage("canViewNotification must be a boolean"),
+];
+
 export const validateUserRoleDelete = [
   check("roleIds.*.roleId")
     .not()
