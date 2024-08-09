@@ -74,3 +74,18 @@ export const validateGetAllNotifications = [
     ),
 ];
 
+export const validateAddGroupToNotification = [
+  check("notificationId")
+    .not()
+    .isEmpty()
+    .withMessage("notificationId cannot be empty")
+    .isUUID(4)
+    .withMessage("notificationId should be a valid UUID v4"),
+
+  check("groupId")
+    .not()
+    .isEmpty()
+    .withMessage("groupId cannot be empty")
+    .isUUID(4)
+    .withMessage("groupId should be a valid UUID v4"),
+];

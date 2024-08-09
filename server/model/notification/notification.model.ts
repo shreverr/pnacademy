@@ -1,10 +1,11 @@
-import { FindAndCountOptions, UniqueConstraintError } from 'sequelize'
+import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from 'sequelize'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
 import Notification, { NotificationAttributes } from '../../schema/group/notification.schema'
 import { type GroupData } from '../../types/group.types'
 import { groupAttributes, NotificationSortBy } from '../../types/notification.types'
+import NotificationGroup from '../../schema/junction/notificationGroup.schema'
 
 export const createNotificationInDB = async (notification: {
   id: string
@@ -284,5 +285,38 @@ export const getAllNotifications = async (
       "Something went wrong",
       true
     );
+  }
+};
+
+export const addGroupToNotificationById = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  logger.info(`Adding group to notification`);
+  try {
+    const notificationGroup = await NotificationGroup.create({
+      notification_id: notificationId,
+      group_id: groupId,
+    });
+
+    return !!notificationGroup;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        "notification already added to group",
+        409,
+        "notification already added to group",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        "Either notification or group does not exist",
+        404,
+        "Either notification or group does not exist",
+        false
+      );
+    } else {
+      throw new AppError("Error adding notification to group", 500, error, true);
+    }
   }
 };

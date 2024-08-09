@@ -3,6 +3,7 @@ import { AppError } from "../../lib/appError";
 import { type UUID } from "crypto";
 
 import {
+  addGroupToNotificationById,
   createGroupInDB,
   createNotificationInDB,
   deleteGroupsById,
@@ -251,4 +252,16 @@ export const viewAllNotifications = async (
     notifications: notificationsData,
     totalPages: totalPages,
   };
+};
+
+export const addGroupToNotification = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  const isGroupAddedToAssessment = await addGroupToNotificationById(
+    notificationId,
+    groupId
+  );
+
+  return isGroupAddedToAssessment;
 };

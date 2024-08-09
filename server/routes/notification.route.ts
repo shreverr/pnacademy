@@ -7,12 +7,13 @@ import {
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import {
+  addGroupToNotificationController,
   CreateNotificationController,
   DeleteNotificationController,
   getAllNotificationsController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
-import { validateGetAllNotifications } from "../lib/validator/notification/validator";
+import { validateAddGroupToNotification, validateGetAllNotifications } from "../lib/validator/notification/validator";
 
 const router: Router = express.Router();
 
@@ -245,6 +246,55 @@ router.get(
   validateGetAllNotifications,
   validateRequest,
   getAllNotificationsController
+);
+
+/**
+ * @swagger
+ * /v1/notification/add-group:
+ *   post:
+ *     summary: Add a notification to a group
+ *     tags:
+ *       - Notification
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationId:
+ *                 type: string
+ *                 description: The unique identifier of the notification.
+ *                 example: 59cfd460-6ded-46e6-a269-b2747065f76c
+ *               groupId:
+ *                 type: string
+ *                 description: The unique identifier of the group.
+ *                 example: d579acc4-4936-4490-9cd5-15ddceaf0413
+ *     responses:
+ *       '200':
+ *         description: Notification successfully added to the group.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Notification or Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.post(
+  "/add-group",
+  authenticateUser(["canManageNotification", "canManageLocalGroup"]),
+  validateAddGroupToNotification,
+  validateRequest,
+  addGroupToNotificationController
 );
 
 export default router;
