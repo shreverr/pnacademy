@@ -18,6 +18,7 @@ import {
   UpdateQuestionController,
   UpdateTagController,
   viewAllTagsController,
+  viewAssessmentBulkController,
   viewAssessmentController,
   viewAssignedAssessmentsController,
   viewQuestionController,
@@ -48,6 +49,7 @@ import {
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
+import { validateBulkAssessment } from "../lib/validator/assessment/validator";
 
 const router: Router = express.Router();
 
@@ -358,7 +360,6 @@ router.patch(
  *       '500':
  *         description: Internal server error.
  */
-
 router.patch(
   "/option",
   authenticateUser(["canManageAssessment"]),
@@ -435,7 +436,6 @@ router.patch(
  */
 router.delete(
   "/delete",
-
   authenticateUser(["canManageAssessment"]),
   validateAssessmentId,
   validateRequest,
@@ -596,6 +596,78 @@ router.get(
   validateAssessmentGetId,
   validateRequest,
   viewAssessmentController
+);
+
+/**
+ * @openapi
+ * /v1/assessment/bulk:
+ *   get:
+ *     tags:
+ *       - Assessment View Controller
+ *     summary: Retrieve multiple assessments
+ *     description: Endpoint to retrieve multiple assessments with pagination, sorting, and filtering options.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Page number for pagination (optional, default is 1)
+ *       - name: pageSize
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Number of items per page (optional)
+ *       - name: sortBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [id, name, description, is_active, start_at, end_at, duration, createdAt, updatedAt]
+ *         description: Field to sort the results by (optional)
+ *       - name: order
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Sort order (optional)
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 assessments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   description: Array of assessment objects.
+ *                 totalCount:
+ *                   type: integer
+ *                   description: Total number of assessments matching the query.
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Current page number.
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages.
+ *       '400':
+ *         description: Bad request. Invalid parameters provided.
+ *       '401':
+ *         description: Unauthorized. User doesn't have the required permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/bulk",
+  authenticateUser(["canManageAssessment"]),
+  validateBulkAssessment,
+  validateRequest,
+  viewAssessmentBulkController
 );
 
 /**
@@ -884,12 +956,13 @@ router.post(
  *         description: Server Error
  */
 router.delete(
-  '/question/remove-tag',
-  authenticateUser(['canManageAssessment']),
+  "/question/remove-tag",
+  authenticateUser(["canManageAssessment"]),
   validateRemoveTagFromQuestion,
   validateRequest,
-  removeTagFromQuestionController,
-)
+  removeTagFromQuestionController
+);
+
 /**
  * @swagger
  * /v1/assessment/add-group:
@@ -985,12 +1058,12 @@ router.post(
  *         description: Internal server error.
  */
 router.delete(
-  '/remove-group',
-  authenticateUser(['canManageAssessment']),
+  "/remove-group",
+  authenticateUser(["canManageAssessment"]),
   validateRemoveGroupFromAssessment,
   validateRequest,
-  removeGroupFromAssessmentController,
-)
+  removeGroupFromAssessmentController
+);
 
 /**
  * @swagger
@@ -1107,11 +1180,11 @@ router.delete(
  *         description: Internal server error.
  */
 router.get(
-  '/assigned',
-  authenticateUser(['canAttemptAssessment']),
+  "/assigned",
+  authenticateUser(["canAttemptAssessment"]),
   validateViewAssignedAssessment,
   validateRequest,
   viewAssignedAssessmentsController
-)
+);
 
 export default router;

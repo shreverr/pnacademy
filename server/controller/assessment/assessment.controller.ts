@@ -17,6 +17,7 @@ import {
   updateQuestion,
   updateTag,
   viewAllTags,
+  viewAssessmentBulk,
   viewAssessmentDetails,
   viewAssignedAssessments,
   viewQuestionDetails,
@@ -28,7 +29,10 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { AssessmentAttribute, TagAttribute } from "../../types/assessment.types";
+import {
+  AssessmentAttribute,
+  TagAttribute,
+} from "../../types/assessment.types";
 import Assessment from "../../schema/assessment/assessment.schema";
 
 export const CreateAssessmentController: RequestHandler = async (
@@ -297,6 +301,28 @@ export const viewAssessmentController: RequestHandler = async (
   }
 };
 
+export const viewAssessmentBulkController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessments = await viewAssessmentBulk(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as AssessmentAttribute,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(201).json({
+      message: "success",
+      data: assessments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const viewQuestionController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -350,7 +376,7 @@ export const viewAllTagsController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const addTagController: RequestHandler = async (
   req: Request,
@@ -358,10 +384,7 @@ export const addTagController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await addTag(
-      req.body.questionId,
-      req.body.tagId,
-    );
+    await addTag(req.body.questionId, req.body.tagId);
 
     return res.status(201).json({
       status: "success",
@@ -377,19 +400,16 @@ export const removeTagFromQuestionController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await removeTagFromQuestion(
-      req.body.tagId,
-      req.body.questionId
-    );
+    await removeTagFromQuestion(req.body.tagId, req.body.questionId);
 
     return res.status(200).json({
       status: "success",
-      message: "Tag removed successfully"
+      message: "Tag removed successfully",
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const addGroupToAssessmentController: RequestHandler = async (
   req: Request,
@@ -397,10 +417,7 @@ export const addGroupToAssessmentController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await addGroupToAssessment(
-      req.body.assessmentId,
-      req.body.groupId,
-    );
+    await addGroupToAssessment(req.body.assessmentId, req.body.groupId);
 
     return res.status(201).json({
       status: "success",
@@ -416,19 +433,16 @@ export const removeGroupFromAssessmentController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await removeGroupFromAssessment(
-      req.body.assessmentId,
-      req.body.groupId,
-    );
+    await removeGroupFromAssessment(req.body.assessmentId, req.body.groupId);
 
     return res.status(200).json({
       status: "success",
-      message: "Group removed successfully"
+      message: "Group removed successfully",
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const viewAssignedAssessmentsController: RequestHandler = async (
   req: Request,
@@ -440,7 +454,7 @@ export const viewAssignedAssessmentsController: RequestHandler = async (
       req.user.userId as string,
       req.query.page as string,
       req.query.pageSize as string,
-      req.query.sortBy as Exclude<AssessmentAttribute, 'created_by'>,
+      req.query.sortBy as Exclude<AssessmentAttribute, "created_by">,
       req.query.order as "ASC" | "DESC"
     );
 
@@ -451,4 +465,4 @@ export const viewAssignedAssessmentsController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
