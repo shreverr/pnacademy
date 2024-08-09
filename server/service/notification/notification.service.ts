@@ -13,25 +13,90 @@ import {
   getnotificationById,
   updateGroupInDB,
 } from "../../model/notification/notification.model";
-import { groupAttributes, NotificationData } from "../../types/notification.types";
+import { groupAttributes, NotificationAttributesWithOptionalImageAndFileUrl } from "../../types/notification.types";
 import { GroupData } from "../../types/group.types";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
+import { deleteFileFromDisk, deleteFileFromS3, uploadFileToS3 } from "../../lib/file";
+import path from "path";
+import { generatePresignedUrl } from "../../utils/s3";
+import logger from "../../config/logger";
 
 export const createNotification = async (notification: {
   description: string;
   title: string;
-  image_url: string | null;
-  file_url: string | null;
-}): Promise<NotificationData | null> => {
-  
-  const notificationData = await createNotificationInDB({
-    id: uuid(),
-    title: notification.title,
-    description: notification.description,
-    image_url: notification.image_url || null,
-    file_url: notification.file_url || null,
-  });
-  return notificationData;
+  image?: Express.Multer.File;
+  file?: Express.Multer.File;
+}): Promise<NotificationAttributesWithOptionalImageAndFileUrl | undefined> => {
+  let notificationImageKey: string | null = null;
+  let notificationFileKey: string | null = null;
+  try {
+    if (notification.image) {
+      notificationImageKey = `notification-images/${uuid()}${path.extname(notification.image.path)}`
+
+      await uploadFileToS3(
+        notification.image.path,
+        notificationImageKey,
+        'image'
+      );
+
+      deleteFileFromDisk(notification.image.path)
+    }
+
+    if (notification.file) {
+      notificationFileKey = `notification-files/${uuid()}${path.extname(notification.file.path)}`
+
+      await uploadFileToS3(
+        notification.file.path,
+        notificationFileKey,
+        'other'
+      );
+
+      deleteFileFromDisk(notification.file.path)
+    }
+
+    const notificationDataInDB = await createNotificationInDB({
+      id: uuid(),
+      title: notification.title,
+      description: notification.description,
+      image_key: notificationImageKey,
+      file_key: notificationFileKey,
+    });
+
+    let notificationData: any = notificationDataInDB;
+    delete notificationData.image_key;
+    delete notificationData.file_key;
+    
+    logger.info(notificationData)
+
+    if (notificationImageKey) {
+      notificationData.image_url = await generatePresignedUrl(notificationImageKey, 60 * 60)
+    }
+
+    if (notificationFileKey) {
+      notificationData.file_url = await generatePresignedUrl(notificationFileKey, 60 * 60)
+    }
+
+    return notificationData;
+  } catch (error: any) {
+    if (notificationFileKey) {
+      try {
+        await deleteFileFromS3(notificationFileKey as string)
+      } catch (error) {
+        throw error
+      }
+    } else if (error instanceof AppError && error.name === 'error creating notification') {
+      try {
+        await deleteFileFromS3(notificationImageKey as string)
+        await deleteFileFromS3(notificationFileKey as string)
+      } catch (error) {
+        throw error
+      }
+    } else {
+      throw error
+    }
+  }
+
+  return undefined;
 };
 
 export const deleteNotification = async (notification: {

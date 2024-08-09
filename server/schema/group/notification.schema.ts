@@ -1,12 +1,12 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database";
 
-interface NotificationAttributes {
+export interface NotificationAttributes {
   id: string;
   description: string;
   title: string;
-  image_url: string | null;
-  file_url: string | null;
+  image_key: string | null;
+  file_key: string | null;
 }
 class Notification
   extends Model<NotificationAttributes>
@@ -15,8 +15,8 @@ class Notification
   public id!: string;
   public description!: string;
   public title!: string;
-  public image_url!: string | null;
-  public file_url!: string | null;
+  public image_key!: string | null;
+  public file_key!: string | null;
 }
 Notification.init(
   {
@@ -33,11 +33,11 @@ Notification.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    image_url: {
+    image_key: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    file_url: {
+    file_key: {
       type: DataTypes.STRING,
       allowNull: true,
     },

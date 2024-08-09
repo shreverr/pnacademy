@@ -7,12 +7,14 @@ import { AppError } from "../lib/appError";
 const tempStorageDir = process.env.TEMP_DIR;
 if (!tempStorageDir) {
   throw new AppError(
-    "environment variable not set", 
-    500, 
-    "TEMP_DIR not set", 
+    "environment variable not set",
+    500,
+    "TEMP_DIR not set",
     false
   );
 }
+
+const maxSize = 1024 * 1024 * 1024; // 1GB
 
 const storage = multer.diskStorage({
   destination: tempStorageDir,
@@ -21,4 +23,7 @@ const storage = multer.diskStorage({
   }
 });
 
-export const upload = multer({ storage: storage });
+export const upload = multer({
+  storage: storage,
+  limits: { fileSize: maxSize },
+});

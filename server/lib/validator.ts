@@ -297,7 +297,7 @@ export const validateUserRoleUpdate = [
     .optional()
     .isBoolean()
     .withMessage("canManageMyAccount must be a boolean"),
-    
+
   check("permissions.canViewNotification")
     .optional()
     .isBoolean()
@@ -554,16 +554,6 @@ export const validateNotification = [
     .isEmpty()
     .isLength({ min: 2 })
     .withMessage("Title must be at least 2 characters long"),
-
-  check("image_url")
-    .optional()
-    .isURL()
-    .withMessage("Image URL must be a valid URL"),
-
-  check("file_url")
-    .optional()
-    .isURL()
-    .withMessage("File URL must be a valid URL"),
 ];
 
 export const validateNotificationDelete = [
