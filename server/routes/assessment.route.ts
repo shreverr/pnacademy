@@ -598,6 +598,70 @@ router.get(
   viewAssessmentController
 );
 
+/**
+ * @openapi
+ * /v1/assessment/bulk:
+ *   get:
+ *     tags:
+ *       - Assessment View Controller
+ *     summary: Retrieve multiple assessments
+ *     description: Endpoint to retrieve multiple assessments with pagination, sorting, and filtering options.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Page number for pagination (optional, default is 1)
+ *       - name: pageSize
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Number of items per page (optional)
+ *       - name: sortBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [id, name, description, is_active, start_at, end_at, duration, createdAt, updatedAt]
+ *         description: Field to sort the results by (optional)
+ *       - name: order
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Sort order (optional)
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 assessments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   description: Array of assessment objects.
+ *                 totalCount:
+ *                   type: integer
+ *                   description: Total number of assessments matching the query.
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Current page number.
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages.
+ *       '400':
+ *         description: Bad request. Invalid parameters provided.
+ *       '401':
+ *         description: Unauthorized. User doesn't have the required permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
 router.get(
   "/bulk",
   authenticateUser(["canManageAssessment"]),

@@ -45,7 +45,8 @@ const router: Router = express.Router();
  * /v1/user/info:
  *   get:
  *     summary: Get your user information (JWT auth header necessary)
- *     tags: [User Controller]
+ *     tags:
+ *     - User view Controller
  *     responses:
  *       '200':
  *         description: User information retrieved successfully
@@ -109,7 +110,8 @@ router.get("/info", authenticateUser(), viewUserDetailsController);
  * /v1/user/bulk:
  *   get:
  *     summary: Get bulk user information
- *     tags: [User Controller]
+ *     tags:
+ *     - User view Controller
  *     parameters:
  *       - in: query
  *         name: page
@@ -336,7 +338,7 @@ router.post(
  * /v1/user/update:
  *   patch:
  *     tags:
- *       - User Controller
+ *       - User update Controller
  *     summary: Update a user
  *     requestBody:
  *       required: true
@@ -589,7 +591,7 @@ router.post("/login", validateUserLogin, validateRequest, loginUserController);
  *             example:
  *               message: Role created successfully
  *               data:
- *                 id: "81d0198a-9872-4f73-8ae6-c8e6ee3aaa98"
+ *                 id: "string"
  *                 name: admin
  *                 permissions:
  *                   canManageAssessment: true
@@ -615,6 +617,93 @@ router.post(
   createRoleController
 );
 
+/**
+ * @swagger
+ * /v1/user/role:
+ *   patch:
+ *     summary: Update role of a user
+ *     tags:
+ *     - User update Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - roleId
+ *             properties:
+ *               roleId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: The unique identifier of the role (UUID v4)
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 description: The name of the role (optional)
+ *               'permissions[canManageAssessment]':
+ *                 type: boolean
+ *                 description: Permission to manage assessments
+ *               'permissions[canManageRole]':
+ *                 type: boolean
+ *                 description: Permission to manage roles
+ *               'permissions[canManageNotification]':
+ *                 type: boolean
+ *                 description: Permission to manage notifications
+ *               'permissions[canManageLocalGroup]':
+ *                 type: boolean
+ *                 description: Permission to manage local groups
+ *               'permissions[canManageReports]':
+ *                 type: boolean
+ *                 description: Permission to manage reports
+ *               'permissions[canAttemptAssessment]':
+ *                 type: boolean
+ *                 description: Permission to attempt assessments
+ *               'permissions[canViewReport]':
+ *                 type: boolean
+ *                 description: Permission to view reports
+ *               'permissions[canManageMyAccount]':
+ *                 type: boolean
+ *                 description: Permission to manage own account
+ *               'permissions[canViewNotification]':
+ *                 type: boolean
+ *                 description: Permission to view notifications
+ *     responses:
+ *       200:
+ *         description: Role updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Role updated successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       msg:
+ *                         type: string
+ *                       param:
+ *                         type: string
+ *                       location:
+ *                         type: string
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
 router.patch(
   "/role",
   authenticateUser(["canManageRole"]),
@@ -628,7 +717,8 @@ router.patch(
  * /v1/user/roles:
  *   get:
  *     summary: Get roles information
- *     tags: [User Controller]
+ *     tags:
+ *     - User view Controller
  *     parameters:
  *       - in: query
  *         name: page
@@ -808,7 +898,7 @@ router.get(
  * /v1/user/role:
  *   delete:
  *     tags:
- *       - User Controller
+ *       - User Delete Controller
  *     summary: Delete a user role
  *     requestBody:
  *       required: true
@@ -970,7 +1060,8 @@ router.post(
  * /v1/user/export:
  *   get:
  *     summary: Export user data as a CSV file
- *     tags: [User Controller]
+ *     tags:
+ *      - User view Controller
  *     description: This endpoint allows exporting user data in CSV format. The CSV file will include all user data from the user table.
  *     responses:
  *       '200':
@@ -1011,7 +1102,8 @@ router.get(
  * /v1/user/delete:
  *   delete:
  *     summary: Delete multiple users
- *     tags: [User Controller]
+ *     tags:
+ *      - User Delete Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -1119,7 +1211,8 @@ router.post(
  * /v1/user/remove-from-group:
  *   delete:
  *     summary: Remove users from a group
- *     tags: [User Controller]
+ *     tags:
+ *      - User Delete Controller
  *     requestBody:
  *       required: true
  *       content:
@@ -1173,7 +1266,8 @@ router.delete(
  * /v1/user/by-group:
  *   get:
  *     summary: Get users by group ID with pagination and sorting.
- *     tags: [User Controller]
+ *     tags:
+ *     - User view Controller
  *     parameters:
  *       - in: query
  *         name: page
