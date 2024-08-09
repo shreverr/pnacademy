@@ -8,18 +8,19 @@ import {
   deleteGroupsById,
   deleteNotificationInDB,
   getAllGroups,
+  getAllNotifications,
   getGroupById,
   getGroupByName,
   getnotificationById,
   updateGroupInDB,
 } from "../../model/notification/notification.model";
-import { groupAttributes, NotificationAttributesWithOptionalImageAndFileUrl } from "../../types/notification.types";
+import { groupAttributes, NotificationAttributesWithOptionalImageAndFileUrl, NotificationSortBy } from "../../types/notification.types";
 import { GroupData } from "../../types/group.types";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { deleteFileFromDisk, deleteFileFromS3, uploadFileToS3 } from "../../lib/file";
 import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
-import logger from "../../config/logger";
+import { NotificationAttributes } from "../../schema/group/notification.schema";
 
 export const createNotification = async (notification: {
   description: string;
@@ -65,7 +66,7 @@ export const createNotification = async (notification: {
     let notificationData: any = notificationDataInDB;
     delete notificationData.image_key;
     delete notificationData.file_key;
-    
+
     if (notificationImageKey) {
       notificationData.image_url = await generatePresignedUrl(notificationImageKey, 60 * 60)
     }
@@ -199,5 +200,55 @@ export const viewAllGroups = async (
   return {
     groups: allGroupsData,
     totalPages: totalPages
+  };
+};
+
+export const viewAllNotifications = async (
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: NotificationSortBy,
+  order?: "ASC" | "DESC"
+): Promise<{
+  notifications: NotificationAttributesWithOptionalImageAndFileUrl[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "title";
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+  const { rows: allNotificationsData, count: allNotificationsCount } =
+    await getAllNotifications(offset, pageSize, sortBy, order);
+
+  if (!allNotificationsData) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  let notificationsData = await Promise.all(allNotificationsData.map(async (notification) => {
+    let notificationData: any = notification;
+  
+    if (notificationData.image_key) {
+      notificationData.image_url = await generatePresignedUrl(notificationData.image_key, 60 * 60)
+    }
+    
+    if (notificationData.file_key) {
+      notificationData.file_url = await generatePresignedUrl(notificationData.file_key, 60 * 60)
+    }
+  
+    delete notificationData.image_key;
+    delete notificationData.file_key;
+    return notificationData
+  }));
+
+  const totalPages = Math.ceil(allNotificationsCount / pageSize);
+  return {
+    notifications: notificationsData,
+    totalPages: totalPages,
   };
 };
