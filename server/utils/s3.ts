@@ -23,7 +23,7 @@ export const generatePresignedUrl = async (key: string, expiresInSeconds: number
 
     // Generate a pre-signed URL
     const url = await getSignedUrl(s3Client, command, { expiresIn: expiresInSeconds });
-    logger.info(`The URL is ${url}`);
+    
     return url;
   } catch (error) {
     throw new AppError(

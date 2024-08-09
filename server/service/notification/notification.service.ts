@@ -66,8 +66,6 @@ export const createNotification = async (notification: {
     delete notificationData.image_key;
     delete notificationData.file_key;
     
-    logger.info(notificationData)
-
     if (notificationImageKey) {
       notificationData.image_url = await generatePresignedUrl(notificationImageKey, 60 * 60)
     }
