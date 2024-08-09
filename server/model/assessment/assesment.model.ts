@@ -8,6 +8,8 @@ import {
   type QuestionDetailedData,
   TagAttribute,
   AssessmentAttribute,
+  AiQuestions,
+  AiQuestionData,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -27,6 +29,7 @@ import { sequelize } from "../../config/database";
 import AssessmentGroup from "../../schema/junction/assessmentGroup.schema";
 import Group from "../../schema/group/group.schema";
 import User from "../../schema/user/user.schema";
+import { model } from "../../config/gemini";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -850,5 +853,55 @@ export const viewAssignedAssessmentsByUserId = async (
     }
 
     throw new AppError("error getting all tags", 500, error, true);
+  }
+};
+
+export const generateAiQuestions = async (
+  topic: string,
+  numberOfQuestions: number,
+  difficulty: string
+): Promise<AiQuestions | null> => {
+  try {
+    const prompt = `Generate ${numberOfQuestions} quiz questions about ${topic} of ${difficulty} difficulty. Format the response as a JSON array where each question object has 'question', 'options' (an array of 4 choices) with  each option is array ( description and is correct boolean ) `;
+
+    const data = await model.generateContent(prompt);
+    const responseText = data.response.text();
+
+    let parsedQuestions: any[];
+
+    try {
+      parsedQuestions = JSON.parse(responseText);
+    } catch (error) {
+      if (
+        responseText.includes("```json\n") &&
+        responseText.includes("\n```")
+      ) {
+        const jsonContent = responseText
+          .trim()
+          .split("```json\n")[1]
+          .split("\n```")[0];
+        parsedQuestions = JSON.parse(jsonContent);
+      } else {
+        throw new Error("Response format is incorrect.");
+      }
+    }
+
+    if (!Array.isArray(parsedQuestions)) {
+      throw new Error("Parsed content is not an array.");
+    }
+
+    const formattedQuestions: AiQuestionData[] = parsedQuestions.map((q) => ({
+      description: q.question,
+      Options: q.options,
+    }));
+
+    return { questions: formattedQuestions };
+  } catch (error) {
+    throw new AppError(
+      "Error generating AI questions",
+      500,
+      String(error),
+      true
+    );
   }
 };

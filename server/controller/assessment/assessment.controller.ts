@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import { type UUID } from 'crypto'
 import {
   addGroupToAssessment,
   addTag,
@@ -10,6 +10,7 @@ import {
   deleteOption,
   deleteQuestion,
   deleteTag,
+  generateAiQuestionsService,
   removeGroupFromAssessment,
   removeTagFromQuestion,
   updateAssessment,
@@ -21,19 +22,20 @@ import {
   viewAssessmentDetails,
   viewAssignedAssessments,
   viewQuestionDetails,
-  viewTag,
-} from "../../service/assessment/assessment.service";
+  viewTag
+} from '../../service/assessment/assessment.service'
 import {
   type NextFunction,
   type Request,
   type RequestHandler,
-  type Response,
-} from "express";
+  type Response
+} from 'express'
 import {
-  AssessmentAttribute,
-  TagAttribute,
-} from "../../types/assessment.types";
-import Assessment from "../../schema/assessment/assessment.schema";
+  type AssessmentAttribute,
+  type TagAttribute
+} from '../../types/assessment.types'
+import Assessment from '../../schema/assessment/assessment.schema'
+import { generateAiQuestions } from '../../model/assessment/assesment.model'
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -48,17 +50,17 @@ export const CreateAssessmentController: RequestHandler = async (
       start_at: req.body.start_at,
       end_at: req.body.end_at,
       duration: req.body.duration,
-      created_by: req.body.created_by,
-    });
+      created_by: req.body.created_by
+    })
 
     return res.status(201).json({
-      message: "Assessment created successfully",
-      data: assessment,
-    });
+      message: 'Assessment created successfully',
+      data: assessment
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const CreateQuestionController: RequestHandler = async (
   req: Request,
@@ -70,17 +72,17 @@ export const CreateQuestionController: RequestHandler = async (
       assessment_id: req.body.assessment_id,
       description: req.body.description,
       marks: req.body.marks,
-      section: req.body.section,
-    });
+      section: req.body.section
+    })
 
     return res.status(201).json({
-      message: "Question created successfully",
-      data: question,
-    });
+      message: 'Question created successfully',
+      data: question
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const CreateOptionController: RequestHandler = async (
   req: Request,
@@ -91,17 +93,17 @@ export const CreateOptionController: RequestHandler = async (
     const option = await createOption({
       question_id: req.body.question_id,
       description: req.body.description,
-      is_correct: req.body.is_correct,
-    });
+      is_correct: req.body.is_correct
+    })
 
     return res.status(201).json({
-      message: "Option created successfully",
-      data: option,
-    });
+      message: 'Option created successfully',
+      data: option
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const CreateTagController: RequestHandler = async (
   req: Request,
@@ -110,16 +112,16 @@ export const CreateTagController: RequestHandler = async (
 ) => {
   try {
     const Tag = await createTag({
-      name: req.body.name,
-    });
+      name: req.body.name
+    })
     return res.status(201).json({
-      message: "Tag created successfully",
-      data: Tag,
-    });
+      message: 'Tag created successfully',
+      data: Tag
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const UpdateAssessmentController: RequestHandler = async (
   req: Request,
@@ -134,17 +136,17 @@ export const UpdateAssessmentController: RequestHandler = async (
       is_active: req.body.is_active,
       start_at: req.body.start_at,
       end_at: req.body.end_at,
-      duration: req.body.duration,
-    });
+      duration: req.body.duration
+    })
 
     return res.status(201).json({
-      message: "Assessment updated successfully",
-      data: assessment,
-    });
+      message: 'Assessment updated successfully',
+      data: assessment
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const UpdateQuestionController: RequestHandler = async (
   req: Request,
@@ -156,17 +158,17 @@ export const UpdateQuestionController: RequestHandler = async (
       id: req.body.id,
       description: req.body.description,
       marks: req.body.marks,
-      section: req.body.section,
-    });
+      section: req.body.section
+    })
 
     return res.status(201).json({
-      message: "Question updated successfully",
-      data: question,
-    });
+      message: 'Question updated successfully',
+      data: question
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const UpdateOptionController: RequestHandler = async (
   req: Request,
@@ -177,17 +179,17 @@ export const UpdateOptionController: RequestHandler = async (
     const option = await updateOption({
       id: req.body.id,
       description: req.body.description,
-      is_correct: req.body.is_correct,
-    });
+      is_correct: req.body.is_correct
+    })
 
     return res.status(201).json({
-      message: "Option updated successfully",
-      data: option,
-    });
+      message: 'Option updated successfully',
+      data: option
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const UpdateTagController: RequestHandler = async (
   req: Request,
@@ -197,16 +199,16 @@ export const UpdateTagController: RequestHandler = async (
   try {
     const Tag = await updateTag({
       id: req.body.id,
-      name: req.body.name,
-    });
+      name: req.body.name
+    })
     return res.status(201).json({
-      message: "Tag updated successfully",
-      data: Tag,
-    });
+      message: 'Tag updated successfully',
+      data: Tag
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const DeleteAssessmentController: RequestHandler = async (
   req: Request,
@@ -215,17 +217,17 @@ export const DeleteAssessmentController: RequestHandler = async (
 ) => {
   try {
     const assessment = await deleteAssessment({
-      id: req.body.id,
-    });
+      id: req.body.id
+    })
 
     return res.status(201).json({
-      message: "Assessment deleted successfully",
-      data: assessment,
-    });
+      message: 'Assessment deleted successfully',
+      data: assessment
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const DeleteQuestionController: RequestHandler = async (
   req: Request,
@@ -234,17 +236,17 @@ export const DeleteQuestionController: RequestHandler = async (
 ) => {
   try {
     const question = await deleteQuestion({
-      id: req.body.id,
-    });
+      id: req.body.id
+    })
 
     return res.status(201).json({
-      message: "Question deleted successfully",
-      data: question,
-    });
+      message: 'Question deleted successfully',
+      data: question
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const DeleteOptionController: RequestHandler = async (
   req: Request,
@@ -253,17 +255,17 @@ export const DeleteOptionController: RequestHandler = async (
 ) => {
   try {
     const option = await deleteOption({
-      id: req.body.id,
-    });
+      id: req.body.id
+    })
 
     return res.status(201).json({
-      message: "Option deleted successfully",
-      data: option,
-    });
+      message: 'Option deleted successfully',
+      data: option
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const DeleteTagController: RequestHandler = async (
   req: Request,
@@ -272,17 +274,17 @@ export const DeleteTagController: RequestHandler = async (
 ) => {
   try {
     const Tag = await deleteTag({
-      id: req.body.id,
-    });
+      id: req.body.id
+    })
 
     return res.status(201).json({
-      message: "Tag deleted successfully",
-      data: Tag,
-    });
+      message: 'Tag deleted successfully',
+      data: Tag
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const viewAssessmentController: RequestHandler = async (
   req: Request,
@@ -290,16 +292,16 @@ export const viewAssessmentController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const assessment = await viewAssessmentDetails(req.query.id as UUID);
+    const assessment = await viewAssessmentDetails(req.query.id as UUID)
 
     return res.status(201).json({
-      message: "Assessment fetched successfully",
-      data: assessment,
-    });
+      message: 'Assessment fetched successfully',
+      data: assessment
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const viewAssessmentBulkController: RequestHandler = async (
   req: Request,
@@ -311,17 +313,17 @@ export const viewAssessmentBulkController: RequestHandler = async (
       req.query.page as string,
       req.query.pageSize as string,
       req.query.sortBy as AssessmentAttribute,
-      req.query.order as "ASC" | "DESC"
-    );
+      req.query.order as 'ASC' | 'DESC'
+    )
 
     return res.status(201).json({
-      message: "success",
-      data: assessments,
-    });
+      message: 'success',
+      data: assessments
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const viewQuestionController: RequestHandler = async (
   req: Request,
@@ -329,15 +331,15 @@ export const viewQuestionController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const question = await viewQuestionDetails(req.query.id as UUID);
+    const question = await viewQuestionDetails(req.query.id as UUID)
     return res.status(201).json({
-      message: "Question fetched successfully",
-      data: question,
-    });
+      message: 'Question fetched successfully',
+      data: question
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const viewTagController: RequestHandler = async (
   req: Request,
@@ -345,16 +347,16 @@ export const viewTagController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const tagData = await viewTag(req.query.id as UUID);
+    const tagData = await viewTag(req.query.id as UUID)
 
     return res.status(200).json({
-      status: "success",
-      data: tagData,
-    });
+      status: 'success',
+      data: tagData
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const viewAllTagsController: RequestHandler = async (
   req: Request,
@@ -366,17 +368,17 @@ export const viewAllTagsController: RequestHandler = async (
       req.query.page as string,
       req.query.pageSize as string,
       req.query.sortBy as TagAttribute,
-      req.query.order as "ASC" | "DESC"
-    );
+      req.query.order as 'ASC' | 'DESC'
+    )
 
     return res.status(201).json({
-      message: "success",
-      data: tagsData,
-    });
+      message: 'success',
+      data: tagsData
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const addTagController: RequestHandler = async (
   req: Request,
@@ -384,15 +386,15 @@ export const addTagController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await addTag(req.body.questionId, req.body.tagId);
+    await addTag(req.body.questionId, req.body.tagId)
 
     return res.status(201).json({
-      status: "success",
-    });
+      status: 'success'
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const removeTagFromQuestionController: RequestHandler = async (
   req: Request,
@@ -400,16 +402,16 @@ export const removeTagFromQuestionController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await removeTagFromQuestion(req.body.tagId, req.body.questionId);
+    await removeTagFromQuestion(req.body.tagId, req.body.questionId)
 
     return res.status(200).json({
-      status: "success",
-      message: "Tag removed successfully",
-    });
+      status: 'success',
+      message: 'Tag removed successfully'
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const addGroupToAssessmentController: RequestHandler = async (
   req: Request,
@@ -417,15 +419,15 @@ export const addGroupToAssessmentController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await addGroupToAssessment(req.body.assessmentId, req.body.groupId);
+    await addGroupToAssessment(req.body.assessmentId, req.body.groupId)
 
     return res.status(201).json({
-      status: "success",
-    });
+      status: 'success'
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const removeGroupFromAssessmentController: RequestHandler = async (
   req: Request,
@@ -433,16 +435,16 @@ export const removeGroupFromAssessmentController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await removeGroupFromAssessment(req.body.assessmentId, req.body.groupId);
+    await removeGroupFromAssessment(req.body.assessmentId, req.body.groupId)
 
     return res.status(200).json({
-      status: "success",
-      message: "Group removed successfully",
-    });
+      status: 'success',
+      message: 'Group removed successfully'
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const viewAssignedAssessmentsController: RequestHandler = async (
   req: Request,
@@ -454,15 +456,36 @@ export const viewAssignedAssessmentsController: RequestHandler = async (
       req.user.userId as string,
       req.query.page as string,
       req.query.pageSize as string,
-      req.query.sortBy as Exclude<AssessmentAttribute, "created_by">,
-      req.query.order as "ASC" | "DESC"
-    );
+      req.query.sortBy as Exclude<AssessmentAttribute, 'created_by'>,
+      req.query.order as 'ASC' | 'DESC'
+    )
 
     return res.status(201).json({
-      message: "success",
-      data: assignedAssessments,
-    });
+      message: 'success',
+      data: assignedAssessments
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
+
+export const generateAiQuestionsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const Questions = await generateAiQuestionsService(
+      req.body.topic as string,
+      req.body.numberOfQuestions as number,
+      req.body.difficulty as string,
+    )
+
+    return res.status(201).json({
+      message: 'Questions generated successfully',
+      data: Questions
+    })
+  } catch (error) {
+    next(error)
+  }
+}

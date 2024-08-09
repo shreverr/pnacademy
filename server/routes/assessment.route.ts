@@ -11,6 +11,7 @@ import {
   DeleteOptionController,
   DeleteQuestionController,
   DeleteTagController,
+  generateAiQuestionsController,
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
   UpdateAssessmentController,
@@ -49,7 +50,10 @@ import {
 } from "../lib/validator";
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
-import { validateBulkAssessment } from "../lib/validator/assessment/validator";
+import {
+  validateBulkAssessment,
+  validateGenerateAssessment,
+} from "../lib/validator/assessment/validator";
 
 const router: Router = express.Router();
 
@@ -1185,6 +1189,14 @@ router.get(
   validateViewAssignedAssessment,
   validateRequest,
   viewAssignedAssessmentsController
+);
+
+router.post(
+  "/generate",
+  authenticateUser(["canManageAssessment"]),
+  validateGenerateAssessment,
+  validateRequest,
+  generateAiQuestionsController
 );
 
 export default router;

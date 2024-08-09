@@ -462,3 +462,23 @@ export const validateViewAssignedAssessment = [
        "ASC", "DESC",`
     ),
 ];
+
+export const validateGenerateAssessment = [
+  check("topic")
+    .not()
+    .isEmpty()
+    .isLength({ min: 2 })
+    .escape()
+    .withMessage("Topic must be more than 2 characters long"),
+  check("numberOfQuestions")
+    .not()
+    .isEmpty()
+    .isNumeric()
+    .withMessage("numberOfQuestions must be a number"),
+  check("difficulty")
+    .not()
+    .isEmpty()
+    .isLength({ min: 2 })
+    .escape()
+    .withMessage("difficulty must be a number"),
+];

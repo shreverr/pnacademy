@@ -12,6 +12,7 @@ import {
   deleteOptionInDB,
   deleteQuestionInDB,
   deleteTagInDB,
+  generateAiQuestions,
   getAllAssessments,
   getAllTags,
   getAssessmentById,
@@ -35,6 +36,7 @@ import {
   type QuestionDetailedData,
   TagAttribute,
   AssessmentAttribute,
+  AiQuestions,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -331,7 +333,6 @@ export const viewAssessmentBulk = async (
   const { rows: allAssesmentsData, count: allAssesmentsCount } =
     await getAllAssessments(offset, pageSize, sortBy, order);
 
-
   if (!allAssesmentsData) {
     throw new AppError(
       commonErrorsDictionary.internalServerError.name,
@@ -496,4 +497,25 @@ export const viewAssignedAssessments = async (
     assessments: assignedAssessments,
     totalPages: totalPages,
   };
+};
+
+export const generateAiQuestionsService = async (
+  topic: string,
+  numberOfQuestions: number,
+  difficulty: string
+): Promise<AiQuestions | null> => {
+  const questions = await generateAiQuestions(
+    topic,
+    numberOfQuestions,
+    difficulty
+  );
+  if (questions === null) {
+    throw new AppError(
+      "Questions Generation Failed",
+      404,
+      "Questions with this topic and difficulty failed to generate",
+      false
+    );
+  }
+  return questions;
 };
