@@ -1063,7 +1063,7 @@ router.post(
  */
 router.delete(
   "/remove-group",
-  authenticateUser(["canManageAssessment"]),
+  authenticateUser(["canManageAssessment", "canManageLocalGroup"]),
   validateRemoveGroupFromAssessment,
   validateRequest,
   removeGroupFromAssessmentController

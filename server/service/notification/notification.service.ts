@@ -13,6 +13,7 @@ import {
   getGroupById,
   getGroupByName,
   getnotificationById,
+  removeGroupFromNotificationById,
   updateGroupInDB,
 } from "../../model/notification/notification.model";
 import { groupAttributes, NotificationAttributesWithOptionalImageAndFileUrl, NotificationSortBy } from "../../types/notification.types";
@@ -264,4 +265,13 @@ export const addGroupToNotification = async (
   );
 
   return isGroupAddedToAssessment;
+};
+
+export const removeGroupFromNotification = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  const result = await removeGroupFromNotificationById(notificationId, groupId);
+
+  return result;
 };

@@ -320,3 +320,31 @@ export const addGroupToNotificationById = async (
     }
   }
 };
+
+export const removeGroupFromNotificationById = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  logger.info(`Removing group from notification`);
+  try {
+    const result = await NotificationGroup.destroy({
+      where: {
+        notification_id: notificationId,
+        group_id: groupId,
+      },
+    });
+
+    if (result === 0) {
+      return false;
+    }
+
+    return true;
+  } catch (error: any) {
+    throw new AppError(
+      "Error removing group from notification",
+      500,
+      error,
+      true
+    );
+  }
+};

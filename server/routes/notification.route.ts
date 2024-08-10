@@ -8,13 +8,14 @@ import {
   CreateNotificationController,
   DeleteNotificationController,
   getAllNotificationsController,
+  removeGroupFromNotificationController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
 import {
   validateNotification,
   validateNotificationDelete,
 } from "../lib/validator/index";
-import { validateAddGroupToNotification, validateGetAllNotifications } from "../lib/validator/notification/validator";
+import { validateAddGroupToNotification, validateGetAllNotifications, validateRemoveGroupFromNotification } from "../lib/validator/notification/validator";
 
 const router: Router = express.Router();
 
@@ -296,6 +297,59 @@ router.post(
   validateAddGroupToNotification,
   validateRequest,
   addGroupToNotificationController
+);
+
+/**
+ * @swagger
+ * /v1/notification/remove-group:
+ *   delete:
+ *     summary: Remove a group from a notification
+ *     tags:
+ *       - Notification
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationId:
+ *                 type: string
+ *                 description: The unique identifier of the notification.
+ *                 example: 59cfd460-6ded-46e6-a269-b2747065f76c
+ *               groupId:
+ *                 type: string
+ *                 description: The unique identifier of the group.
+ *                 example: d579acc4-4936-4490-9cd5-15ddceaf0413
+ *     responses:
+ *       '200':
+ *         description: Group removed successfully from the notification.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: Detailed message about the operation.
+ *                   example: Group removed successfully
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Notification or Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.delete(
+  "/remove-group",
+  authenticateUser(["canManageAssessment", "canManageLocalGroup"]),
+  validateRemoveGroupFromNotification,
+  validateRequest,
+  removeGroupFromNotificationController
 );
 
 export default router;

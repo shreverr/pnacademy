@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, updateGroup, viewAllGroups, viewAllNotifications } from "../../service/notification/notification.service";
+import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, updateGroup, viewAllGroups, viewAllNotifications } from "../../service/notification/notification.service";
 import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
 
 export const CreateNotificationController: RequestHandler = async (
@@ -174,6 +174,23 @@ export const addGroupToNotificationController: RequestHandler = async (
 
     return res.status(201).json({
       status: 'success'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const removeGroupFromNotificationController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await removeGroupFromNotification(req.body.notificationId, req.body.groupId)
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Group removed successfully'
     })
   } catch (error) {
     next(error)
