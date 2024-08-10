@@ -852,7 +852,7 @@ export const viewAssignedAssessmentsByUserId = async (
       );
     }
 
-    throw new AppError("error getting all tags", 500, error, true);
+    throw new AppError("error getting all assessments", 500, error, true);
   }
 };
 

@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, updateGroup, viewAllGroups, viewAllNotifications } from "../../service/notification/notification.service";
+import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, updateGroup, viewAllGroups, viewAllNotifications, viewAssignedNotifications } from "../../service/notification/notification.service";
 import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
 
 export const CreateNotificationController: RequestHandler = async (
@@ -191,6 +191,29 @@ export const removeGroupFromNotificationController: RequestHandler = async (
     return res.status(200).json({
       status: 'success',
       message: 'Group removed successfully'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const viewAssignedNotificationsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assignedNotifications = await viewAssignedNotifications(
+      req.user.userId as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as NotificationSortBy,
+      req.query.order as 'ASC' | 'DESC'
+    )
+
+    return res.status(200).json({
+      message: 'success',
+      data: assignedNotifications
     })
   } catch (error) {
     next(error)
