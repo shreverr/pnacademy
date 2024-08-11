@@ -15,6 +15,7 @@ import AssessmentGroup from "./junction/assessmentGroup.schema";
 import Section from "./assessment/section.schema";
 import SectionStatus from "./assessment/sectionStatus.schema";
 import AssessmentStatus from "./assessment/assessmentStatus.schema";
+import AssessmentResponse from "./assessment/assessmentResponse.schema";
 
 const models = [
   "./user/user.schema",
@@ -33,6 +34,7 @@ const models = [
   "./junction/userGroup.schema",
   "./junction/assessmentGroup.schema",
   "./assessment/sectionStatus.schema",
+  "./assessment/assessmentResponse.schema",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -65,11 +67,20 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
+  User.hasMany(AssessmentResponse, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+  });
+
   Assessment.hasMany(AssessmentStatus, {
     foreignKey: "assessment_id",
     onDelete: "CASCADE",
   });
 
+  Assessment.hasMany(AssessmentResponse, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  });
 
   Assessment.hasMany(Question, {
     foreignKey: "assessment_id",
@@ -83,6 +94,16 @@ const instantiateModels = async (): Promise<void> => {
 
   Question.hasMany(Option, {
     foreignKey: "question_id",
+    onDelete: "CASCADE",
+  });
+
+  Question.hasMany(AssessmentResponse, {
+    foreignKey: "question_id",
+    onDelete: "CASCADE",
+  });
+
+  Option.hasMany(AssessmentResponse, {
+    foreignKey: "selected_option_id",
     onDelete: "CASCADE",
   });
 
