@@ -14,6 +14,7 @@ import UserGroup from "./junction/userGroup.schema";
 import AssessmentGroup from "./junction/assessmentGroup.schema";
 import Section from "./assessment/section.schema";
 import SectionStatus from "./assessment/sectionStatus.schema";
+import AssessmentStatus from "./assessment/assessmentStatus.schema";
 
 const models = [
   "./user/user.schema",
@@ -58,6 +59,17 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "created_by",
     onDelete: "CASCADE",
   });
+
+  User.hasMany(AssessmentStatus, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+  });
+
+  Assessment.hasMany(AssessmentStatus, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  });
+
 
   Assessment.hasMany(Question, {
     foreignKey: "assessment_id",
