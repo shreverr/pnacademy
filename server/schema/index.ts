@@ -12,6 +12,7 @@ import QuestionTag from "./junction/questionTag.schema";
 import NotificationGroup from "./junction/notificationGroup.schema";
 import UserGroup from "./junction/userGroup.schema";
 import AssessmentGroup from "./junction/assessmentGroup.schema";
+import Section from "./assessment/section.schema";
 
 const models = [
   "./user/user.schema",
@@ -21,6 +22,7 @@ const models = [
   "./assessment/assessment.schema",
   "./assessment/question.schema",
   "./assessment/options.schema",
+  "./assessment/section.schema",
   "./assessment/tag.schema",
   "./group/group.schema",
   "./group/notification.schema",
@@ -55,23 +57,33 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
-  Assessment.hasMany(Question, { 
-    foreignKey: "assessment_id", 
+  Assessment.hasMany(Question, {
+    foreignKey: "assessment_id",
     onDelete: "CASCADE",
   });
 
-  Question.hasMany(Option, { 
+  Assessment.hasMany(Section, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  })
+
+  Question.hasMany(Option, {
     foreignKey: "question_id",
-    onDelete: "CASCADE", 
+    onDelete: "CASCADE",
   });
 
-  Question.belongsToMany(Tag, { 
+  Section.hasMany(Question, {
+    foreignKey: "section",
+    onDelete: "CASCADE",
+  });
+
+  Question.belongsToMany(Tag, {
     through: QuestionTag,
     foreignKey: "question_id",
     onDelete: "CASCADE",
   });
 
-  Tag.belongsToMany(Question, { 
+  Tag.belongsToMany(Question, {
     through: QuestionTag,
     foreignKey: "tag_id",
     onDelete: "CASCADE",
@@ -89,25 +101,25 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
-  User.belongsToMany(Group, { 
+  User.belongsToMany(Group, {
     through: UserGroup,
     foreignKey: "user_id",
     onDelete: "CASCADE",
   });
 
-  Group.belongsToMany(User, { 
+  Group.belongsToMany(User, {
     through: UserGroup,
     foreignKey: "group_id",
     onDelete: "CASCADE",
   });
-  
-  Assessment.belongsToMany(Group, { 
+
+  Assessment.belongsToMany(Group, {
     through: AssessmentGroup,
     foreignKey: "assessment_id",
     onDelete: "CASCADE",
   });
 
-  Group.belongsToMany(Assessment, { 
+  Group.belongsToMany(Assessment, {
     through: AssessmentGroup,
     foreignKey: "group_id",
     onDelete: "CASCADE",
