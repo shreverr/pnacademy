@@ -13,6 +13,7 @@ import NotificationGroup from "./junction/notificationGroup.schema";
 import UserGroup from "./junction/userGroup.schema";
 import AssessmentGroup from "./junction/assessmentGroup.schema";
 import Section from "./assessment/section.schema";
+import SectionStatus from "./assessment/sectionStatus.schema";
 
 const models = [
   "./user/user.schema",
@@ -30,6 +31,7 @@ const models = [
   "./junction/notificationGroup.schema",
   "./junction/userGroup.schema",
   "./junction/assessmentGroup.schema",
+  "./assessment/sectionStatus.schema",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -74,6 +76,16 @@ const instantiateModels = async (): Promise<void> => {
 
   Section.hasMany(Question, {
     foreignKey: "section",
+    onDelete: "CASCADE",
+  });
+
+  User.hasMany(SectionStatus, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+  });
+
+  Assessment.hasMany(SectionStatus, {
+    foreignKey: "assessment_id",
     onDelete: "CASCADE",
   });
 
