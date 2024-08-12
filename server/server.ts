@@ -4,6 +4,7 @@ import logger from "./config/logger";
 import swaggerDocs from "./config/swagger";
 import { AppError } from "./lib/appError";
 import fs from "fs";
+import { defineCustomRelations } from "./schema";
 
 logger.info("/////////////////////////////////////////////");
 logger.info("/////////////////////////////////////////////");
@@ -33,9 +34,10 @@ void connectDatabase();
 
 void sequelize
   .sync({
-   force: process.env.ENVIRONMENT === "dev",
+   alter: process.env.ENVIRONMENT === "dev",
   })
-  .then(() => {
+  .then(async () => {
+    await defineCustomRelations()
     logger.info("Postgres database synced successfully!");
   })
   .catch((error) => {

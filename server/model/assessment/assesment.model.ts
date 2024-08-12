@@ -266,15 +266,14 @@ export const getTagById = async (id: UUID): Promise<TagData | null> => {
 
 export const createQuestionInDB = async (question: {
   id: string;
-  assessment_id: UUID;
+  assessment_id: string;
   description: string;
   marks: number;
   section: number;
 }): Promise<QuestionData | null> => {
   logger.info(`Creating question for assessment: ${question.assessment_id}`);
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const existingSection = await Section.findOne({
       where: {
         assessment_id: question.assessment_id,
@@ -318,11 +317,20 @@ export const createQuestionInDB = async (question: {
         raw: true,
       }
     );
+    transaction.commit();
     return createdQuestion;
   } catch (error: any) {
+    transaction.rollback();
     if (error instanceof AppError) {
       throw error
-    }
+    } else if (error instanceof ForeignKeyConstraintError && error.table === 'assessments') {
+      throw new AppError(
+        "Assessment not found",
+        404,
+        "Assessment with this id does not exist so can't create question",
+        false
+      );
+    } 
 
     throw new AppError(
       "Error creating question",

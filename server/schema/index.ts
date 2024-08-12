@@ -16,6 +16,10 @@ import Section from "./assessment/section.schema";
 import SectionStatus from "./assessment/sectionStatus.schema";
 import AssessmentStatus from "./assessment/assessmentStatus.schema";
 import AssessmentResponse from "./assessment/assessmentResponse.schema";
+import { sequelize } from "../config/database";
+import { QueryTypes } from "sequelize";
+import { AppError } from "../lib/appError";
+import logger from "../config/logger";
 
 const models = [
   "./user/user.schema",
@@ -169,6 +173,30 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "group_id",
     onDelete: "CASCADE",
   });
-};
+}
+
+//Writing raw SQL to define foreign key constraints for section because squelize does not support composite foreign keys;
+export const defineCustomRelations = async () => {
+  const transaction = await sequelize.transaction();
+  try {
+    await sequelize.query(
+      // 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY(assessment_id, section) REFERENCES sections(assessment_id, section) ON DELETE CASCADE;',
+      "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_sections') THEN EXECUTE 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY (assessment_id, section) REFERENCES sections (assessment_id, section) ON DELETE CASCADE'; END IF; END $$;",
+      {
+        type: QueryTypes.RAW,
+        transaction: transaction
+      }
+    );
+    await transaction.commit();
+  } catch (error: any) {
+    await transaction.rollback();
+    throw new AppError(
+      'Error defining foreign key to question.section',
+      500,
+      error,
+      true
+    )
+  }
+}
 
 export default instantiateModels;

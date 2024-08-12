@@ -82,17 +82,17 @@ export const createQuestion = async (question: {
   marks: number;
   section: number;
 }): Promise<QuestionData | null> => {
-  const existingAssessment = await checkAssessmentExists(
-    question.assessment_id
-  );
-  if (existingAssessment == null) {
-    throw new AppError(
-      "Assessment not found",
-      404,
-      "Assessment with this id does not exist so Can't create question",
-      false
-    );
-  }
+  // const existingAssessment = await checkAssessmentExists(
+  //   question.assessment_id
+  // );
+  // if (existingAssessment == null) {
+  //   throw new AppError(
+  //     "Assessment not found",
+  //     404,
+  //     "Assessment with this id does not exist so Can't create question",
+  //     false
+  //   );
+  // }
   const questionData = await createQuestionInDB({
     id: uuid(),
     assessment_id: question.assessment_id,
