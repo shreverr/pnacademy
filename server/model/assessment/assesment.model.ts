@@ -355,12 +355,28 @@ export const createOptionInDB = async (option: {
     );
     return createdOption;
   } catch (error) {
-    throw new AppError(
-      "Error creating option",
-      500,
-      "Something went wrong",
-      false
-    );
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        "Option already exists",
+        409,
+        "An option with ID already exists",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        "Question does not exist",
+        404,
+        "Question with this question_id does not exists",
+        false
+      );
+    } else {
+      throw new AppError(
+        "Error creating option",
+        500,
+        "Something went wrong",
+        false
+      );
+    }
   }
 };
 
