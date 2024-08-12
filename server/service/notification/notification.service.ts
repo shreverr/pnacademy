@@ -125,9 +125,9 @@ export const createNotification = async (notification: {
 export const deleteNotification = async (notification: {
   id: UUID;
 }): Promise<boolean | null> => {
-  const checkNotification = await getnotificationById(notification.id);
+  const notificationExists = await getnotificationById(notification.id);
 
-  if (!checkNotification) {
+  if (!notificationExists) {
     throw new AppError(
       "Notification not found",
       404,
@@ -135,17 +135,17 @@ export const deleteNotification = async (notification: {
       false
     );
   }
-  if (checkNotification.file_key || checkNotification.image_key) {
-    if (checkNotification.file_key) {
+  if (notificationExists.file_key || notificationExists.image_key) {
+    if (notificationExists.file_key) {
       try {
-        await deleteFileFromS3(checkNotification.file_key as string);
+        await deleteFileFromS3(notificationExists.file_key as string);
       } catch (error) {
         throw error;
       }
     }
-    if (checkNotification.image_key) {
+    if (notificationExists.image_key) {
       try {
-        await deleteFileFromS3(checkNotification.image_key as string);
+        await deleteFileFromS3(notificationExists.image_key as string);
       } catch (error) {
         throw error;
       }
