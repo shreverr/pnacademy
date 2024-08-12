@@ -5,7 +5,7 @@ export interface AssessmentStatusAttributes {
   assessment_id: string
   user_id: string
   started_at: Date
-  submitted_at: Date
+  submitted_at?: Date
 }
 class AssessmentStatus extends Model<AssessmentStatusAttributes> implements AssessmentStatusAttributes {
   public assessment_id!: string

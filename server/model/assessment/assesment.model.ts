@@ -33,6 +33,7 @@ import Group from "../../schema/group/group.schema";
 import User from "../../schema/user/user.schema";
 import { model } from "../../config/gemini";
 import Section from "../../schema/assessment/section.schema";
+import AssessmentStatus from "../../schema/assessment/assessmentStatus.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -330,7 +331,7 @@ export const createQuestionInDB = async (question: {
         "Assessment with this id does not exist so can't create question",
         false
       );
-    } 
+    }
 
     throw new AppError(
       "Error creating question",
@@ -973,7 +974,7 @@ export const removeSectionFromAssessmentById = async (
   assessmentId: string,
   section: number
 ): Promise<boolean> => {
-  logger.info(`Removing group from assessment`);
+  logger.info(`Removing section from assessment`);
   try {
     const result = await Section.destroy({
       where: {
@@ -985,7 +986,7 @@ export const removeSectionFromAssessmentById = async (
     if (result === 0) {
       return false;
     }
-    
+
     logger.info(result)
     return true;
   } catch (error: any) {
@@ -995,5 +996,45 @@ export const removeSectionFromAssessmentById = async (
       error,
       true
     );
+  }
+};
+
+export const startAssessmentById = async (
+  assessmentId: string,
+  userId: string
+): Promise<boolean> => {
+  logger.info(`Starting assessment`);
+  try {
+    const result = await AssessmentStatus.create({
+      assessment_id: assessmentId,
+      user_id: userId,
+      started_at: new Date(),
+    })
+
+    logger.info(result)
+    return true;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError && (error.parent as any).table === 'assessment_statuses') {
+      throw new AppError(
+        "Assessment already started",
+        409,
+        "Assessment already started",
+        false
+      );
+    } else if(error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_statuses_user_id_fkey') {
+      throw new AppError(
+        "user does not exist",
+        404,
+        "user does not exist",
+        false
+      );
+    } else {
+      throw new AppError(
+        "Error starting test",
+        500,
+        error,
+        true
+      );
+    }
   }
 };

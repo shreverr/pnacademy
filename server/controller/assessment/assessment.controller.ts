@@ -14,6 +14,7 @@ import {
   removeGroupFromAssessment,
   removeSectionFromAssessment,
   removeTagFromQuestion,
+  startAssessment,
   updateAssessment,
   updateOption,
   updateQuestion,
@@ -509,6 +510,23 @@ export const deleteSectionController: RequestHandler = async (
         message: 'Section not found'
       })
     }
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const startAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await startAssessment(req.body.assessmentId, req.user.userId)
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Assessment Started'
+    })
   } catch (error) {
     next(error)
   }

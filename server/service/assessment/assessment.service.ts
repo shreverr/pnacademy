@@ -22,6 +22,7 @@ import {
   removeGroupFromAssessmentById,
   removeSectionFromAssessmentById,
   removeTagFromQuestionById,
+  startAssessmentById,
   updateAssessmentInDB,
   updateOptionInDB,
   updateQuestionInDB,
@@ -518,5 +519,44 @@ export const removeSectionFromAssessment = async (
 ): Promise<boolean> => {
   const result = await removeSectionFromAssessmentById(assessmentId, section);
 
+  return result;
+};
+
+export const startAssessment = async (
+  assessmentId: string,
+  userId: string
+): Promise<boolean> => {
+  const currentTime = Date.now()
+
+  const assessment = await getAssessmentById(assessmentId as UUID);
+  if (!assessment) {
+    throw new AppError(
+      "Assessment not found",
+      404,
+      "Assessment with this id does not exist",
+      false
+    );
+  }
+
+  if (currentTime < assessment.start_at.getTime()) {
+    throw new AppError(
+      "Assessment not started",
+      403,
+      "Assessment has not started yet",
+      false
+    );
+  }
+
+  if (currentTime > assessment.end_at.getTime()) {
+    throw new AppError(
+      "Assessment ended",
+      403,
+      "Assessment has ended",
+      false
+    );
+  }
+
+  const result = await startAssessmentById(assessmentId, userId);
+  
   return result;
 };

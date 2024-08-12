@@ -15,6 +15,7 @@ import {
   generateAiQuestionsController,
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
+  startAssessmentController,
   UpdateAssessmentController,
   UpdateOptionController,
   UpdateQuestionController,
@@ -55,7 +56,9 @@ import {
   validateBulkAssessment,
   validateGenerateAssessment,
   validateSectionDelete,
+  validateStartAssessment,
 } from "../lib/validator/assessment/validator";
+import { start } from "repl";
 
 const router: Router = express.Router();
 
@@ -1259,6 +1262,114 @@ router.delete(
   validateSectionDelete,
   validateRequest,
   deleteSectionController,
+)
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/start:
+ *   put:
+ *     summary: Start an assessment attempt
+ *     description: This endpoint starts an assessment attempt for the user by recording the start time.
+ *     tags:
+ *       - Assessment Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment to start.
+ *                 example: 0ba767e7-79fd-4b9d-a51e-60d9487358eb
+ *             required:
+ *               - assessmentId
+ *     responses:
+ *       '200':
+ *         description: Assessment successfully started.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: Assessment Started
+ *       '403':
+ *         description: Forbidden. The assessment has either not started yet or has already ended.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing why the request was forbidden.
+ *                   example: Assessment has not started yet
+ *       '404':
+ *         description: Not Found. The assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the assessment was not found.
+ *                   example: Assessment with this id does not exist
+ *       '409':
+ *         description: Conflict. The assessment has already been started by the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the assessment has already been started.
+ *                   example: Assessment already started
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error starting test
+ */
+router.put(
+  '/attempt/start',
+  authenticateUser(["canAttemptAssessment"]),
+  validateStartAssessment,
+  validateRequest,
+  startAssessmentController
 )
 
 export default router;
