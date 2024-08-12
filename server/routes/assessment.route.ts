@@ -268,6 +268,9 @@ router.post(
  *                 type: string
  *                 format: date-time
  *                 description: The updated end date and time of the assessment.
+ *               duration:
+ *                 type: number
+ *                 description: The updated duration of the assessment in milliseconds.
  *     responses:
  *       '200':
  *         description: Successfully updated assessment.
