@@ -20,7 +20,9 @@ import Question from "../../schema/assessment/question.schema";
 import Option from "../../schema/assessment/options.schema";
 import Tag from "../../schema/assessment/tag.schema";
 import {
+  col,
   FindAndCountOptions,
+  fn,
   ForeignKeyConstraintError,
   UniqueConstraintError,
 } from "sequelize";
@@ -30,6 +32,7 @@ import AssessmentGroup from "../../schema/junction/assessmentGroup.schema";
 import Group from "../../schema/group/group.schema";
 import User from "../../schema/user/user.schema";
 import { model } from "../../config/gemini";
+import Section from "../../schema/assessment/section.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -164,10 +167,10 @@ export const getAllAssessments = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
     const allAssessments = await Assessment.findAndCountAll(findOptions);
     // Convert the data to plain object
@@ -269,8 +272,39 @@ export const createQuestionInDB = async (question: {
   section: number;
 }): Promise<QuestionData | null> => {
   logger.info(`Creating question for assessment: ${question.assessment_id}`);
-
   try {
+    const transaction = await sequelize.transaction();
+
+    const existingSection = await Section.findOne({
+      where: {
+        assessment_id: question.assessment_id,
+      },
+      order: [[fn('max', col('section')), 'DESC']],
+      attributes: [[fn('max', col('section')), 'section']]
+    });
+
+    if ((!existingSection && question.section === 1)) {
+      await Section.create({
+        assessment_id: question.assessment_id,
+        section: question.section,
+      }, { transaction });
+
+    } else if (existingSection && question.section === existingSection.section + 1) {
+      await Section.create({
+        assessment_id: question.assessment_id,
+        section: question.section
+      }, { transaction });
+
+    } else if (existingSection && question.section <= existingSection.section) {
+
+    } else {
+      throw new AppError(
+        "Section does not exist or is not in order",
+        404,
+        "Section does not exist",
+        false)
+    }
+
     const createdQuestion = await Question.create(
       {
         id: question.id,
@@ -280,15 +314,20 @@ export const createQuestionInDB = async (question: {
         section: question.section,
       },
       {
+        transaction,
         raw: true,
       }
     );
     return createdQuestion;
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error
+    }
+
     throw new AppError(
       "Error creating question",
       500,
-      "Something went wrong",
+      error,
       false
     );
   }
@@ -637,10 +676,10 @@ export const getAllTags = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
 
     const allTagsData = await Tag.findAndCountAll(findOptions);
@@ -803,10 +842,10 @@ export const viewAssignedAssessmentsByUserId = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
 
     const assignedAssessments = await Assessment.findAndCountAll({
@@ -852,7 +891,7 @@ export const viewAssignedAssessmentsByUserId = async (
       );
     }
 
-    throw new AppError("error getting all tags", 500, error, true);
+    throw new AppError("error getting all assessments", 500, error, true);
   }
 };
 

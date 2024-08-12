@@ -4,16 +4,19 @@ import { authenticateUser } from "../middleware/Auth";
 
 import { validateRequest } from "../utils/validateRequest";
 import {
+  addGroupToNotificationController,
   CreateNotificationController,
   DeleteNotificationController,
   getAllNotificationsController,
+  removeGroupFromNotificationController,
+  viewAssignedNotificationsController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
 import {
   validateNotification,
   validateNotificationDelete,
 } from "../lib/validator/index";
-import { validateGetAllNotifications } from "../lib/validator/notification/validator";
+import { validateAddGroupToNotification, validateGetAllNotifications, validateRemoveGroupFromNotification, validateViewAssignedNotifications } from "../lib/validator/notification/validator";
 
 const router: Router = express.Router();
 
@@ -246,6 +249,213 @@ router.get(
   validateGetAllNotifications,
   validateRequest,
   getAllNotificationsController
+);
+
+/**
+ * @swagger
+ * /v1/notification/add-group:
+ *   post:
+ *     summary: Add a notification to a group
+ *     tags:
+ *       - Notification
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationId:
+ *                 type: string
+ *                 description: The unique identifier of the notification.
+ *                 example: 59cfd460-6ded-46e6-a269-b2747065f76c
+ *               groupId:
+ *                 type: string
+ *                 description: The unique identifier of the group.
+ *                 example: d579acc4-4936-4490-9cd5-15ddceaf0413
+ *     responses:
+ *       '200':
+ *         description: Notification successfully added to the group.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Notification or Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.post(
+  "/add-group",
+  authenticateUser(["canManageNotification", "canManageLocalGroup"]),
+  validateAddGroupToNotification,
+  validateRequest,
+  addGroupToNotificationController
+);
+
+/**
+ * @swagger
+ * /v1/notification/remove-group:
+ *   delete:
+ *     summary: Remove a group from a notification
+ *     tags:
+ *       - Notification
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notificationId:
+ *                 type: string
+ *                 description: The unique identifier of the notification.
+ *                 example: 59cfd460-6ded-46e6-a269-b2747065f76c
+ *               groupId:
+ *                 type: string
+ *                 description: The unique identifier of the group.
+ *                 example: d579acc4-4936-4490-9cd5-15ddceaf0413
+ *     responses:
+ *       '200':
+ *         description: Group removed successfully from the notification.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: Detailed message about the operation.
+ *                   example: Group removed successfully
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Notification or Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.delete(
+  "/remove-group",
+  authenticateUser(["canManageAssessment", "canManageLocalGroup"]),
+  validateRemoveGroupFromNotification,
+  validateRequest,
+  removeGroupFromNotificationController
+);
+
+/**
+ * @swagger
+ * /v1/notification/assigned:
+ *   get:
+ *     summary: Get assigned notifications with pagination and sorting options.
+ *     tags:
+ *       - Notification
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: false
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 3
+ *         required: false
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           example: createdAt
+ *         required: false
+ *         description: The field to sort the results by.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *         required: false
+ *         description: The sort order, either ascending (ASC) or descending (DESC).
+ *     responses:
+ *       '200':
+ *         description: A list of assigned notifications.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     notifications:
+ *                       type: array
+ *                       description: A list of notifications.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the notification.
+ *                             example: 59cfd460-6ded-46e6-a269-b2747065f76c
+ *                           description:
+ *                             type: string
+ *                             description: The description of the notification.
+ *                             example: bar
+ *                           title:
+ *                             type: string
+ *                             description: The title of the notification.
+ *                             example: foo
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The creation timestamp of the notification.
+ *                             example: 2024-08-09T17:27:50.700Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The last update timestamp of the notification.
+ *                             example: 2024-08-09T17:27:50.700Z
+ *                           image_url:
+ *                             type: string
+ *                             description: The URL of the notification image.
+ *                             example: https://pnacademy-dev.s3.ap-south-1.amazonaws.com/notification-images/74276e6c-dfbf-4c9f-9ff7-e52bacb278bc.png
+ *                           file_url:
+ *                             type: string
+ *                             description: The URL of the notification file.
+ *                             example: https://pnacademy-dev.s3.ap-south-1.amazonaws.com/notification-files/f40e1fb8-e633-4dbc-8a81-9e47b15200e2.pdf
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad request. Invalid query parameters.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/assigned",
+  authenticateUser(["canViewNotification"]),
+  validateViewAssignedNotifications,
+  validateRequest,
+  viewAssignedNotificationsController
 );
 
 export default router;

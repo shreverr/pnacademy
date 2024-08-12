@@ -1,10 +1,12 @@
-import { FindAndCountOptions, UniqueConstraintError } from 'sequelize'
+import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from 'sequelize'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
 import Notification, { NotificationAttributes } from '../../schema/group/notification.schema'
 import { type GroupData } from '../../types/group.types'
 import { groupAttributes, NotificationSortBy } from '../../types/notification.types'
+import NotificationGroup from '../../schema/junction/notificationGroup.schema'
+import User from '../../schema/user/user.schema'
 
 export const createNotificationInDB = async (notification: {
   id: string
@@ -284,5 +286,133 @@ export const getAllNotifications = async (
       "Something went wrong",
       true
     );
+  }
+};
+
+export const addGroupToNotificationById = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  logger.info(`Adding group to notification`);
+  try {
+    const notificationGroup = await NotificationGroup.create({
+      notification_id: notificationId,
+      group_id: groupId,
+    });
+
+    return !!notificationGroup;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(
+        "notification already added to group",
+        409,
+        "notification already added to group",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        "Either notification or group does not exist",
+        404,
+        "Either notification or group does not exist",
+        false
+      );
+    } else {
+      throw new AppError("Error adding notification to group", 500, error, true);
+    }
+  }
+};
+
+export const removeGroupFromNotificationById = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  logger.info(`Removing group from notification`);
+  try {
+    const result = await NotificationGroup.destroy({
+      where: {
+        notification_id: notificationId,
+        group_id: groupId,
+      },
+    });
+
+    if (result === 0) {
+      return false;
+    }
+
+    return true;
+  } catch (error: any) {
+    throw new AppError(
+      "Error removing group from notification",
+      500,
+      error,
+      true
+    );
+  }
+};
+
+export const viewAssignedNotificationsByUserId = async (
+  userId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: NotificationSortBy,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: NotificationAttributes[];
+  count: number;
+}> => {
+  try {
+    const findOptions: FindAndCountOptions =
+      (offset !== null || offset !== undefined) && pageSize && sortBy && order
+        ? {
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
+        : {};
+
+    const assignedNotifications = await Notification.findAndCountAll({
+      include: [
+        {
+          model: Group,
+          include: [
+            {
+              model: User,
+              where: {
+                id: userId,
+              },
+              attributes: [],
+              required: true,
+            },
+          ],
+          attributes: [],
+          required: true,
+        },
+      ],
+      ...findOptions,
+    });
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: NotificationAttributes[];
+      count: number;
+    } = {
+      rows: assignedNotifications.rows.map((notification) =>
+        notification.get({ plain: true })
+      ),
+      count: assignedNotifications.count,
+    };
+
+    return plainData;
+  } catch (error: any) {
+    if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(
+        "User does not exists",
+        404,
+        "User does not exists",
+        false
+      );
+    }
+
+    throw new AppError("error getting all notifications", 500, error, true);
   }
 };

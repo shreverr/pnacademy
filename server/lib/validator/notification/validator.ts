@@ -74,3 +74,68 @@ export const validateGetAllNotifications = [
     ),
 ];
 
+export const validateAddGroupToNotification = [
+  check("notificationId")
+    .not()
+    .isEmpty()
+    .withMessage("notificationId cannot be empty")
+    .isUUID(4)
+    .withMessage("notificationId should be a valid UUID v4"),
+
+  check("groupId")
+    .not()
+    .isEmpty()
+    .withMessage("groupId cannot be empty")
+    .isUUID(4)
+    .withMessage("groupId should be a valid UUID v4"),
+];
+
+export const validateRemoveGroupFromNotification = [
+  check("notificationId")
+    .not()
+    .isEmpty()
+    .withMessage("notificationId cannot be empty")
+    .isUUID(4)
+    .withMessage("notificationId should be a valid UUID v4"),
+
+  check("groupId")
+    .not()
+    .isEmpty()
+    .withMessage("groupId cannot be empty")
+    .isUUID(4)
+    .withMessage("groupId should be a valid UUID v4"),
+];
+
+export const validateViewAssignedNotifications = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(id|description|title|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Column names must match one of the specified options:
+        id|description|title|createdAt|updatedAt.`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+       "ASC", "DESC",`
+    ),
+];

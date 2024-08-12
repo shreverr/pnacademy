@@ -3,6 +3,7 @@ import { AppError } from "../../lib/appError";
 import { type UUID } from "crypto";
 
 import {
+  addGroupToNotificationById,
   createGroupInDB,
   createNotificationInDB,
   deleteGroupsById,
@@ -12,7 +13,9 @@ import {
   getGroupById,
   getGroupByName,
   getnotificationById,
+  removeGroupFromNotificationById,
   updateGroupInDB,
+  viewAssignedNotificationsByUserId,
 } from "../../model/notification/notification.model";
 import {
   groupAttributes,
@@ -292,6 +295,87 @@ export const viewAllNotifications = async (
   const totalPages = Math.ceil(allNotificationsCount / pageSize);
   return {
     notifications: notificationsData,
+    totalPages: totalPages,
+  };
+};
+
+export const addGroupToNotification = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  const isGroupAddedToAssessment = await addGroupToNotificationById(
+    notificationId,
+    groupId
+  );
+
+  return isGroupAddedToAssessment;
+};
+
+export const removeGroupFromNotification = async (
+  notificationId: string,
+  groupId: string
+): Promise<boolean> => {
+  const result = await removeGroupFromNotificationById(notificationId, groupId);
+
+  return result;
+};
+
+export const viewAssignedNotifications = async (
+  userId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: NotificationSortBy,
+  order?: "ASC" | "DESC"
+): Promise<{
+  notifications: NotificationAttributesWithOptionalImageAndFileUrl[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "updatedAt";
+  order = order ?? "DESC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: assignedNotifications, count: assignedNotificationsCount } =
+    await viewAssignedNotificationsByUserId(
+      userId,
+      offset,
+      pageSize,
+      sortBy,
+      order
+    );
+
+  if (!assignedNotifications) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
+
+  let assignedNotificationsData = await Promise.all(assignedNotifications.map(async (notification) => {
+    let notificationData: any = notification;
+  
+    if (notificationData.image_key) {
+      notificationData.image_url = await generatePresignedUrl(notificationData.image_key, 60 * 60)
+    }
+    
+    if (notificationData.file_key) {
+      notificationData.file_url = await generatePresignedUrl(notificationData.file_key, 60 * 60)
+    }
+  
+    delete notificationData.image_key;
+    delete notificationData.file_key;
+    return notificationData
+  }));
+
+
+  const totalPages = Math.ceil(assignedNotificationsCount / pageSize);
+
+  return {
+    notifications: assignedNotificationsData,
     totalPages: totalPages,
   };
 };
