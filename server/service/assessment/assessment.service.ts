@@ -108,15 +108,6 @@ export const createOption = async (option: {
   description: string;
   is_correct: boolean;
 }): Promise<OptionData | null> => {
-  const existingQuestion = await checkQuestionExists(option.question_id);
-  if (existingQuestion == null) {
-    throw new AppError(
-      "Question not found",
-      404,
-      "Question with this id does not exist so Can't create option",
-      false
-    );
-  }
   const optionData = await createOptionInDB({
     id: uuid(),
     question_id: option.question_id,
