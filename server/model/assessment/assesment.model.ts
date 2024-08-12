@@ -968,3 +968,32 @@ export const generateAiQuestions = async (
     );
   }
 };
+
+export const removeSectionFromAssessmentById = async (
+  assessmentId: string,
+  section: number
+): Promise<boolean> => {
+  logger.info(`Removing group from assessment`);
+  try {
+    const result = await Section.destroy({
+      where: {
+        assessment_id: assessmentId,
+        section: section,
+      },
+    });
+
+    if (result === 0) {
+      return false;
+    }
+    
+    logger.info(result)
+    return true;
+  } catch (error: any) {
+    throw new AppError(
+      "Error removing section from assessment",
+      500,
+      error,
+      true
+    );
+  }
+};

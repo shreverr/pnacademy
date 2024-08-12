@@ -12,6 +12,7 @@ import {
   deleteTag,
   generateAiQuestionsService,
   removeGroupFromAssessment,
+  removeSectionFromAssessment,
   removeTagFromQuestion,
   updateAssessment,
   updateOption,
@@ -485,6 +486,29 @@ export const generateAiQuestionsController: RequestHandler = async (
       message: 'Questions generated successfully',
       data: Questions
     })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteSectionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await removeSectionFromAssessment(req.body.assessmentId, req.body.section)
+    if (result) {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Section removed successfully'
+      })
+    } else {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Section not found'
+      })
+    }
   } catch (error) {
     next(error)
   }

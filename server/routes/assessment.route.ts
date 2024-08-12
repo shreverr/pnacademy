@@ -10,6 +10,7 @@ import {
   DeleteAssessmentController,
   DeleteOptionController,
   DeleteQuestionController,
+  deleteSectionController,
   DeleteTagController,
   generateAiQuestionsController,
   removeGroupFromAssessmentController,
@@ -53,6 +54,7 @@ import { authenticateUser } from "../middleware/Auth";
 import {
   validateBulkAssessment,
   validateGenerateAssessment,
+  validateSectionDelete,
 } from "../lib/validator/assessment/validator";
 
 const router: Router = express.Router();
@@ -1201,5 +1203,62 @@ router.post(
   validateRequest,
   generateAiQuestionsController
 );
+
+/**
+ * @swagger
+ * /v1/assessment/section:
+ *   delete:
+ *     summary: Delete a specific section from an assessment.
+ *     tags:
+ *       - Assessment Delete Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: 0ba767e7-79fd-4b9d-a51e-60d9487358eb
+ *               section:
+ *                 type: integer
+ *                 description: The section number to be removed from the assessment.
+ *                 example: 3
+ *     responses:
+ *       '200':
+ *         description: Section removed successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the result of the operation.
+ *                   example: Section removed successfully
+ *       '400':
+ *         description: Bad request. Invalid parameters.
+ *       '401':
+ *         description: Unauthorized. JWT token is missing or invalid.
+ *       '404':
+ *         description: Not found. The specified section or assessment does not exist.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.delete(
+  '/section',
+  authenticateUser(["canManageAssessment"]),
+  validateSectionDelete,
+  validateRequest,
+  deleteSectionController,
+)
 
 export default router;

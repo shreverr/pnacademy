@@ -20,6 +20,7 @@ import {
   getQuestionById,
   getTagById,
   removeGroupFromAssessmentById,
+  removeSectionFromAssessmentById,
   removeTagFromQuestionById,
   updateAssessmentInDB,
   updateOptionInDB,
@@ -509,4 +510,13 @@ export const generateAiQuestionsService = async (
     );
   }
   return questions;
+};
+
+export const removeSectionFromAssessment = async (
+  assessmentId: string,
+  section: number
+): Promise<boolean> => {
+  const result = await removeSectionFromAssessmentById(assessmentId, section);
+
+  return result;
 };
