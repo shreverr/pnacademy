@@ -366,7 +366,7 @@ export const createRole = async (role: {
 };
 
 export const updateRole = async (role: {
-  id: string;
+  roleId: string;
   name: string | null;
   canManageAssessment: boolean | null;
   canManageUser: boolean | null;
@@ -379,7 +379,7 @@ export const updateRole = async (role: {
   canManageMyAccount: boolean | null;
   canViewNotification: boolean | null;
 }): Promise<RoleData | null> => {
-  const existingRole = await getRoleById(role.id);
+  const existingRole = await getRoleById(role.roleId);
   if (!existingRole)
     throw new AppError(
       "Role not found",
@@ -389,7 +389,7 @@ export const updateRole = async (role: {
     );
 
   const updatedRole = await updateRoleInDB({
-    id: role.id,
+    id: role.roleId,
     name: role.name,
     canManageAssessment: role.canManageAssessment,
     canManageUser: role.canManageUser,

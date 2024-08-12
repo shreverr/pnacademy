@@ -54,5 +54,6 @@
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.2",
     "typescript": "*"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
