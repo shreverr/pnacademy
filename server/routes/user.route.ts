@@ -621,13 +621,13 @@ router.post(
  * @swagger
  * /v1/user/role:
  *   patch:
- *     summary: Update role of a user
+ *     summary: Update a user role
  *     tags:
- *     - User update Controller
+ *       - User update Controller
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             required:
@@ -641,35 +641,38 @@ router.post(
  *                 type: string
  *                 minLength: 2
  *                 description: The name of the role (optional)
- *               'permissions[canManageAssessment]':
- *                 type: boolean
- *                 description: Permission to manage assessments
- *               'permissions[canManageRole]':
- *                 type: boolean
- *                 description: Permission to manage roles
- *               'permissions[canManageNotification]':
- *                 type: boolean
- *                 description: Permission to manage notifications
- *               'permissions[canManageLocalGroup]':
- *                 type: boolean
- *                 description: Permission to manage local groups
- *               'permissions[canManageReports]':
- *                 type: boolean
- *                 description: Permission to manage reports
- *               'permissions[canAttemptAssessment]':
- *                 type: boolean
- *                 description: Permission to attempt assessments
- *               'permissions[canViewReport]':
- *                 type: boolean
- *                 description: Permission to view reports
- *               'permissions[canManageMyAccount]':
- *                 type: boolean
- *                 description: Permission to manage own account
- *               'permissions[canViewNotification]':
- *                 type: boolean
- *                 description: Permission to view notifications
+ *               permissions:
+ *                 type: object
+ *                 properties:
+ *                   canManageAssessment:
+ *                     type: boolean
+ *                     description: Permission to manage assessments
+ *                   canManageRole:
+ *                     type: boolean
+ *                     description: Permission to manage roles
+ *                   canManageNotification:
+ *                     type: boolean
+ *                     description: Permission to manage notifications
+ *                   canManageLocalGroup:
+ *                     type: boolean
+ *                     description: Permission to manage local groups
+ *                   canManageReports:
+ *                     type: boolean
+ *                     description: Permission to manage reports
+ *                   canAttemptAssessment:
+ *                     type: boolean
+ *                     description: Permission to attempt assessments
+ *                   canViewReport:
+ *                     type: boolean
+ *                     description: Permission to view reports
+ *                   canManageMyAccount:
+ *                     type: boolean
+ *                     description: Permission to manage own account
+ *                   canViewNotification:
+ *                     type: boolean
+ *                     description: Permission to view notifications
  *     responses:
- *       200:
+ *       201:
  *         description: Role updated successfully
  *         content:
  *           application/json:
@@ -678,7 +681,10 @@ router.post(
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Role updated successfully
+ *                   example: Role Updated successfully
+ *                 data:
+ *                   type: object
+ *                   description: The updated role object
  *       400:
  *         description: Bad request
  *         content:

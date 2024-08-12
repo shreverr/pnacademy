@@ -4,8 +4,19 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { createGroup, createNotification, deleteGroups, deleteNotification, updateGroup, viewAllGroups, viewAllNotifications } from "../../service/notification/notification.service";
-import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
+import {
+  createGroup,
+  createNotification,
+  deleteGroups,
+  deleteNotification,
+  updateGroup,
+  viewAllGroups,
+  viewAllNotifications,
+} from "../../service/notification/notification.service";
+import {
+  groupAttributes,
+  NotificationSortBy,
+} from "../../types/notification.types";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -25,17 +36,17 @@ export const CreateNotificationController: RequestHandler = async (
 
     // Expicitly type the files object
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
-    if (files  && (files['image'])) {
+
+    if (files && files["image"]) {
       notificationArgs.image = files["image"][0];
     }
 
-    if (files  && (files['file'])) {
+    if (files && files["file"]) {
       notificationArgs.file = files["file"][0];
     }
-    
+
     const notification = await createNotification(notificationArgs);
-    
+
     return res.status(201).json({
       status: "success",
       message: "Notification created successfully",
@@ -56,7 +67,7 @@ export const DeleteNotificationController: RequestHandler = async (
       id: req.body.id,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Notification deleted successfully",
       data: notification,
     });
@@ -90,10 +101,7 @@ export const UpdateGroupController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const group = await updateGroup(
-      req.body.id,
-      req.body.name,
-    );
+    const group = await updateGroup(req.body.id, req.body.name);
     return res.status(201).json({
       message: "Group updated successfully",
       data: group,
@@ -102,7 +110,6 @@ export const UpdateGroupController: RequestHandler = async (
     next(error);
   }
 };
-
 
 export const deleteGroupController: RequestHandler = async (
   req: Request,
@@ -113,12 +120,14 @@ export const deleteGroupController: RequestHandler = async (
     const allGroupssDeleted = await deleteGroups(req.body.groupIds);
 
     return res.status(200).json({
-      message: allGroupssDeleted ? "Groups Deleted successfully" : "Some groups deleted"
+      message: allGroupssDeleted
+        ? "Groups Deleted successfully"
+        : "Some groups deleted",
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const getAllGroupsController: RequestHandler = async (
   req: Request,
@@ -140,7 +149,7 @@ export const getAllGroupsController: RequestHandler = async (
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const getAllNotificationsController: RequestHandler = async (
   req: Request,
@@ -152,14 +161,14 @@ export const getAllNotificationsController: RequestHandler = async (
       req.query.page as string,
       req.query.pageSize as string,
       req.query.sortBy as NotificationSortBy,
-      req.query.order as 'ASC' | 'DESC'
-    )
+      req.query.order as "ASC" | "DESC"
+    );
 
     return res.status(201).json({
-      message: 'success',
-      data: notifications
-    })
+      message: "success",
+      data: notifications,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};

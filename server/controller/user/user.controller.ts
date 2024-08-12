@@ -171,7 +171,7 @@ export const updateRoleController: RequestHandler = async (
 ) => {
   try {
     const updatedRole = await updateRole({
-      id: req.body.id,
+      roleId: req.body.id,
       name: req.body.name,
       canManageAssessment: req.body.permissions.canManageAssessment,
       canManageUser: req.body.permissions.canManageUser,

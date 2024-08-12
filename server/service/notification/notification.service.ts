@@ -14,10 +14,18 @@ import {
   getnotificationById,
   updateGroupInDB,
 } from "../../model/notification/notification.model";
-import { groupAttributes, NotificationAttributesWithOptionalImageAndFileUrl, NotificationSortBy } from "../../types/notification.types";
+import {
+  groupAttributes,
+  NotificationAttributesWithOptionalImageAndFileUrl,
+  NotificationSortBy,
+} from "../../types/notification.types";
 import { GroupData } from "../../types/group.types";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
-import { deleteFileFromDisk, deleteFileFromS3, uploadFileToS3 } from "../../lib/file";
+import {
+  deleteFileFromDisk,
+  deleteFileFromS3,
+  uploadFileToS3,
+} from "../../lib/file";
 import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
 import { NotificationAttributes } from "../../schema/group/notification.schema";
@@ -32,27 +40,31 @@ export const createNotification = async (notification: {
   let notificationFileKey: string | null = null;
   try {
     if (notification.image) {
-      notificationImageKey = `notification-images/${uuid()}${path.extname(notification.image.path)}`
+      notificationImageKey = `notification-images/${uuid()}${path.extname(
+        notification.image.path
+      )}`;
 
       await uploadFileToS3(
         notification.image.path,
         notificationImageKey,
-        'image'
+        "image"
       );
 
-      deleteFileFromDisk(notification.image.path)
+      deleteFileFromDisk(notification.image.path);
     }
 
     if (notification.file) {
-      notificationFileKey = `notification-files/${uuid()}${path.extname(notification.file.path)}`
+      notificationFileKey = `notification-files/${uuid()}${path.extname(
+        notification.file.path
+      )}`;
 
       await uploadFileToS3(
         notification.file.path,
         notificationFileKey,
-        'other'
+        "other"
       );
 
-      deleteFileFromDisk(notification.file.path)
+      deleteFileFromDisk(notification.file.path);
     }
 
     const notificationDataInDB = await createNotificationInDB({
@@ -68,30 +80,39 @@ export const createNotification = async (notification: {
     delete notificationData.file_key;
 
     if (notificationImageKey) {
-      notificationData.image_url = await generatePresignedUrl(notificationImageKey, 60 * 60)
+      notificationData.image_url = await generatePresignedUrl(
+        notificationImageKey,
+        60 * 60
+      );
     }
 
     if (notificationFileKey) {
-      notificationData.file_url = await generatePresignedUrl(notificationFileKey, 60 * 60)
+      notificationData.file_url = await generatePresignedUrl(
+        notificationFileKey,
+        60 * 60
+      );
     }
 
     return notificationData;
   } catch (error: any) {
     if (notificationFileKey) {
       try {
-        await deleteFileFromS3(notificationFileKey as string)
+        await deleteFileFromS3(notificationFileKey as string);
       } catch (error) {
-        throw error
+        throw error;
       }
-    } else if (error instanceof AppError && error.name === 'error creating notification') {
+    } else if (
+      error instanceof AppError &&
+      error.name === "error creating notification"
+    ) {
       try {
-        await deleteFileFromS3(notificationImageKey as string)
-        await deleteFileFromS3(notificationFileKey as string)
+        await deleteFileFromS3(notificationImageKey as string);
+        await deleteFileFromS3(notificationFileKey as string);
       } catch (error) {
-        throw error
+        throw error;
       }
     } else {
-      throw error
+      throw error;
     }
   }
 
@@ -102,6 +123,7 @@ export const deleteNotification = async (notification: {
   id: UUID;
 }): Promise<boolean | null> => {
   const checkNotification = await getnotificationById(notification.id);
+
   if (!checkNotification) {
     throw new AppError(
       "Notification not found",
@@ -110,12 +132,28 @@ export const deleteNotification = async (notification: {
       false
     );
   }
+  if (checkNotification.file_key || checkNotification.image_key) {
+    if (checkNotification.file_key) {
+      try {
+        await deleteFileFromS3(checkNotification.file_key as string);
+      } catch (error) {
+        throw error;
+      }
+    }
+    if (checkNotification.image_key) {
+      try {
+        await deleteFileFromS3(checkNotification.image_key as string);
+      } catch (error) {
+        throw error;
+      }
+    }
+  }
+
   const notificationData = await deleteNotificationInDB({
     id: notification.id,
   });
   return true;
-}
-
+};
 
 export const createGroup = async (group: {
   name: string;
@@ -141,22 +179,19 @@ export const updateGroup = async (
   id: UUID,
   name: string
 ): Promise<GroupData | null> => {
-  const existingGroup = await getGroupById(id)
+  const existingGroup = await getGroupById(id);
   if (existingGroup == null) {
     throw new AppError(
-      'Group not found',
+      "Group not found",
       404,
       "Group with this id does not exist so Can't update group",
       false
-    )
+    );
   }
-  const updatedGroup = await updateGroupInDB(
-    id,
-    name
-  )
+  const updatedGroup = await updateGroupInDB(id, name);
 
-  return updatedGroup
-}
+  return updatedGroup;
+};
 
 export const deleteGroups = async (groupIds: string[]): Promise<boolean> => {
   const result = await deleteGroupsById(groupIds);
@@ -167,15 +202,15 @@ export const viewAllGroups = async (
   pageStr?: string,
   pageSizeStr?: string,
   sortBy?: groupAttributes,
-  order?: "ASC" | "DESC",
+  order?: "ASC" | "DESC"
 ): Promise<{
-  groups: GroupData[],
-  totalPages: number,
+  groups: GroupData[];
+  totalPages: number;
 }> => {
-  const page = parseInt(pageStr ?? '1');
-  const pageSize = parseInt(pageSizeStr ?? '10');
-  sortBy = sortBy ?? 'name';
-  order = order ?? 'ASC';
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "name";
+  order = order ?? "ASC";
 
   const offset = (page - 1) * pageSize;
 
@@ -184,7 +219,7 @@ export const viewAllGroups = async (
     pageSize,
     sortBy,
     order
-  )
+  );
 
   if (!allGroupsData) {
     throw new AppError(
@@ -199,7 +234,7 @@ export const viewAllGroups = async (
 
   return {
     groups: allGroupsData,
-    totalPages: totalPages
+    totalPages: totalPages,
   };
 };
 
@@ -230,21 +265,29 @@ export const viewAllNotifications = async (
     );
   }
 
-  let notificationsData = await Promise.all(allNotificationsData.map(async (notification) => {
-    let notificationData: any = notification;
-  
-    if (notificationData.image_key) {
-      notificationData.image_url = await generatePresignedUrl(notificationData.image_key, 60 * 60)
-    }
-    
-    if (notificationData.file_key) {
-      notificationData.file_url = await generatePresignedUrl(notificationData.file_key, 60 * 60)
-    }
-  
-    delete notificationData.image_key;
-    delete notificationData.file_key;
-    return notificationData
-  }));
+  let notificationsData = await Promise.all(
+    allNotificationsData.map(async (notification) => {
+      let notificationData: any = notification;
+
+      if (notificationData.image_key) {
+        notificationData.image_url = await generatePresignedUrl(
+          notificationData.image_key,
+          60 * 60
+        );
+      }
+
+      if (notificationData.file_key) {
+        notificationData.file_url = await generatePresignedUrl(
+          notificationData.file_key,
+          60 * 60
+        );
+      }
+
+      delete notificationData.image_key;
+      delete notificationData.file_key;
+      return notificationData;
+    })
+  );
 
   const totalPages = Math.ceil(allNotificationsCount / pageSize);
   return {
