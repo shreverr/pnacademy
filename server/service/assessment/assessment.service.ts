@@ -16,13 +16,17 @@ import {
   getAllAssessments,
   getAllTags,
   getAssessmentById,
+  getAssessmentStatusById,
   getOptionById,
   getQuestionById,
+  getQuestionsBySection,
+  getSectionStatusesById,
   getTagById,
   removeGroupFromAssessmentById,
   removeSectionFromAssessmentById,
   removeTagFromQuestionById,
   startAssessmentById,
+  startSectionById,
   updateAssessmentInDB,
   updateOptionInDB,
   updateQuestionInDB,
@@ -46,6 +50,7 @@ import { AppError } from "../../lib/appError";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
+import Question from "../../schema/assessment/question.schema";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -557,6 +562,84 @@ export const startAssessment = async (
   }
 
   const result = await startAssessmentById(assessmentId, userId);
-  
+
   return result;
+};
+
+
+export const startSection = async (
+  assessmentId: string,
+  userId: string,
+  section: number
+): Promise<Question[] | null> => {
+  const currentTime = Date.now()
+
+  const assessment = await getAssessmentById(assessmentId as UUID);
+  if (!assessment) {
+    throw new AppError(
+      "Assessment not found",
+      404,
+      "Assessment with this id does not exist",
+      false
+    );
+  }
+
+  if (currentTime < assessment.start_at.getTime()) {
+    throw new AppError(
+      "Assessment not started",
+      403, 
+      "Assessment has not started yet",
+      false
+    );
+  }
+
+  if (currentTime > assessment.end_at.getTime()) {
+    throw new AppError(
+      "Assessment ended",
+      403,
+      "Assessment has ended",
+      false
+    );
+  }
+
+  const assessmentStatus = await getAssessmentStatusById(assessmentId, userId);
+  if (assessmentStatus.started_at === null) {
+    throw new AppError(
+      'Assessment not started',
+      404,
+      'Assessment not started',
+      false
+    );
+  }
+
+  if (assessmentStatus.submitted_at !== null) {
+    throw new AppError(
+      'Assessment has ended',
+      404,
+      'Assessment has ended',
+      false
+    );
+  }
+
+  const sectionStatuses = (await getSectionStatusesById(assessmentId, userId)).rows;
+
+  const currentSectionStatus = sectionStatuses.find((sectionStatus) => sectionStatus.section === section);
+
+  if (currentSectionStatus?.is_submited === true) {
+    throw new AppError(
+      'Section already subimted',
+      409,
+      'Section already subimted',
+      false
+    );
+  }
+
+  const isSectionStarted = await startSectionById(assessmentId, userId, section);
+
+  if(isSectionStarted) {
+    const questionsBySection = getQuestionsBySection(assessmentId, section);
+    return questionsBySection;
+  }
+  
+  return null;
 };

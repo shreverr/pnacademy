@@ -15,6 +15,7 @@ import {
   removeSectionFromAssessment,
   removeTagFromQuestion,
   startAssessment,
+  startSection,
   updateAssessment,
   updateOption,
   updateQuestion,
@@ -526,6 +527,24 @@ export const startAssessmentController: RequestHandler = async (
     return res.status(200).json({
       status: 'success',
       message: 'Assessment Started'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const startSectionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const questions = await startSection(req.body.assessmentId, req.user.userId, req.body.section)
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Section Started',
+      questions: questions
     })
   } catch (error) {
     next(error)

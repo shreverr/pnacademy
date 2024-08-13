@@ -33,7 +33,8 @@ import Group from "../../schema/group/group.schema";
 import User from "../../schema/user/user.schema";
 import { model } from "../../config/gemini";
 import Section from "../../schema/assessment/section.schema";
-import AssessmentStatus from "../../schema/assessment/assessmentStatus.schema";
+import AssessmentStatus, { AssessmentStatusAttributes } from "../../schema/assessment/assessmentStatus.schema";
+import SectionStatus from "../../schema/assessment/sectionStatus.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1011,7 +1012,6 @@ export const startAssessmentById = async (
       started_at: new Date(),
     })
 
-    logger.info(result)
     return true;
   } catch (error: any) {
     if (error instanceof UniqueConstraintError && (error.parent as any).table === 'assessment_statuses') {
@@ -1021,7 +1021,7 @@ export const startAssessmentById = async (
         "Assessment already started",
         false
       );
-    } else if(error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_statuses_user_id_fkey') {
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_statuses_user_id_fkey') {
       throw new AppError(
         "user does not exist",
         404,
@@ -1038,3 +1038,155 @@ export const startAssessmentById = async (
     }
   }
 };
+
+export const getAssessmentStatusById = async (
+  assessmentId: string,
+  userId: string
+): Promise<AssessmentStatusAttributes> => {
+  logger.info(`Getting assessment `);
+
+  try {
+    const assessmentStatus = await AssessmentStatus.findOne({
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId
+      },
+      raw: true,
+    });
+
+    if (!assessmentStatus) {
+      throw new AppError(
+        'Assessment not started by user',
+        404,
+        'Assessment not started by user',
+        false
+      );
+    }
+
+    return assessmentStatus;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "Error getting assessment",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const startSectionById = async (
+  assessmentId: string,
+  userId: string,
+  section: number
+): Promise<boolean> => {
+  logger.info(`Starting assessment`);
+  try {
+    const result = await SectionStatus.create({
+      assessment_id: assessmentId,
+      user_id: userId,
+      section: section,
+      is_submited: false,
+    })
+
+    return true;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError && (error.parent as any).table === 'section_statuses') {
+      return true;
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_user_id_fkey') {
+      throw new AppError(
+        "user does not exist",
+        404,
+        "user does not exist",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_assessment_id_fkey') {
+      throw new AppError(
+        "Assessment does not exist",
+        404,
+        "Assessment does not exist",
+        false
+      );
+    } else {
+      throw new AppError(
+        "Error starting test",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getQuestionsBySection = async (
+  assessmentId: string,
+  section: number
+): Promise<Question[] | null> => {
+  logger.info(`Getting questios by section`);
+  try {
+    // Find the question
+    const questions = await Question.findAll({
+      where: {
+        assessment_id: assessmentId,
+        section: section
+      },
+      attributes: ['id', 'description', 'marks', 'section', 'assessment_id'],
+      include: [
+        {
+          model: Option,
+          as: "options",
+          attributes: ['id', 'description', 'question_id']
+        },
+      ],
+    });
+
+    logger.info(questions)
+
+    if (!questions) {
+      return null;
+    }
+    return questions;
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting question",
+      500,
+      error,
+      false
+    );
+  }
+};
+
+export const getSectionStatusesById = async (
+  assessmentId: string,
+  userId: string
+): Promise<{
+  rows: SectionStatus[]
+  count: number
+}> => {
+  logger.info(`Getting section statuses by id`);
+  try {
+    // Find the question
+    const sectionStatuses = await SectionStatus.findAndCountAll({
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId
+      },
+    });
+
+    logger.info(sectionStatuses)
+
+
+    return sectionStatuses;
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting section statuses",
+      500,
+      error,
+      false
+    );
+  }
+};
+

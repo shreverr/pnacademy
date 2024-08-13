@@ -16,6 +16,7 @@ import {
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
   startAssessmentController,
+  startSectionController,
   UpdateAssessmentController,
   UpdateOptionController,
   UpdateQuestionController,
@@ -57,6 +58,7 @@ import {
   validateGenerateAssessment,
   validateSectionDelete,
   validateStartAssessment,
+  validateStartSection,
 } from "../lib/validator/assessment/validator";
 import { start } from "repl";
 
@@ -1370,6 +1372,167 @@ router.put(
   validateStartAssessment,
   validateRequest,
   startAssessmentController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/section/start:
+ *   put:
+ *     summary: Start a section of an assessment
+ *     description: This endpoint starts a specific section of an assessment attempt by the user, providing access to the questions within that section.
+ *     tags:
+ *       - Assessment Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
+ *               section:
+ *                 type: integer
+ *                 description: The section number of the assessment to start.
+ *                 example: 3
+ *             required:
+ *               - assessmentId
+ *               - section
+ *     responses:
+ *       '200':
+ *         description: Section successfully started.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: Section Started
+ *                 questions:
+ *                   type: array
+ *                   description: A list of questions in the section.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                         description: The unique identifier of the question.
+ *                         example: b3d5a587-be5f-44b7-a202-38af92c266c3
+ *                       description:
+ *                         type: string
+ *                         description: The question text or description.
+ *                         example: "This is a random description for the assessment question."
+ *                       marks:
+ *                         type: integer
+ *                         description: The marks assigned to the question.
+ *                         example: 91
+ *                       section:
+ *                         type: integer
+ *                         description: The section number to which this question belongs.
+ *                         example: 3
+ *                       assessment_id:
+ *                         type: string
+ *                         format: uuid
+ *                         description: The ID of the assessment to which this question belongs.
+ *                         example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
+ *                       options:
+ *                         type: array
+ *                         description: The list of options for the question.
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                               format: uuid
+ *                               description: The unique identifier of the option.
+ *                               example: 662b8629-b91b-4fd6-8069-54a3dd7fdcee
+ *                             description:
+ *                               type: string
+ *                               description: The description or text of the option.
+ *                               example: "This is a randomly generated description for an option."
+ *                             question_id:
+ *                               type: string
+ *                               format: uuid
+ *                               description: The ID of the question to which this option belongs.
+ *                               example: b3d5a587-be5f-44b7-a202-38af92c266c3
+ *       '403':
+ *         description: Forbidden. The assessment has either not started yet, has already ended, or the section has already been submitted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing why the request was forbidden.
+ *                   example: Assessment has not started yet
+ *       '404':
+ *         description: Not Found. The assessment or user with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the assessment or user was not found.
+ *                   example: Assessment with this id does not exist
+ *       '409':
+ *         description: Conflict. The section has already been submitted or the section is invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the section has already been submitted.
+ *                   example: Section already submitted
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error starting test
+ */
+router.put(
+  '/attempt/section/start',
+  authenticateUser(["canAttemptAssessment"]),
+  validateStartSection,
+  validateRequest,
+  startSectionController
 )
 
 export default router;
