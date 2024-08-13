@@ -523,3 +523,26 @@ export const validateStartSection = [
     .matches(/^[1-9]\d*$/)
     .withMessage("section should be >= 1"),
 ];
+
+export const validateAttemptQuestion = [
+  check("assessmentId")
+    .not()
+    .isEmpty()
+    .withMessage("assessmentId cannot be empty")
+    .isUUID(4)
+    .withMessage("assessmentId should be a valid UUID v4"),
+
+  check("questionId")
+    .not()
+    .isEmpty()
+    .withMessage("questionId cannot be empty")
+    .isUUID(4)
+    .withMessage("questionId should be a valid UUID v4"),
+
+  check("selectedOptionId")
+    .not()
+    .isEmpty()
+    .withMessage("selectedOptionId cannot be empty")
+    .isUUID(4)
+    .withMessage("selectedOptionId should be a valid UUID v4"),
+];

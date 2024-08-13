@@ -35,6 +35,7 @@ import { model } from "../../config/gemini";
 import Section from "../../schema/assessment/section.schema";
 import AssessmentStatus, { AssessmentStatusAttributes } from "../../schema/assessment/assessmentStatus.schema";
 import SectionStatus from "../../schema/assessment/sectionStatus.schema";
+import AssessmentResponse from "../../schema/assessment/assessmentResponse.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -219,7 +220,7 @@ export const checkQuestionExists = async (
   }
 };
 
-export const getQuestionById = async (
+export const getQuestionAndOptionsById = async (
   id: UUID
 ): Promise<QuestionDetailedData | null> => {
   logger.info(`Getting question with id: ${id}`);
@@ -1190,3 +1191,97 @@ export const getSectionStatusesById = async (
   }
 };
 
+export const getQuestionById = async (
+  assessmentId: string,
+  questionId: string
+): Promise<Question | null> => {
+  logger.info(`Getting question by id`);
+  try {
+    // Find the question
+    const question = await Question.findOne({
+      where: {
+        assessment_id: assessmentId,
+        id: questionId
+      },
+    });
+
+    if (!question) {
+      throw new AppError(
+        "Question does not exist",
+        404,
+        "Question does not exist",
+        false
+      )
+    }
+
+    return question;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "Error getting question",
+        500,
+        error,
+        false
+      );
+    }
+  }
+};
+
+export const attemptQuestionById = async (
+  assessmentId: string,
+  userId: string,
+  questionId: string,
+  selectedOptionId: string,
+): Promise<[AssessmentResponse, boolean | null]> => {
+  logger.info(`Attempting question by id`);
+  try {
+    // Find the question
+    const attemptedQuestion = await AssessmentResponse.upsert({
+      assessment_id: assessmentId,
+      user_id: userId,
+      question_id: questionId,
+      selected_option_id: selectedOptionId,
+    });
+
+    return attemptedQuestion;
+  } catch (error: any) {
+    if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_question_id_fkey') {
+      throw new AppError(
+        "Question does not exist",
+        404,
+        "Question does not exist",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_user_id_fkey') {
+      throw new AppError(
+        "User does not exist",
+        404,
+        "User does not exist",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_assessment_id_fkey') {
+      throw new AppError(
+        "Assessment does not exist",
+        404,
+        "Assessment does not exist",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_selected_option_id_fkey') {
+      throw new AppError(
+        "Option does not exist",
+        404,
+        "Option does not exist",
+        false
+      );
+    } else {
+      throw new AppError(
+        "Error Attempting question",
+        500,
+        error,
+        false
+      );
+    }
+  }
+};

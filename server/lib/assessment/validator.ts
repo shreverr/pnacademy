@@ -67,16 +67,26 @@ export const validateSectionStatus = async (
   section: number
 ) => {
   const sectionStatuses = (await getSectionStatusesById(assessmentId, userId)).rows;
-  const currentSectionStatus = sectionStatuses.find((sectionStatus) => sectionStatus.section === section);
 
-  if (currentSectionStatus?.is_submited === true) {
-    throw new AppError(
-      'Section already submitted',
-      409,
-      'Section already submitted',
-      false
-    );
-  }
+  sectionStatuses.forEach((sectionStatus) => {
+    if (sectionStatus.is_submited === true) {
+        throw new AppError(
+          'Section already submitted',
+          409,
+          'Section already submitted',
+          false
+        );
+      }
 
-  return currentSectionStatus;
+    if (sectionStatus.section !== section && sectionStatus.is_submited === false) {
+      throw new AppError(
+        'Previous section not submitted',
+        409,
+        'Previous section not submitted',
+        false
+      );
+    }
+  });
+
+  return sectionStatuses;
 };

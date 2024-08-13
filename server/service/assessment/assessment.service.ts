@@ -2,6 +2,7 @@ import { type UUID } from "crypto";
 import {
   addGroupToAssessmentById,
   addTagToQuestion,
+  attemptQuestionById,
   checkAssessmentExists,
   checkQuestionExists,
   createAssementInDB,
@@ -18,6 +19,7 @@ import {
   getAssessmentById,
   getAssessmentStatusById,
   getOptionById,
+  getQuestionAndOptionsById,
   getQuestionById,
   getQuestionsBySection,
   getSectionStatusesById,
@@ -350,7 +352,7 @@ export const viewAssessmentBulk = async (
 export const viewQuestionDetails = async (
   userId: UUID
 ): Promise<QuestionDetailedData | null> => {
-  const questionData = await getQuestionById(userId);
+  const questionData = await getQuestionAndOptionsById(userId);
   if (questionData === null) {
     throw new AppError(
       "Question not found",
@@ -555,4 +557,30 @@ export const startSection = async (
   }
 
   return null;
+};
+
+export const attemptQustion = async (
+  assessmentId: string,
+  userId: string,
+  questionId: string,
+  selectedOptionId: string
+): Promise<boolean> => {
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
+  const questionSection = (await getQuestionById(assessmentId, questionId))!.section
+  await validateSectionStatus(assessmentId, userId, questionSection);
+  const isSectionStarted = await startSectionById(assessmentId, userId, questionSection);
+
+  if (isSectionStarted) {
+    const [attemptedQuestion, isCreated] = await attemptQuestionById(
+      assessmentId,
+      userId,
+      questionId,
+      selectedOptionId
+    );
+
+    return !!attemptedQuestion;
+  }
+
+  return false;
 };

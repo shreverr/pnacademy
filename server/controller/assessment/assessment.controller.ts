@@ -2,6 +2,7 @@ import { type UUID } from 'crypto'
 import {
   addGroupToAssessment,
   addTag,
+  attemptQustion,
   createAssessment,
   createOption,
   createQuestion,
@@ -545,6 +546,28 @@ export const startSectionController: RequestHandler = async (
       status: 'success',
       message: 'Section Started',
       questions: questions
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const attemptQuestionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await attemptQustion(
+      req.body.assessmentId,
+      req.user.userId,
+      req.body.questionId,
+      req.body.selectedOptionId
+    )
+
+    return res.status(201).json({
+      status: 'success',
+      message: 'Question attempted',
     })
   } catch (error) {
     next(error)
