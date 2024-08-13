@@ -51,6 +51,7 @@ import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import Question from "../../schema/assessment/question.schema";
+import { validateAssessment, validateAssessmentStatus, validateSectionStatus } from "../../lib/assessment/validator";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -531,36 +532,7 @@ export const startAssessment = async (
   assessmentId: string,
   userId: string
 ): Promise<boolean> => {
-  const currentTime = Date.now()
-
-  const assessment = await getAssessmentById(assessmentId as UUID);
-  if (!assessment) {
-    throw new AppError(
-      "Assessment not found",
-      404,
-      "Assessment with this id does not exist",
-      false
-    );
-  }
-
-  if (currentTime < assessment.start_at.getTime()) {
-    throw new AppError(
-      "Assessment not started",
-      403,
-      "Assessment has not started yet",
-      false
-    );
-  }
-
-  if (currentTime > assessment.end_at.getTime()) {
-    throw new AppError(
-      "Assessment ended",
-      403,
-      "Assessment has ended",
-      false
-    );
-  }
-
+  await validateAssessment(assessmentId);
   const result = await startAssessmentById(assessmentId, userId);
 
   return result;
@@ -572,74 +544,15 @@ export const startSection = async (
   userId: string,
   section: number
 ): Promise<Question[] | null> => {
-  const currentTime = Date.now()
-
-  const assessment = await getAssessmentById(assessmentId as UUID);
-  if (!assessment) {
-    throw new AppError(
-      "Assessment not found",
-      404,
-      "Assessment with this id does not exist",
-      false
-    );
-  }
-
-  if (currentTime < assessment.start_at.getTime()) {
-    throw new AppError(
-      "Assessment not started",
-      403, 
-      "Assessment has not started yet",
-      false
-    );
-  }
-
-  if (currentTime > assessment.end_at.getTime()) {
-    throw new AppError(
-      "Assessment ended",
-      403,
-      "Assessment has ended",
-      false
-    );
-  }
-
-  const assessmentStatus = await getAssessmentStatusById(assessmentId, userId);
-  if (assessmentStatus.started_at === null) {
-    throw new AppError(
-      'Assessment not started',
-      404,
-      'Assessment not started',
-      false
-    );
-  }
-
-  if (assessmentStatus.submitted_at !== null) {
-    throw new AppError(
-      'Assessment has ended',
-      404,
-      'Assessment has ended',
-      false
-    );
-  }
-
-  const sectionStatuses = (await getSectionStatusesById(assessmentId, userId)).rows;
-
-  const currentSectionStatus = sectionStatuses.find((sectionStatus) => sectionStatus.section === section);
-
-  if (currentSectionStatus?.is_submited === true) {
-    throw new AppError(
-      'Section already subimted',
-      409,
-      'Section already subimted',
-      false
-    );
-  }
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
+  await validateSectionStatus(assessmentId, userId, section);
 
   const isSectionStarted = await startSectionById(assessmentId, userId, section);
-
-  if(isSectionStarted) {
+  if (isSectionStarted) {
     const questionsBySection = getQuestionsBySection(assessmentId, section);
     return questionsBySection;
   }
-  
+
   return null;
 };
