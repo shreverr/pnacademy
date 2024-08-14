@@ -1209,6 +1209,83 @@ router.get(
   viewAssignedAssessmentsController
 );
 
+/**
+ * @swagger
+ * /v1/assessment/generate:
+ *   post:
+ *     summary: Generate AI questions for an assessment
+ *     tags:
+ *       - Assessment Management
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - topic
+ *               - numberOfQuestions
+ *               - difficulty
+ *             properties:
+ *               topic:
+ *                 type: string
+ *                 minLength: 2
+ *                 description: The topic for which questions should be generated
+ *                 example: "Bihar"
+ *               numberOfQuestions:
+ *                 type: integer
+ *                 minimum: 1
+ *                 description: The number of questions to generate
+ *                 example: 10
+ *               difficulty:
+ *                 type: string
+ *                 minLength: 2
+ *                 description: The difficulty level of the questions
+ *                 example: "medium"
+ *     responses:
+ *       '200':
+ *         description: Successfully generated AI questions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Questions generated successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     questions:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           description:
+ *                             type: string
+ *                             example: "What is the capital of Bihar?"
+ *                           Options:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 description:
+ *                                   type: string
+ *                                   example: "Patna"
+ *                                 isCorrect:
+ *                                   type: boolean
+ *                                   example: true
+ *       '400':
+ *         description: Bad request. Invalid input parameters.
+ *       '401':
+ *         description: Unauthorized. JWT token is missing or invalid.
+ *       '403':
+ *         description: Forbidden. User does not have the required permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
 router.post(
   "/generate",
   authenticateUser(["canManageAssessment"]),
@@ -1267,12 +1344,12 @@ router.post(
  *         description: Internal server error.
  */
 router.delete(
-  '/section',
+  "/section",
   authenticateUser(["canManageAssessment"]),
   validateSectionDelete,
   validateRequest,
-  deleteSectionController,
-)
+  deleteSectionController
+);
 
 /**
  * @swagger
@@ -1375,12 +1452,12 @@ router.delete(
  *                   example: Error starting test
  */
 router.put(
-  '/attempt/start',
+  "/attempt/start",
   authenticateUser(["canAttemptAssessment"]),
   validateStartAssessment,
   validateRequest,
   startAssessmentController
-)
+);
 
 /**
  * @swagger
@@ -1536,12 +1613,12 @@ router.put(
  *                   example: Error starting test
  */
 router.put(
-  '/attempt/section/start',
+  "/attempt/section/start",
   authenticateUser(["canAttemptAssessment"]),
   validateStartSection,
   validateRequest,
   startSectionController
-)
+);
 
 /**
  * @swagger
@@ -1654,12 +1731,12 @@ router.put(
  *                   example: Error attempting question
  */
 router.post(
-  '/attempt/question',
+  "/attempt/question",
   authenticateUser(["canAttemptAssessment"]),
   validateAttemptQuestion,
   validateRequest,
   attemptQuestionController
-)
+);
 
 /**
  * @swagger
@@ -1757,12 +1834,12 @@ router.post(
  *                   example: Error deleting question
  */
 router.delete(
-  '/attempt/question',
+  "/attempt/question",
   authenticateUser(["canAttemptAssessment"]),
   validateAttemptQuestionDelete,
   validateRequest,
   attemptQuestionDeleteController
-)
+);
 
 /**
  * @swagger
@@ -1870,7 +1947,7 @@ router.delete(
  *                   example: Error ending section
  */
 router.put(
-  '/attempt/section/end',
+  "/attempt/section/end",
   authenticateUser(["canAttemptAssessment"]),
   validateEndSection,
   validateRequest,
@@ -1978,11 +2055,11 @@ router.put(
  *                   example: Error ending assessment
  */
 router.put(
-  '/attempt/end',
+  "/attempt/end",
   authenticateUser(["canAttemptAssessment"]),
   validateEndAssessment,
   validateRequest,
   endAssessmentController
-)
+);
 
 export default router;
