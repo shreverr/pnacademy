@@ -1122,6 +1122,50 @@ export const startSectionById = async (
   }
 };
 
+export const endSectionById = async (
+  assessmentId: string,
+  userId: string,
+  section: number
+): Promise<boolean> => {
+  logger.info(`Marking section as ended`);
+  try {
+    const [endedSectionRecord, isCreated] = await SectionStatus.upsert({
+        assessment_id: assessmentId,
+        user_id: userId,
+        section: section,
+        is_submited: true,
+      }
+    );
+
+    return !!endedSectionRecord;
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError && (error.parent as any).table === 'section_statuses') {
+      return true;
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_user_id_fkey') {
+      throw new AppError(
+        "user does not exist",
+        404,
+        "user does not exist",
+        false
+      );
+    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_assessment_id_fkey') {
+      throw new AppError(
+        "Assessment does not exist",
+        404,
+        "Assessment does not exist",
+        false
+      );
+    } else {
+      throw new AppError(
+        "Error marking section as ended",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
 export const getQuestionsBySection = async (
   assessmentId: string,
   section: number

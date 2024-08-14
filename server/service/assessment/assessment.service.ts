@@ -14,6 +14,7 @@ import {
   deleteOptionInDB,
   deleteQuestionInDB,
   deleteTagInDB,
+  endSectionById,
   generateAiQuestions,
   getAllAssessments,
   getAllTags,
@@ -570,20 +571,15 @@ export const attemptQustion = async (
   await validateAssessmentStatus(assessmentId, userId);
   const questionSection = (await getQuestionById(assessmentId, questionId))!.section
   await validateSectionStatus(assessmentId, userId, questionSection);
-  const isSectionStarted = await startSectionById(assessmentId, userId, questionSection);
 
-  if (isSectionStarted) {
-    const [attemptedQuestion, isCreated] = await attemptQuestionById(
-      assessmentId,
-      userId,
-      questionId,
-      selectedOptionId
-    );
+  const [attemptedQuestion, isCreated] = await attemptQuestionById(
+    assessmentId,
+    userId,
+    questionId,
+    selectedOptionId
+  );
 
-    return !!attemptedQuestion;
-  }
-
-  return false;
+  return !!attemptedQuestion;
 };
 
 export const attemptQustionDelete = async (
@@ -596,18 +592,27 @@ export const attemptQustionDelete = async (
   await validateAssessmentStatus(assessmentId, userId);
   const questionSection = (await getQuestionById(assessmentId, questionId))!.section
   await validateSectionStatus(assessmentId, userId, questionSection);
-  const isSectionStarted = await startSectionById(assessmentId, userId, questionSection);
 
-  if (isSectionStarted) {
-    const isDeleted = await attemptQuestionDeleteById(
-      assessmentId,
-      userId,
-      questionId,
-      selectedOptionId
-    );
+  const isDeleted = await attemptQuestionDeleteById(
+    assessmentId,
+    userId,
+    questionId,
+    selectedOptionId
+  );
 
-    return isDeleted;
-  }
+  return isDeleted;
+}
 
-  return false;
+export const endSection = async (
+  assessmentId: string,
+  userId: string,
+  section: number
+): Promise<boolean> => {
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
+  await validateSectionStatus(assessmentId, userId, section);
+
+  const isSectionEnded = await endSectionById(assessmentId, userId, section);
+  
+  return isSectionEnded;
 };

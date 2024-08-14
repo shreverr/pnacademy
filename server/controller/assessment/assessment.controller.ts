@@ -12,6 +12,7 @@ import {
   deleteOption,
   deleteQuestion,
   deleteTag,
+  endSection,
   generateAiQuestionsService,
   removeGroupFromAssessment,
   removeSectionFromAssessment,
@@ -591,6 +592,23 @@ export const attemptQuestionDeleteController: RequestHandler = async (
     return res.status(200).json({
       status: 'success',
       message: 'Question deleted',
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const endSectionController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await endSection(req.body.assessmentId, req.user.userId, req.body.section)
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Section ended',
     })
   } catch (error) {
     next(error)

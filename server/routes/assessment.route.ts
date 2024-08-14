@@ -14,6 +14,7 @@ import {
   DeleteQuestionController,
   deleteSectionController,
   DeleteTagController,
+  endSectionController,
   generateAiQuestionsController,
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
@@ -59,6 +60,7 @@ import {
   validateAttemptQuestion,
   validateAttemptQuestionDelete,
   validateBulkAssessment,
+  validateEndSection,
   validateGenerateAssessment,
   validateSectionDelete,
   validateStartAssessment,
@@ -1759,5 +1761,118 @@ router.delete(
   validateRequest,
   attemptQuestionDeleteController
 )
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/section/end:
+ *   put:
+ *     summary: End a section in an assessment attempt
+ *     description: This endpoint ends a section within an ongoing assessment attempt for the user. The section must be started before it can be ended.
+ *     tags:
+ *       - Assessment Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
+ *               section:
+ *                 type: number
+ *                 description: The section number to end.
+ *                 example: 1
+ *             required:
+ *               - assessmentId
+ *               - section
+ *     responses:
+ *       '200':
+ *         description: Section successfully ended.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: Section ended successfully
+ *       '400':
+ *         description: Bad Request. The section could not be ended due to invalid input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid section number or assessment ID
+ *       '403':
+ *         description: Forbidden. The user is not allowed to end the section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing why the request was forbidden.
+ *                   example: Not authorized to end this section
+ *       '404':
+ *         description: Not Found. The section or assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the section or assessment was not found.
+ *                   example: Section or assessment with this ID does not exist
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error ending section
+ */
+router.put(
+  '/attempt/section/end',
+  authenticateUser(["canAttemptAssessment"]),
+  validateEndSection,
+  validateRequest,
+  endSectionController
+);
 
 export default router;

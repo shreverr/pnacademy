@@ -569,3 +569,19 @@ export const validateAttemptQuestionDelete = [
     .isUUID(4)
     .withMessage("selectedOptionId should be a valid UUID v4"),
 ];
+
+export const validateEndSection = [
+  check("assessmentId")
+    .not()
+    .isEmpty()
+    .withMessage("assessmentId cannot be empty")
+    .isUUID(4)
+    .withMessage("assessmentId should be a valid UUID v4"),
+
+  check("section")
+    .not()
+    .isEmpty()
+    .withMessage("section cannot be empty")
+    .matches(/^[1-9]\d*$/)
+    .withMessage("section should be >= 1"),
+];
