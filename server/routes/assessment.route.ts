@@ -4,6 +4,7 @@ import {
   addGroupToAssessmentController,
   addTagController,
   attemptQuestionController,
+  attemptQuestionDeleteController,
   CreateAssessmentController,
   CreateOptionController,
   CreateQuestionController,
@@ -56,6 +57,7 @@ import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import {
   validateAttemptQuestion,
+  validateAttemptQuestionDelete,
   validateBulkAssessment,
   validateGenerateAssessment,
   validateSectionDelete,
@@ -1653,6 +1655,109 @@ router.post(
   validateAttemptQuestion,
   validateRequest,
   attemptQuestionController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/question:
+ *   delete:
+ *     summary: Delete an attempted question
+ *     description: This endpoint deletes an attempted question from an ongoing assessment attempt.
+ *     tags:
+ *       - Assessment Delete Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
+ *               questionId:
+ *                 type: string
+ *                 description: The unique identifier of the question to delete.
+ *                 example: b3d5a587-be5f-44b7-a202-38af92c266c3
+ *               selectedOptionId:
+ *                 type: string
+ *                 description: The unique identifier of the selected option that was attempted.
+ *                 example: 662b8629-b91b-4fd6-8069-54a3dd7fdcee
+ *             required:
+ *               - assessmentId
+ *               - questionId
+ *               - selectedOptionId
+ *     responses:
+ *       '200':
+ *         description: Question successfully deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: Question deleted
+ *       '403':
+ *         description: Forbidden. The user is not allowed to delete the question.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing why the request was forbidden.
+ *                   example: Not authorized to delete this question
+ *       '404':
+ *         description: Not Found. The question or assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the question or assessment was not found.
+ *                   example: Question or assessment with this ID does not exist
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error deleting question
+ */
+router.delete(
+  '/attempt/question',
+  authenticateUser(["canAttemptAssessment"]),
+  validateAttemptQuestionDelete,
+  validateRequest,
+  attemptQuestionDeleteController
 )
 
 export default router;

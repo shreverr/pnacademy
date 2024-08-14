@@ -3,6 +3,7 @@ import {
   addGroupToAssessmentById,
   addTagToQuestion,
   attemptQuestionById,
+  attemptQuestionDeleteById,
   checkAssessmentExists,
   checkQuestionExists,
   createAssementInDB,
@@ -580,6 +581,32 @@ export const attemptQustion = async (
     );
 
     return !!attemptedQuestion;
+  }
+
+  return false;
+};
+
+export const attemptQustionDelete = async (
+  assessmentId: string,
+  userId: string,
+  questionId: string,
+  selectedOptionId: string
+): Promise<boolean> => {
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
+  const questionSection = (await getQuestionById(assessmentId, questionId))!.section
+  await validateSectionStatus(assessmentId, userId, questionSection);
+  const isSectionStarted = await startSectionById(assessmentId, userId, questionSection);
+
+  if (isSectionStarted) {
+    const isDeleted = await attemptQuestionDeleteById(
+      assessmentId,
+      userId,
+      questionId,
+      selectedOptionId
+    );
+
+    return isDeleted;
   }
 
   return false;

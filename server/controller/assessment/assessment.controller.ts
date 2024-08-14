@@ -3,6 +3,7 @@ import {
   addGroupToAssessment,
   addTag,
   attemptQustion,
+  attemptQustionDelete,
   createAssessment,
   createOption,
   createQuestion,
@@ -568,6 +569,28 @@ export const attemptQuestionController: RequestHandler = async (
     return res.status(201).json({
       status: 'success',
       message: 'Question attempted',
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const attemptQuestionDeleteController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await attemptQustionDelete(
+      req.body.assessmentId,
+      req.user.userId,
+      req.body.questionId,
+      req.body.selectedOptionId
+    )
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Question deleted',
     })
   } catch (error) {
     next(error)

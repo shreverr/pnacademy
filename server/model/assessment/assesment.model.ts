@@ -1285,3 +1285,44 @@ export const attemptQuestionById = async (
     }
   }
 };
+
+export const attemptQuestionDeleteById = async (
+  assessmentId: string,
+  userId: string,
+  questionId: string,
+  selectedOptionId: string,
+): Promise<boolean> => {
+  logger.info(`Attempting question by id`);
+  try {
+    const recordDeleted = await AssessmentResponse.destroy({
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId,
+        question_id: questionId,
+        selected_option_id: selectedOptionId,
+      }
+    });
+
+    if (recordDeleted === 0) {
+      throw new AppError(
+        "Response does not exist",
+        404,
+        "Response does not exist",
+        false
+      )
+    }
+
+    return true;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error
+    } else {
+      throw new AppError(
+        "Error deleting record",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
