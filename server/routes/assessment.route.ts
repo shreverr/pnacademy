@@ -14,6 +14,7 @@ import {
   DeleteQuestionController,
   deleteSectionController,
   DeleteTagController,
+  endAssessmentController,
   endSectionController,
   generateAiQuestionsController,
   removeGroupFromAssessmentController,
@@ -60,6 +61,7 @@ import {
   validateAttemptQuestion,
   validateAttemptQuestionDelete,
   validateBulkAssessment,
+  validateEndAssessment,
   validateEndSection,
   validateGenerateAssessment,
   validateSectionDelete,
@@ -1874,5 +1876,113 @@ router.put(
   validateRequest,
   endSectionController
 );
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/end:
+ *   put:
+ *     summary: End an assessment attempt
+ *     description: This endpoint ends an ongoing assessment attempt for the user. All sections must be completed before the assessment can be ended.
+ *     tags:
+ *       - Assessment Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment to end.
+ *                 example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
+ *             required:
+ *               - assessmentId
+ *     responses:
+ *       '200':
+ *         description: Assessment successfully ended.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: Assessment ended successfully
+ *       '400':
+ *         description: Bad Request. The assessment could not be ended due to invalid input or unfinished sections.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: All sections must be completed before ending the assessment
+ *       '403':
+ *         description: Forbidden. The user is not authorized to end the assessment.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing why the request was forbidden.
+ *                   example: Not authorized to end this assessment
+ *       '404':
+ *         description: Not Found. The assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the assessment was not found.
+ *                   example: Assessment with this ID does not exist
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error ending assessment
+ */
+router.put(
+  '/attempt/end',
+  authenticateUser(["canAttemptAssessment"]),
+  validateEndAssessment,
+  validateRequest,
+  endAssessmentController
+)
 
 export default router;

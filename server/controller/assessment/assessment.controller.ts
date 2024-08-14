@@ -12,6 +12,7 @@ import {
   deleteOption,
   deleteQuestion,
   deleteTag,
+  endAssessment,
   endSection,
   generateAiQuestionsService,
   removeGroupFromAssessment,
@@ -530,6 +531,23 @@ export const startAssessmentController: RequestHandler = async (
     return res.status(200).json({
       status: 'success',
       message: 'Assessment Started'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const endAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await endAssessment(req.body.assessmentId, req.user.userId)
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Assessment Ended'
     })
   } catch (error) {
     next(error)

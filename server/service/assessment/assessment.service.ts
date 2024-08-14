@@ -14,6 +14,7 @@ import {
   deleteOptionInDB,
   deleteQuestionInDB,
   deleteTagInDB,
+  endAssessmentById,
   endSectionById,
   generateAiQuestions,
   getAllAssessments,
@@ -542,6 +543,17 @@ export const startAssessment = async (
   return result;
 };
 
+export const endAssessment = async (
+  assessmentId: string,
+  userId: string
+): Promise<boolean> => {
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
+
+  const result = await endAssessmentById(assessmentId, userId);
+
+  return result;
+};
 
 export const startSection = async (
   assessmentId: string,

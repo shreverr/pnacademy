@@ -1040,6 +1040,41 @@ export const startAssessmentById = async (
   }
 };
 
+export const endAssessmentById = async (
+  assessmentId: string,
+  userId: string
+): Promise<boolean> => {
+  logger.info(`Ending assessment`);
+  try {
+    const result = await AssessmentStatus.update({
+      submitted_at: new Date(),
+    }, {
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId,
+      }
+    })
+
+    return true;
+  } catch (error: any) {
+     if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_statuses_user_id_fkey') {
+      throw new AppError(
+        "user does not exist",
+        404,
+        "user does not exist",
+        false
+      );
+    } else {
+      throw new AppError(
+        "Error starting test",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
 export const getAssessmentStatusById = async (
   assessmentId: string,
   userId: string
@@ -1130,11 +1165,11 @@ export const endSectionById = async (
   logger.info(`Marking section as ended`);
   try {
     const [endedSectionRecord, isCreated] = await SectionStatus.upsert({
-        assessment_id: assessmentId,
-        user_id: userId,
-        section: section,
-        is_submited: true,
-      }
+      assessment_id: assessmentId,
+      user_id: userId,
+      section: section,
+      is_submited: true,
+    }
     );
 
     return !!endedSectionRecord;
