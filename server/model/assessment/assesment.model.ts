@@ -876,6 +876,9 @@ export const viewAssignedAssessmentsByUserId = async (
         : {};
 
     const assignedAssessments = await Assessment.findAndCountAll({
+      where: {
+        is_active: true,
+      },
       include: [
         {
           model: Group,
