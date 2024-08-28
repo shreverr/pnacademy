@@ -1,4 +1,4 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
 import { AppError } from "../lib/appError";
 
 const awsRegion = process.env.AWS_REGION;
@@ -28,7 +28,7 @@ if (!awsSecretAccessKey)
     false
   );
 
-const s3Client = new S3Client({
+const eventBridgeClient = new EventBridgeClient({
   region: awsRegion,
   credentials: {
     accessKeyId: awsAccessKeyId,
@@ -36,4 +36,4 @@ const s3Client = new S3Client({
   }
 });
 
-export default s3Client;
+export default eventBridgeClient;

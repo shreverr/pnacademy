@@ -1,4 +1,4 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { LambdaClient } from "@aws-sdk/client-lambda";
 import { AppError } from "../lib/appError";
 
 const awsRegion = process.env.AWS_REGION;
@@ -28,12 +28,12 @@ if (!awsSecretAccessKey)
     false
   );
 
-const s3Client = new S3Client({
+const lambdaClient = new LambdaClient({
   region: awsRegion,
   credentials: {
     accessKeyId: awsAccessKeyId,
-    secretAccessKey: awsSecretAccessKey
-  }
+    secretAccessKey: awsSecretAccessKey,
+  },
 });
 
-export default s3Client;
+export default lambdaClient;

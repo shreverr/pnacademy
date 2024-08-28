@@ -57,6 +57,8 @@ import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import Question from "../../schema/assessment/question.schema";
 import { validateAssessment, validateAssessmentStatus, validateSectionStatus } from "../../lib/assessment/validator";
+import { scheduleAssessmentEndEvent } from "../../lib/assessment/event";
+import logger from "../../config/logger";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -76,8 +78,9 @@ export const createAssessment = async (assement: {
       false
     );
   }
+  const assesmentId = uuid()
   const assementData = await createAssementInDB({
-    id: uuid(),
+    id: assesmentId,
     name: assement.name,
     description: assement.description,
     is_active: assement.is_active,
@@ -86,6 +89,38 @@ export const createAssessment = async (assement: {
     duration: assement.duration,
     created_by: assement.created_by,
   });
+  
+  if (assementData)
+    try {
+      await scheduleAssessmentEndEvent(assesmentId, assementData.end_at);
+    } catch (error) {
+      try {
+        await deleteAssessmentInDB({ id: assesmentId as UUID })
+      } catch (error) {
+        if (error instanceof AppError) {
+          throw error;
+        } else {
+          throw new AppError(
+            "Internal server error",
+            500,
+            "Error scheduling assessment end event and deleting assessment",
+            false
+          );
+        }
+      }
+
+      if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          "Internal server error",
+          500,
+          "Error scheduling assessment end event",
+          false
+        );
+      }
+    }
+
   return assementData;
 };
 
@@ -625,6 +660,6 @@ export const endSection = async (
   await validateSectionStatus(assessmentId, userId, section);
 
   const isSectionEnded = await endSectionById(assessmentId, userId, section);
-  
+
   return isSectionEnded;
 };
