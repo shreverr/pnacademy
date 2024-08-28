@@ -98,10 +98,10 @@ export const getOptionById = async (id: UUID): Promise<OptionData | null> => {
   }
 };
 
-export const checkAssessmentExists = async (
+export const getAssessmentDetailsById = async (
   id: UUID
-): Promise<boolean | null> => {
-  logger.info(`Checking if assessment exists with id: ${id}`);
+): Promise<Assessment | null> => {
+  logger.info(`Getting assessment details`);
 
   try {
     const assessment = await Assessment.findOne({
@@ -111,7 +111,7 @@ export const checkAssessmentExists = async (
       raw: true,
     });
 
-    return assessment !== null;
+    return assessment;
   } catch (error) {
     throw new AppError(
       "Error getting assessment",

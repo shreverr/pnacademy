@@ -4,7 +4,7 @@ import {
   addTagToQuestion,
   attemptQuestionById,
   attemptQuestionDeleteById,
-  checkAssessmentExists,
+  getAssessmentDetailsById,
   checkQuestionExists,
   createAssementInDB,
   createOptionInDB,
@@ -57,7 +57,7 @@ import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import Question from "../../schema/assessment/question.schema";
 import { validateAssessment, validateAssessmentStatus, validateSectionStatus } from "../../lib/assessment/validator";
-import { scheduleAssessmentEndEvent } from "../../lib/assessment/event";
+import { scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
 import logger from "../../config/logger";
 
 export const createAssessment = async (assement: {
@@ -89,7 +89,7 @@ export const createAssessment = async (assement: {
     duration: assement.duration,
     created_by: assement.created_by,
   });
-  
+
   if (assementData)
     try {
       await scheduleAssessmentEndEvent(assesmentId, assementData.end_at);
@@ -130,7 +130,7 @@ export const createQuestion = async (question: {
   marks: number;
   section: number;
 }): Promise<QuestionData | null> => {
-  // const existingAssessment = await checkAssessmentExists(
+  // const existingAssessment = await getAssessmentDetailsById(
   //   question.assessment_id
   // );
   // if (existingAssessment == null) {
@@ -184,8 +184,8 @@ export const updateAssessment = async (assessment: {
   end_at: Date | null;
   duration: number | null;
 }): Promise<AssementData | null> => {
-  const existingAssessment = await checkAssessmentExists(assessment.id);
-  if (existingAssessment == null) {
+  const existingAssessment = await getAssessmentDetailsById(assessment.id);
+  if (!existingAssessment) {
     throw new AppError(
       "Assessment not found",
       404,
@@ -193,6 +193,7 @@ export const updateAssessment = async (assessment: {
       false
     );
   }
+
   const updatedAssessment = await updateAssessmentInDB({
     id: assessment.id,
     name: assessment.name,
@@ -202,6 +203,42 @@ export const updateAssessment = async (assessment: {
     end_at: assessment.end_at,
     duration: assessment.duration,
   });
+
+  if (updatedAssessment && assessment.end_at && existingAssessment.end_at.toUTCString() !== updatedAssessment.end_at.toUTCString()) {
+    try {
+      await updateAssessmentEndEventSchedule(updatedAssessment.id, updatedAssessment.end_at);
+    } catch (eventError) {
+      // Rollback the assessment update if event scheduling fails
+      try {
+        await updateAssessmentInDB({
+          id: existingAssessment.id as UUID,
+          name: existingAssessment.name,
+          description: existingAssessment.description,
+          is_active: existingAssessment.is_active,
+          start_at: existingAssessment.start_at,
+          end_at: existingAssessment.end_at,
+          duration: existingAssessment.duration,
+        });
+      } catch (rollbackError) {
+        // If rollback fails, log the rollback error and throw the original event error
+        throw new AppError(
+          "Internal server error",
+          500,
+          "Error rolling back assessment update after failing to update event schedule",
+          false
+        );
+      }
+
+      // Throw the original event scheduling error
+      throw new AppError(
+        "Internal server error",
+        500,
+        "Error updating assessment end event schedule",
+        false
+      );
+    }
+  }
+
   return updatedAssessment;
 };
 
@@ -274,7 +311,7 @@ export const updateTag = async (option: {
 export const deleteAssessment = async (Assessment: {
   id: UUID;
 }): Promise<boolean> => {
-  const existingAssessment = await checkAssessmentExists(Assessment.id);
+  const existingAssessment = await getAssessmentDetailsById(Assessment.id);
   if (existingAssessment == null) {
     throw new AppError(
       "Assessment not found",
