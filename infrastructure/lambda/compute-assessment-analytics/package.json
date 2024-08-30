@@ -1,0 +1,22 @@
+{
+  "name": "compute-assessment-analytics",
+  "version": "1.0.0",
+  "description": "lambda function to compute assessment analytics",
+  "main": "app.js",
+  "repository": "https://github.com/shreverr/pnacademy",
+  "author": "shreverr",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.5.1",
+    "chai": "^4.3.6",
+    "mocha": "^10.2.0"
+  }
+}
