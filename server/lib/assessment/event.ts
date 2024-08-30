@@ -1,9 +1,12 @@
 import {
   DeleteRuleCommand,
+  DeleteRuleCommandInput,
   PutRuleCommand,
   PutRuleCommandInput,
   PutTargetsCommand,
   PutTargetsCommandInput,
+  RemoveTargetsCommand,
+  RemoveTargetsCommandInput,
 } from "@aws-sdk/client-eventbridge";
 import logger from "../../config/logger";
 import { AppError } from "../appError";
@@ -111,14 +114,20 @@ export const deleteEventRule = async (assessmentId: string): Promise<void> => {
   try {
     logger.info(`Deleting EventBridge rule`);
     const ruleName = `assessment-end-${assessmentId}`;
-    
-    const deleteRuleParams = {
+
+    const deleteAssessmentEndEventTargetParams: RemoveTargetsCommandInput = {
+      Rule: ruleName,
+      Ids: [`assessment-end-target-${assessmentId}`],
+    };
+    const deleteAssessmentEndEventTargetCommand = new RemoveTargetsCommand(deleteAssessmentEndEventTargetParams);
+    await eventBridgeClient.send(deleteAssessmentEndEventTargetCommand);
+
+    const deleteRuleParams: DeleteRuleCommandInput = {
       Name: ruleName,
     };
-
     const deleteRuleCommand = new DeleteRuleCommand(deleteRuleParams);
     await eventBridgeClient.send(deleteRuleCommand);
-    
+
   } catch (error: any) {
     throw new AppError(
       `Error deleting EventBridge rule`,

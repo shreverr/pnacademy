@@ -57,7 +57,7 @@ import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import Question from "../../schema/assessment/question.schema";
 import { validateAssessment, validateAssessmentStatus, validateSectionStatus } from "../../lib/assessment/validator";
-import { scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
+import { deleteEventRule, scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
 import logger from "../../config/logger";
 
 export const createAssessment = async (assement: {
@@ -312,7 +312,7 @@ export const deleteAssessment = async (Assessment: {
   id: UUID;
 }): Promise<boolean> => {
   const existingAssessment = await getAssessmentDetailsById(Assessment.id);
-  if (existingAssessment == null) {
+  if (!existingAssessment) {
     throw new AppError(
       "Assessment not found",
       404,
@@ -323,6 +323,28 @@ export const deleteAssessment = async (Assessment: {
   const deletedAssessment = await deleteAssessmentInDB({
     id: Assessment.id,
   });
+
+  if (deletedAssessment) {
+    try {
+      await deleteEventRule(Assessment.id)
+    } catch (error: any) {
+      createAssementInDB({
+        ...existingAssessment,
+        created_by: existingAssessment.created_by as UUID
+      })
+
+      if (error instanceof AppError) {
+        throw (error)
+      } else {
+        throw new AppError(
+          "Internal server error",
+          500,
+          error,
+          false
+        );
+      }
+    }
+  }
 
   return deletedAssessment;
 };
