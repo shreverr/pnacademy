@@ -37,6 +37,7 @@ import {
   updateQuestionInDB,
   updateTagInDB,
   viewAssignedAssessmentsByUserId,
+  getAssessmentAssignedGroups,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -48,6 +49,7 @@ import {
   TagAttribute,
   AssessmentAttribute,
   AiQuestions,
+  AssessmentAssigendGroupData,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -56,9 +58,19 @@ import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import Question from "../../schema/assessment/question.schema";
-import { validateAssessment, validateAssessmentStatus, validateSectionStatus } from "../../lib/assessment/validator";
-import { deleteEventRule, scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
+import {
+  validateAssessment,
+  validateAssessmentStatus,
+  validateSectionStatus,
+} from "../../lib/assessment/validator";
+import {
+  deleteEventRule,
+  scheduleAssessmentEndEvent,
+  updateAssessmentEndEventSchedule,
+} from "../../lib/assessment/event";
 import logger from "../../config/logger";
+import Group from "../../schema/group/group.schema";
+import { GroupData } from "../../types/group.types";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -78,7 +90,7 @@ export const createAssessment = async (assement: {
       false
     );
   }
-  const assesmentId = uuid()
+  const assesmentId = uuid();
   const assementData = await createAssementInDB({
     id: assesmentId,
     name: assement.name,
@@ -95,7 +107,7 @@ export const createAssessment = async (assement: {
       await scheduleAssessmentEndEvent(assesmentId, assementData.end_at);
     } catch (error) {
       try {
-        await deleteAssessmentInDB({ id: assesmentId as UUID })
+        await deleteAssessmentInDB({ id: assesmentId as UUID });
       } catch (error) {
         if (error instanceof AppError) {
           throw error;
@@ -204,9 +216,17 @@ export const updateAssessment = async (assessment: {
     duration: assessment.duration,
   });
 
-  if (updatedAssessment && assessment.end_at && existingAssessment.end_at.toUTCString() !== updatedAssessment.end_at.toUTCString()) {
+  if (
+    updatedAssessment &&
+    assessment.end_at &&
+    existingAssessment.end_at.toUTCString() !==
+      updatedAssessment.end_at.toUTCString()
+  ) {
     try {
-      await updateAssessmentEndEventSchedule(updatedAssessment.id, updatedAssessment.end_at);
+      await updateAssessmentEndEventSchedule(
+        updatedAssessment.id,
+        updatedAssessment.end_at
+      );
     } catch (eventError) {
       // Rollback the assessment update if event scheduling fails
       try {
@@ -326,22 +346,17 @@ export const deleteAssessment = async (Assessment: {
 
   if (deletedAssessment) {
     try {
-      await deleteEventRule(Assessment.id)
+      await deleteEventRule(Assessment.id);
     } catch (error: any) {
       createAssementInDB({
         ...existingAssessment,
-        created_by: existingAssessment.created_by as UUID
-      })
+        created_by: existingAssessment.created_by as UUID,
+      });
 
       if (error instanceof AppError) {
-        throw (error)
+        throw error;
       } else {
-        throw new AppError(
-          "Internal server error",
-          500,
-          error,
-          false
-        );
+        throw new AppError("Internal server error", 500, error, false);
       }
     }
   }
@@ -554,6 +569,23 @@ export const removeGroupFromAssessment = async (
   return result;
 };
 
+export const viewAssessmentGroupDetails = async (
+  assessmentId: UUID
+): Promise<AssessmentAssigendGroupData[]> => {
+  const assessmentGroupData = await getAssessmentAssignedGroups(assessmentId);
+
+  if (!assessmentGroupData) {
+    throw new AppError(
+      "Assessment not found",
+      404,
+      "Assessment with this id does not exist",
+      false
+    );
+  }
+
+  return assessmentGroupData;
+};
+
 export const viewAssignedAssessments = async (
   userId: string,
   pageStr?: string,
@@ -658,7 +690,11 @@ export const startSection = async (
   await validateAssessmentStatus(assessmentId, userId);
   await validateSectionStatus(assessmentId, userId, section);
 
-  const isSectionStarted = await startSectionById(assessmentId, userId, section);
+  const isSectionStarted = await startSectionById(
+    assessmentId,
+    userId,
+    section
+  );
   if (isSectionStarted) {
     const questionsBySection = getQuestionsBySection(assessmentId, section);
     return questionsBySection;
@@ -675,7 +711,8 @@ export const attemptQustion = async (
 ): Promise<boolean> => {
   await validateAssessment(assessmentId);
   await validateAssessmentStatus(assessmentId, userId);
-  const questionSection = (await getQuestionById(assessmentId, questionId))!.section
+  const questionSection = (await getQuestionById(assessmentId, questionId))!
+    .section;
   await validateSectionStatus(assessmentId, userId, questionSection);
 
   const [attemptedQuestion, isCreated] = await attemptQuestionById(
@@ -696,7 +733,8 @@ export const attemptQustionDelete = async (
 ): Promise<boolean> => {
   await validateAssessment(assessmentId);
   await validateAssessmentStatus(assessmentId, userId);
-  const questionSection = (await getQuestionById(assessmentId, questionId))!.section
+  const questionSection = (await getQuestionById(assessmentId, questionId))!
+    .section;
   await validateSectionStatus(assessmentId, userId, questionSection);
 
   const isDeleted = await attemptQuestionDeleteById(
@@ -707,7 +745,7 @@ export const attemptQustionDelete = async (
   );
 
   return isDeleted;
-}
+};
 
 export const endSection = async (
   assessmentId: string,

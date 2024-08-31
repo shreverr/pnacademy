@@ -27,6 +27,7 @@ import {
   viewAllTags,
   viewAssessmentBulk,
   viewAssessmentDetails,
+  viewAssessmentGroupDetails,
   viewAssignedAssessments,
   viewQuestionDetails,
   viewTag
@@ -41,8 +42,7 @@ import {
   type AssessmentAttribute,
   type TagAttribute
 } from '../../types/assessment.types'
-import Assessment from '../../schema/assessment/assessment.schema'
-import { generateAiQuestions } from '../../model/assessment/assesment.model'
+
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -403,6 +403,22 @@ export const addTagController: RequestHandler = async (
   }
 }
 
+export const viewAssesmentGroupController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessment = await viewAssessmentDetails(req.query.id as UUID)
+
+    return res.status(201).json
+  }
+  catch (error) {
+    next(error)
+  }
+}
+
+
 export const removeTagFromQuestionController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -432,6 +448,24 @@ export const addGroupToAssessmentController: RequestHandler = async (
       status: 'success'
     })
   } catch (error) {
+    next(error)
+  }
+}
+
+export const viewAllAssignedGroupsController : RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const groupDetails= await viewAssessmentGroupDetails(req.query.id as UUID)
+
+    return res.status(200).json({
+      status: 'success',
+      data: groupDetails
+    })
+  }
+  catch (error) {
     next(error)
   }
 }

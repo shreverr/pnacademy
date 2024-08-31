@@ -71,3 +71,7 @@ export type AssessmentAttribute =
   | "created_by"
   | "createdAt"
   | "updatedAt";
+
+export type AssessmentAssigendGroupData = {
+  id:string;
+}

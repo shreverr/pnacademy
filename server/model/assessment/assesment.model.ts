@@ -10,12 +10,14 @@ import {
   AssessmentAttribute,
   AiQuestions,
   AiQuestionData,
+  AssessmentAssigendGroupData,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
 import Assessment, {
   AssessmentAttributes,
 } from "../../schema/assessment/assessment.schema";
+
 import Question from "../../schema/assessment/question.schema";
 import Option from "../../schema/assessment/options.schema";
 import Tag from "../../schema/assessment/tag.schema";
@@ -33,9 +35,12 @@ import Group from "../../schema/group/group.schema";
 import User from "../../schema/user/user.schema";
 import { model } from "../../config/gemini";
 import Section from "../../schema/assessment/section.schema";
-import AssessmentStatus, { AssessmentStatusAttributes } from "../../schema/assessment/assessmentStatus.schema";
+import AssessmentStatus, {
+  AssessmentStatusAttributes,
+} from "../../schema/assessment/assessmentStatus.schema";
 import SectionStatus from "../../schema/assessment/sectionStatus.schema";
 import AssessmentResponse from "../../schema/assessment/assessmentResponse.schema";
+import { GroupData } from "../../types/group.types";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -170,10 +175,10 @@ export const getAllAssessments = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-          limit: pageSize,
-          offset: offset,
-          order: [[sortBy, order]],
-        }
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
         : {};
     const allAssessments = await Assessment.findAndCountAll(findOptions);
     // Convert the data to plain object
@@ -281,30 +286,37 @@ export const createQuestionInDB = async (question: {
       where: {
         assessment_id: question.assessment_id,
       },
-      order: [[fn('max', col('section')), 'DESC']],
-      attributes: [[fn('max', col('section')), 'section']]
+      order: [[fn("max", col("section")), "DESC"]],
+      attributes: [[fn("max", col("section")), "section"]],
     });
 
-    if ((!existingSection && question.section === 1)) {
-      await Section.create({
-        assessment_id: question.assessment_id,
-        section: question.section,
-      }, { transaction });
-
-    } else if (existingSection && question.section === existingSection.section + 1) {
-      await Section.create({
-        assessment_id: question.assessment_id,
-        section: question.section
-      }, { transaction });
-
+    if (!existingSection && question.section === 1) {
+      await Section.create(
+        {
+          assessment_id: question.assessment_id,
+          section: question.section,
+        },
+        { transaction }
+      );
+    } else if (
+      existingSection &&
+      question.section === existingSection.section + 1
+    ) {
+      await Section.create(
+        {
+          assessment_id: question.assessment_id,
+          section: question.section,
+        },
+        { transaction }
+      );
     } else if (existingSection && question.section <= existingSection.section) {
-
     } else {
       throw new AppError(
         "Section does not exist or is not in order",
         404,
         "Section does not exist",
-        false)
+        false
+      );
     }
 
     const createdQuestion = await Question.create(
@@ -325,8 +337,11 @@ export const createQuestionInDB = async (question: {
   } catch (error: any) {
     transaction.rollback();
     if (error instanceof AppError) {
-      throw error
-    } else if (error instanceof ForeignKeyConstraintError && error.table === 'assessments') {
+      throw error;
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      error.table === "assessments"
+    ) {
       throw new AppError(
         "Assessment not found",
         404,
@@ -335,12 +350,7 @@ export const createQuestionInDB = async (question: {
       );
     }
 
-    throw new AppError(
-      "Error creating question",
-      500,
-      error,
-      false
-    );
+    throw new AppError("Error creating question", 500, error, false);
   }
 };
 
@@ -703,10 +713,10 @@ export const getAllTags = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-          limit: pageSize,
-          offset: offset,
-          order: [[sortBy, order]],
-        }
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
         : {};
 
     const allTagsData = await Tag.findAndCountAll(findOptions);
@@ -855,6 +865,30 @@ export const removeGroupFromAssessmentById = async (
   }
 };
 
+export const getAssessmentAssignedGroups = async (
+  assessmentId: UUID
+): Promise<AssessmentAssigendGroupData[]> => {
+  logger.info(`Getting groups assigned to assessment ${assessmentId}`);
+
+  try {
+    const assignedGroups = await AssessmentGroup.findAll({
+      where: {
+        assessment_id: assessmentId,
+      },
+      attributes: ["group_id"],
+    });
+  
+    return assignedGroups.map((group) => ({ id: group.group_id }));
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting groups assigned to assessment",
+      500,
+      error,
+      true
+    );
+  }
+};
+
 export const viewAssignedAssessmentsByUserId = async (
   userId: string,
   offset?: number,
@@ -869,10 +903,10 @@ export const viewAssignedAssessmentsByUserId = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-          limit: pageSize,
-          offset: offset,
-          order: [[sortBy, order]],
-        }
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
         : {};
 
     const assignedAssessments = await Assessment.findAndCountAll({
@@ -992,7 +1026,7 @@ export const removeSectionFromAssessmentById = async (
       return false;
     }
 
-    logger.info(result)
+    logger.info(result);
     return true;
   } catch (error: any) {
     throw new AppError(
@@ -1014,18 +1048,24 @@ export const startAssessmentById = async (
       assessment_id: assessmentId,
       user_id: userId,
       started_at: new Date(),
-    })
+    });
 
     return true;
   } catch (error: any) {
-    if (error instanceof UniqueConstraintError && (error.parent as any).table === 'assessment_statuses') {
+    if (
+      error instanceof UniqueConstraintError &&
+      (error.parent as any).table === "assessment_statuses"
+    ) {
       throw new AppError(
         "Assessment already started",
         409,
         "Assessment already started",
         false
       );
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_statuses_user_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "assessment_statuses_user_id_fkey"
+    ) {
       throw new AppError(
         "user does not exist",
         404,
@@ -1033,12 +1073,7 @@ export const startAssessmentById = async (
         false
       );
     } else {
-      throw new AppError(
-        "Error starting test",
-        500,
-        error,
-        true
-      );
+      throw new AppError("Error starting test", 500, error, true);
     }
   }
 };
@@ -1049,18 +1084,24 @@ export const endAssessmentById = async (
 ): Promise<boolean> => {
   logger.info(`Ending assessment`);
   try {
-    const result = await AssessmentStatus.update({
-      submitted_at: new Date(),
-    }, {
-      where: {
-        assessment_id: assessmentId,
-        user_id: userId,
+    const result = await AssessmentStatus.update(
+      {
+        submitted_at: new Date(),
+      },
+      {
+        where: {
+          assessment_id: assessmentId,
+          user_id: userId,
+        },
       }
-    })
+    );
 
     return true;
   } catch (error: any) {
-     if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_statuses_user_id_fkey') {
+    if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "assessment_statuses_user_id_fkey"
+    ) {
       throw new AppError(
         "user does not exist",
         404,
@@ -1068,12 +1109,7 @@ export const endAssessmentById = async (
         false
       );
     } else {
-      throw new AppError(
-        "Error starting test",
-        500,
-        error,
-        true
-      );
+      throw new AppError("Error starting test", 500, error, true);
     }
   }
 };
@@ -1088,16 +1124,16 @@ export const getAssessmentStatusById = async (
     const assessmentStatus = await AssessmentStatus.findOne({
       where: {
         assessment_id: assessmentId,
-        user_id: userId
+        user_id: userId,
       },
       raw: true,
     });
 
     if (!assessmentStatus) {
       throw new AppError(
-        'Assessment not started by user',
+        "Assessment not started by user",
         404,
-        'Assessment not started by user',
+        "Assessment not started by user",
         false
       );
     }
@@ -1107,12 +1143,7 @@ export const getAssessmentStatusById = async (
     if (error instanceof AppError) {
       throw error;
     } else {
-      throw new AppError(
-        "Error getting assessment",
-        500,
-        error,
-        true
-      );
+      throw new AppError("Error getting assessment", 500, error, true);
     }
   }
 };
@@ -1129,20 +1160,29 @@ export const startSectionById = async (
       user_id: userId,
       section: section,
       is_submited: false,
-    })
+    });
 
     return true;
   } catch (error: any) {
-    if (error instanceof UniqueConstraintError && (error.parent as any).table === 'section_statuses') {
+    if (
+      error instanceof UniqueConstraintError &&
+      (error.parent as any).table === "section_statuses"
+    ) {
       return true;
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_user_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "section_statuses_user_id_fkey"
+    ) {
       throw new AppError(
         "user does not exist",
         404,
         "user does not exist",
         false
       );
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_assessment_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "section_statuses_assessment_id_fkey"
+    ) {
       throw new AppError(
         "Assessment does not exist",
         404,
@@ -1150,12 +1190,7 @@ export const startSectionById = async (
         false
       );
     } else {
-      throw new AppError(
-        "Error starting test",
-        500,
-        error,
-        true
-      );
+      throw new AppError("Error starting test", 500, error, true);
     }
   }
 };
@@ -1172,21 +1207,29 @@ export const endSectionById = async (
       user_id: userId,
       section: section,
       is_submited: true,
-    }
-    );
+    });
 
     return !!endedSectionRecord;
   } catch (error: any) {
-    if (error instanceof UniqueConstraintError && (error.parent as any).table === 'section_statuses') {
+    if (
+      error instanceof UniqueConstraintError &&
+      (error.parent as any).table === "section_statuses"
+    ) {
       return true;
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_user_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "section_statuses_user_id_fkey"
+    ) {
       throw new AppError(
         "user does not exist",
         404,
         "user does not exist",
         false
       );
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'section_statuses_assessment_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "section_statuses_assessment_id_fkey"
+    ) {
       throw new AppError(
         "Assessment does not exist",
         404,
@@ -1194,12 +1237,7 @@ export const endSectionById = async (
         false
       );
     } else {
-      throw new AppError(
-        "Error marking section as ended",
-        500,
-        error,
-        true
-      );
+      throw new AppError("Error marking section as ended", 500, error, true);
     }
   }
 };
@@ -1214,31 +1252,26 @@ export const getQuestionsBySection = async (
     const questions = await Question.findAll({
       where: {
         assessment_id: assessmentId,
-        section: section
+        section: section,
       },
-      attributes: ['id', 'description', 'marks', 'section', 'assessment_id'],
+      attributes: ["id", "description", "marks", "section", "assessment_id"],
       include: [
         {
           model: Option,
           as: "options",
-          attributes: ['id', 'description', 'question_id']
+          attributes: ["id", "description", "question_id"],
         },
       ],
     });
 
-    logger.info(questions)
+    logger.info(questions);
 
     if (!questions) {
       return null;
     }
     return questions;
   } catch (error: any) {
-    throw new AppError(
-      "Error getting question",
-      500,
-      error,
-      false
-    );
+    throw new AppError("Error getting question", 500, error, false);
   }
 };
 
@@ -1246,8 +1279,8 @@ export const getSectionStatusesById = async (
   assessmentId: string,
   userId: string
 ): Promise<{
-  rows: SectionStatus[]
-  count: number
+  rows: SectionStatus[];
+  count: number;
 }> => {
   logger.info(`Getting section statuses by id`);
   try {
@@ -1255,21 +1288,15 @@ export const getSectionStatusesById = async (
     const sectionStatuses = await SectionStatus.findAndCountAll({
       where: {
         assessment_id: assessmentId,
-        user_id: userId
+        user_id: userId,
       },
     });
 
-    logger.info(sectionStatuses)
-
+    logger.info(sectionStatuses);
 
     return sectionStatuses;
   } catch (error: any) {
-    throw new AppError(
-      "Error getting section statuses",
-      500,
-      error,
-      false
-    );
+    throw new AppError("Error getting section statuses", 500, error, false);
   }
 };
 
@@ -1283,7 +1310,7 @@ export const getQuestionById = async (
     const question = await Question.findOne({
       where: {
         assessment_id: assessmentId,
-        id: questionId
+        id: questionId,
       },
     });
 
@@ -1293,7 +1320,7 @@ export const getQuestionById = async (
         404,
         "Question does not exist",
         false
-      )
+      );
     }
 
     return question;
@@ -1301,12 +1328,7 @@ export const getQuestionById = async (
     if (error instanceof AppError) {
       throw error;
     } else {
-      throw new AppError(
-        "Error getting question",
-        500,
-        error,
-        false
-      );
+      throw new AppError("Error getting question", 500, error, false);
     }
   }
 };
@@ -1315,7 +1337,7 @@ export const attemptQuestionById = async (
   assessmentId: string,
   userId: string,
   questionId: string,
-  selectedOptionId: string,
+  selectedOptionId: string
 ): Promise<[AssessmentResponse, boolean | null]> => {
   logger.info(`Attempting question by id`);
   try {
@@ -1329,28 +1351,43 @@ export const attemptQuestionById = async (
 
     return attemptedQuestion;
   } catch (error: any) {
-    if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_question_id_fkey') {
+    if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint ===
+        "assessment_responses_question_id_fkey"
+    ) {
       throw new AppError(
         "Question does not exist",
         404,
         "Question does not exist",
         false
       );
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_user_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "assessment_responses_user_id_fkey"
+    ) {
       throw new AppError(
         "User does not exist",
         404,
         "User does not exist",
         false
       );
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_assessment_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint ===
+        "assessment_responses_assessment_id_fkey"
+    ) {
       throw new AppError(
         "Assessment does not exist",
         404,
         "Assessment does not exist",
         false
       );
-    } else if (error instanceof ForeignKeyConstraintError && (error.parent as any).constraint === 'assessment_responses_selected_option_id_fkey') {
+    } else if (
+      error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint ===
+        "assessment_responses_selected_option_id_fkey"
+    ) {
       throw new AppError(
         "Option does not exist",
         404,
@@ -1358,12 +1395,7 @@ export const attemptQuestionById = async (
         false
       );
     } else {
-      throw new AppError(
-        "Error Attempting question",
-        500,
-        error,
-        false
-      );
+      throw new AppError("Error Attempting question", 500, error, false);
     }
   }
 };
@@ -1372,7 +1404,7 @@ export const attemptQuestionDeleteById = async (
   assessmentId: string,
   userId: string,
   questionId: string,
-  selectedOptionId: string,
+  selectedOptionId: string
 ): Promise<boolean> => {
   logger.info(`Attempting question by id`);
   try {
@@ -1382,7 +1414,7 @@ export const attemptQuestionDeleteById = async (
         user_id: userId,
         question_id: questionId,
         selected_option_id: selectedOptionId,
-      }
+      },
     });
 
     if (recordDeleted === 0) {
@@ -1391,20 +1423,15 @@ export const attemptQuestionDeleteById = async (
         404,
         "Response does not exist",
         false
-      )
+      );
     }
 
     return true;
   } catch (error: any) {
     if (error instanceof AppError) {
-      throw error
+      throw error;
     } else {
-      throw new AppError(
-        "Error deleting record",
-        500,
-        error,
-        true
-      );
+      throw new AppError("Error deleting record", 500, error, true);
     }
   }
 };
