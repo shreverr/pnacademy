@@ -25,6 +25,7 @@ import {
   UpdateOptionController,
   UpdateQuestionController,
   UpdateTagController,
+  viewAllAssignedGroupsController,
   viewAllTagsController,
   viewAssessmentBulkController,
   viewAssessmentController,
@@ -68,7 +69,6 @@ import {
   validateStartAssessment,
   validateStartSection,
 } from "../lib/validator/assessment/validator";
-import { start } from "repl";
 
 const router: Router = express.Router();
 
@@ -983,6 +983,60 @@ router.delete(
   validateRemoveTagFromQuestion,
   validateRequest,
   removeTagFromQuestionController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/group:
+ *   get:
+ *     summary: Get all assigned groups for an assessment
+ *     tags:
+ *       - Assessment View Controller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The UUID of the assessment
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assigned groups
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                         description: The UUID of the assigned group
+ *       '400':
+ *         description: Bad Request - Invalid UUID format
+ *       '401':
+ *         description: Unauthorized - User doesn't have the required permissions
+ *       '404':
+ *         description: Not Found - No assigned groups found for the given assessment
+ *       '500':
+ *         description: Internal Server Error
+ */
+router.get(
+  "/group",
+  authenticateUser(["canManageAssessment"]),
+  validateAssessmentGetId,
+  validateRequest,
+  viewAllAssignedGroupsController
 );
 
 /**
