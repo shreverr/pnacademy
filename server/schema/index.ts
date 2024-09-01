@@ -19,6 +19,7 @@ import AssessmentResponse from "./assessment/assessmentResponse.schema";
 import { sequelize } from "../config/database";
 import { QueryTypes } from "sequelize";
 import { AppError } from "../lib/appError";
+import UserAssessmentResult from './assessment/userAssessmentResult.schema'
 import logger from "../config/logger";
 
 const models = [
@@ -39,6 +40,7 @@ const models = [
   "./junction/assessmentGroup.schema",
   "./assessment/sectionStatus.schema",
   "./assessment/assessmentResponse.schema",
+  "./assessment/userAssessmentResult.schema"
 ];
 
 const instantiateModels = async (): Promise<void> => {
