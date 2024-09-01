@@ -165,6 +165,7 @@ export const getAssessmentById = async (
     );
   }
 };
+
 export const getAllAssessments = async (
   offset?: number,
   pageSize?: number,

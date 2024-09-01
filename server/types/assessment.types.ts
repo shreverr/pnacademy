@@ -46,6 +46,17 @@ export interface AssementDetailedData {
   created_by: string;
   questions: QuestionDetailedData[];
 }
+export interface AssessmentDataBySection {
+  id: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  start_at: Date;
+  end_at: Date;
+  duration: number;
+  created_by: string;
+  sections: QuestionDetailedData[][]
+}
 export interface AIOptionData {
   description: string;
   is_correct: boolean;

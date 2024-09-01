@@ -601,9 +601,88 @@ router.delete(
  *             schema:
  *               type: object
  *               properties:
- *                 assessment:
+ *                 message:
+ *                   type: string
+ *                   example: Assessment fetched successfully
+ *                   description: Response message.
+ *                 data:
  *                   type: object
- *                   description: The details of the assessment.
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: The unique identifier for the assessment.
+ *                     name:
+ *                       type: string
+ *                       description: The name of the assessment.
+ *                     description:
+ *                       type: string
+ *                       description: The description of the assessment.
+ *                     is_active:
+ *                       type: boolean
+ *                       description: Whether the assessment is active.
+ *                     start_at:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The start date and time of the assessment.
+ *                     end_at:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The end date and time of the assessment.
+ *                     duration:
+ *                       type: integer
+ *                       description: The duration of the assessment in milliseconds.
+ *                     created_by:
+ *                       type: string
+ *                       description: The ID of the user who created the assessment.
+ *                     sections:
+ *                       type: array
+ *                       description: An array containing the sections of the assessment.
+ *                       items:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                               description: The unique identifier for the question.
+ *                             assessment_id:
+ *                               type: string
+ *                               description: The unique identifier for the assessment.
+ *                             description:
+ *                               type: string
+ *                               description: The description of the question.
+ *                             marks:
+ *                               type: integer
+ *                               description: The marks assigned to the question.
+ *                             section:
+ *                               type: integer
+ *                               description: The section number this question belongs to.
+ *                             createdAt:
+ *                               type: string
+ *                               format: date-time
+ *                               description: The creation timestamp of the question.
+ *                             updatedAt:
+ *                               type: string
+ *                               format: date-time
+ *                               description: The last update timestamp of the question.
+ *                             options:
+ *                               type: array
+ *                               description: An array of options for the question.
+ *                               items:
+ *                                 type: object
+ *                                 properties:
+ *                                   id:
+ *                                     type: string
+ *                                     description: The unique identifier for the option.
+ *                                   question_id:
+ *                                     type: string
+ *                                     description: The unique identifier for the question the option belongs to.
+ *                                   description:
+ *                                     type: string
+ *                                     description: The description of the option.
+ *                                   is_correct:
+ *                                     type: boolean
+ *                                     description: Whether the option is correct.
  *       '400':
  *         description: Bad request. Invalid data provided.
  *       '404':

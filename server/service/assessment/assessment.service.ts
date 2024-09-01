@@ -50,6 +50,7 @@ import {
   AssessmentAttribute,
   AiQuestions,
   AssessmentAssigendGroupData,
+  AssessmentDataBySection,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -416,9 +417,9 @@ export const deleteTag = async (tag: { id: UUID }): Promise<boolean> => {
 
 export const viewAssessmentDetails = async (
   userId: UUID
-): Promise<AssementDetailedData | null> => {
-  const assementData = await getAssessmentById(userId);
-  if (assementData == null) {
+): Promise<AssessmentDataBySection | null> => {
+  const assessmentData = await getAssessmentById(userId);
+  if (!assessmentData) {
     throw new AppError(
       "Assessment not found",
       404,
@@ -426,7 +427,30 @@ export const viewAssessmentDetails = async (
       false
     );
   }
-  return assementData;
+
+  const sections: QuestionDetailedData[][] = []
+  
+  assessmentData.questions.forEach(question  => {
+    const sectionIndex = question.section - 1; // section number (1-based) to array index (0-based)
+    if (!sections[sectionIndex]) {
+      sections[sectionIndex] = [];
+    }
+    sections[sectionIndex].push(question);
+  });
+
+
+  return {
+    id: assessmentData.id,
+    name: assessmentData.name,
+    description: assessmentData.description,
+    is_active: assessmentData.is_active,
+    start_at: assessmentData.start_at,
+    end_at: assessmentData.end_at,
+    duration: assessmentData.duration,
+    created_by: assessmentData.created_by,
+    sections: sections
+  };
+
 };
 export const viewAssessmentBulk = async (
   pageStr?: string,
