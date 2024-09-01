@@ -84,5 +84,5 @@ export type AssessmentAttribute =
   | "updatedAt";
 
 export type AssessmentAssigendGroupData = {
-  id:string;
-}
+  id: string;
+};

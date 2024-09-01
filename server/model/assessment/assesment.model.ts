@@ -154,8 +154,9 @@ export const getAssessmentById = async (
     if (!assessment) {
       return null;
     }
-
-    return assessment.dataValues as AssementDetailedData;
+    const assessmentData = assessment.dataValues as AssementDetailedData;
+    assessmentData.questions.sort((a, b) => a.section - b.section);
+    return assessmentData;
   } catch (error) {
     throw new AppError(
       "Error getting assessment",
