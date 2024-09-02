@@ -329,6 +329,25 @@ export const updateTag = async (option: {
   return updatedTag;
 };
 
+export const totalAssessmentMarks = async (
+  assessmentId: UUID
+): Promise<number> => {
+  const assessmentData = await getAssessmentById(assessmentId);
+  if (!assessmentData) {
+    throw new AppError(
+      "Assessment not found",
+      404,
+      "Assessment with this id does not exist",
+      false
+    );
+  }
+  let totalMarks = 0;
+  assessmentData.questions.forEach((question) => {
+    totalMarks += question.marks;
+  });
+  return totalMarks;
+};
+
 export const deleteAssessment = async (Assessment: {
   id: UUID;
 }): Promise<boolean> => {
@@ -428,16 +447,15 @@ export const viewAssessmentDetails = async (
     );
   }
 
-  const sections: QuestionDetailedData[][] = []
-  
-  assessmentData.questions.forEach(question  => {
+  const sections: QuestionDetailedData[][] = [];
+
+  assessmentData.questions.forEach((question) => {
     const sectionIndex = question.section - 1; // section number (1-based) to array index (0-based)
     if (!sections[sectionIndex]) {
       sections[sectionIndex] = [];
     }
     sections[sectionIndex].push(question);
   });
-
 
   return {
     id: assessmentData.id,
@@ -448,9 +466,8 @@ export const viewAssessmentDetails = async (
     end_at: assessmentData.end_at,
     duration: assessmentData.duration,
     created_by: assessmentData.created_by,
-    sections: sections
+    sections: sections,
   };
-
 };
 export const viewAssessmentBulk = async (
   pageStr?: string,

@@ -21,6 +21,7 @@ import {
   removeTagFromQuestionController,
   startAssessmentController,
   startSectionController,
+  totalAssessmentMarksController,
   UpdateAssessmentController,
   UpdateOptionController,
   UpdateQuestionController,
@@ -462,6 +463,52 @@ router.delete(
   validateAssessmentId,
   validateRequest,
   DeleteAssessmentController
+);
+
+/**
+ * @openapi
+ * /totalmarks:
+ *   get:
+ *     tags:
+ *       - Assessment view controller
+ *     summary: Get total marks for an assessment
+ *     description: Retrieves the total marks for a specific assessment. Requires authentication and appropriate permissions.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The UUID of the assessment
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved total marks
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalMarks:
+ *                   type: number
+ *                   description: The total marks for the assessment
+ *       '400':
+ *         description: Bad request. Invalid assessment ID provided.
+ *       '401':
+ *         description: Unauthorized. User lacks required permissions.
+ *       '404':
+ *         description: Assessment not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/totalmarks",
+  authenticateUser(["canManageAssessment"]),
+  validateAssessmentId,
+  validateRequest,
+  totalAssessmentMarksController
 );
 
 /**
