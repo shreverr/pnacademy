@@ -145,9 +145,20 @@ export const getAssessmentById = async (
             {
               model: Option,
               as: "options",
+              // Ordering options by createdAt in descending order
             },
           ],
         },
+      ],
+      order: [
+        [{ model: Question, as: "questions" }, "section", "ASC"], // Order questions by section first
+        [{ model: Question, as: "questions" }, "createdAt", "ASC"], // Then order questions by createdAt within each section
+        [
+          { model: Question, as: "questions" },
+          { model: Option, as: "options" },
+          "createdAt",
+          "ASC",
+        ], // Order options by createdAt in descending order
       ],
     });
 
@@ -155,7 +166,8 @@ export const getAssessmentById = async (
       return null;
     }
     const assessmentData = assessment.dataValues as AssementDetailedData;
-    assessmentData.questions.sort((a, b) => a.section - b.section);
+    // assessmentData.questions.sort((a, b) => a.section - b.section);
+
     return assessmentData;
   } catch (error) {
     throw new AppError(
@@ -243,6 +255,8 @@ export const getQuestionAndOptionsById = async (
           as: "options",
         },
       ],
+
+      order: [["options", "createdAt", "ASC"]],
     });
     if (!question) {
       return null;
@@ -879,7 +893,7 @@ export const getAssessmentAssignedGroups = async (
       },
       attributes: ["group_id"],
     });
-  
+
     return assignedGroups.map((group) => ({ id: group.group_id }));
   } catch (error: any) {
     throw new AppError(
