@@ -1,0 +1,23 @@
+{
+  "configurations": [
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "compute-assessment-analytics:ComputeAssessmentAnalyticsFunction (nodejs20.x)",
+      "invokeTarget": {
+        "target": "template",
+        "templatePath": "${workspaceFolder}/infrastructure/lambda/compute-assessment-analytics/template.yaml",
+        "logicalId": "ComputeAssessmentAnalyticsFunction"
+      },
+      "lambda": {
+        "payload": {
+          "assessmentId": "example-assessment-id"
+        },
+        "environmentVariables": {
+          "ENV_VAR_NAME": "value"  // Add any environment variables needed
+        },
+        "runtime": "nodejs20.x"
+      }
+    }
+  ]
+}
