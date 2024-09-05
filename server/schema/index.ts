@@ -20,7 +20,7 @@ import { sequelize } from "../config/database";
 import { QueryTypes } from "sequelize";
 import { AppError } from "../lib/appError";
 import UserAssessmentResult from './assessment/userAssessmentResult.schema'
-import logger from "../config/logger";
+import AssessmentResult from "./assessment/assessmentResult.schema";
 
 const models = [
   "./user/user.schema",
@@ -40,7 +40,8 @@ const models = [
   "./junction/assessmentGroup.schema",
   "./assessment/sectionStatus.schema",
   "./assessment/assessmentResponse.schema",
-  "./assessment/userAssessmentResult.schema"
+  "./assessment/userAssessmentResult.schema",
+  "./assessment/assessmentResult.schema",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -73,6 +74,11 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
+  User.hasMany(UserAssessmentResult, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+  });
+
   User.hasMany(AssessmentResponse, {
     foreignKey: "user_id",
     onDelete: "CASCADE",
@@ -94,6 +100,16 @@ const instantiateModels = async (): Promise<void> => {
   });
 
   Assessment.hasMany(Section, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  })
+
+  Assessment.hasMany(UserAssessmentResult, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  })
+
+  Assessment.hasMany(AssessmentResult, {
     foreignKey: "assessment_id",
     onDelete: "CASCADE",
   })
@@ -175,6 +191,8 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "group_id",
     onDelete: "CASCADE",
   });
+
+
 }
 
 //Writing raw SQL to define foreign key constraints for section because squelize does not support composite foreign keys;
