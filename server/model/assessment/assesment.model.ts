@@ -26,6 +26,7 @@ import {
   FindAndCountOptions,
   fn,
   ForeignKeyConstraintError,
+  Op,
   UniqueConstraintError,
 } from "sequelize";
 import QuestionTag from "../../schema/junction/questionTag.schema";
@@ -41,6 +42,7 @@ import AssessmentStatus, {
 import SectionStatus from "../../schema/assessment/sectionStatus.schema";
 import AssessmentResponse from "../../schema/assessment/assessmentResponse.schema";
 import { GroupData } from "../../types/group.types";
+import { log } from "console";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1030,19 +1032,33 @@ export const removeSectionFromAssessmentById = async (
 ): Promise<boolean> => {
   logger.info(`Removing section from assessment`);
   try {
+    const transaction = await sequelize.transaction();
     const result = await Section.destroy({
       where: {
         assessment_id: assessmentId,
         section: section,
       },
+    transaction,
     });
-
+    logger.info(`Section ${section} removed from assessment`);
     if (result === 0) {
       return false;
     }
-
-    logger.info(result);
+    await Section.update(
+      { section: sequelize.literal('section - 1') },
+      {
+        where: {
+          assessment_id: assessmentId,
+          section: { [Op.gt]: section }
+        },
+        transaction,
+      }
+    );
+    transaction.commit();
+    logger.info(`Section ${section} removed and subsequent sections updated`);
     return true;
+  
+
   } catch (error: any) {
     throw new AppError(
       "Error removing section from assessment",
