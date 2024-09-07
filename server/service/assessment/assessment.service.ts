@@ -39,6 +39,7 @@ import {
   viewAssignedAssessmentsByUserId,
   getAssessmentAssignedGroups,
   computeUserResultsByAssessment,
+  computeAssessmentAnalytics,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -223,7 +224,7 @@ export const updateAssessment = async (assessment: {
     updatedAssessment &&
     assessment.end_at &&
     existingAssessment.end_at.toUTCString() !==
-      updatedAssessment.end_at.toUTCString()
+    updatedAssessment.end_at.toUTCString()
   ) {
     try {
       await updateAssessmentEndEventSchedule(
@@ -809,6 +810,8 @@ export const computeResults = async (
 ): Promise<boolean> => {
   await validateAssessmentEnd(assessmentId)
 
-  await computeUserResultsByAssessment(assessmentId, true)
+  const { transaction } = await computeUserResultsByAssessment(assessmentId, false)
+  await computeAssessmentAnalytics(assessmentId, true, transaction)
+  
   return true
 };

@@ -38,6 +38,7 @@ AssessmentResult.init(
     assessment_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      unique: true
     },
     total_marks: {
       type: DataTypes.FLOAT,
@@ -77,6 +78,12 @@ AssessmentResult.init(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    indexes: [
+      {
+        unique: true,
+        fields: ['assessment_id'] 
+      }
+    ]
   }
 );
 

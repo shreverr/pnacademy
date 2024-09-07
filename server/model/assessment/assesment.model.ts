@@ -31,6 +31,7 @@ import {
   Transaction,
   Op,
   UniqueConstraintError,
+  Sequelize,
 } from "sequelize";
 import QuestionTag from "../../schema/junction/questionTag.schema";
 import { sequelize } from "../../config/database";
@@ -47,6 +48,7 @@ import AssessmentResponse from "../../schema/assessment/assessmentResponse.schem
 import { GroupData } from "../../types/group.types";
 import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
 import { log } from "console";
+import AssessmentResult from "../../schema/assessment/assessmentResult.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1042,7 +1044,7 @@ export const removeSectionFromAssessmentById = async (
         assessment_id: assessmentId,
         section: section,
       },
-    transaction,
+      transaction,
     });
     logger.info(`Section ${section} removed from assessment`);
     if (result === 0) {
@@ -1061,7 +1063,7 @@ export const removeSectionFromAssessmentById = async (
     transaction.commit();
     logger.info(`Section ${section} removed and subsequent sections updated`);
     return true;
-  
+
 
   } catch (error: any) {
     throw new AppError(
@@ -1544,6 +1546,104 @@ export const computeUserResultsByAssessment = async (
 
     return {
       result: updatedUserAssessmentResults,
+      transaction
+    }
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "Error calculating results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+}
+
+export const computeAssessmentAnalytics = async (
+  assessmentId: string,
+  commitTransaction: boolean,
+  transaction?: Transaction
+): Promise<{
+  result: AssessmentResult
+  transaction: Transaction
+}> => {
+  logger.info(`calculating assessment results`);
+
+  if (!transaction) {
+    transaction = await sequelize.transaction();
+  }
+  try {
+    const assessmentAnalytics = await UserAssessmentResult.findOne({
+      attributes: [
+        [Sequelize.cast(Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('user_id'))), "INTEGER"), 'total_participants'],
+        [Sequelize.cast(Sequelize.fn('AVG', Sequelize.col('marks_scored')), "FLOAT"), 'average_marks'],
+        [Sequelize.cast(Sequelize.fn('AVG', Sequelize.col('correct_percentage')), "FLOAT"), 'average_marks_percentage']
+      ],
+      where: {
+        assessment_id: assessmentId
+      },
+      raw: true,
+      transaction
+    }) as unknown as {
+      total_participants: number;
+      average_marks: number;
+      average_marks_percentage: number;
+    }
+
+    const totalMarks = await Question.findOne({
+      attributes: [
+        [Sequelize.cast(Sequelize.fn('SUM', Sequelize.col('marks')), "FLOAT"), 'total_marks'],
+      ],
+      where: {
+        assessment_id: assessmentId
+      },
+      raw: true,
+      transaction
+    }) as unknown as {
+      total_marks: number;
+    }
+
+    const [updatedRowsCount] = await AssessmentResult.update({
+      total_participants: assessmentAnalytics.total_participants,
+      average_marks: assessmentAnalytics.average_marks,
+      average_marks_percentage: assessmentAnalytics.average_marks_percentage,
+      total_marks: totalMarks.total_marks,
+      is_published: false
+    }, {
+      where: { assessment_id: assessmentId },
+      transaction
+    });
+
+    let updatedAssessmentAnalyticsData: AssessmentResult;
+
+    if (updatedRowsCount === 0) {
+      // If no rows were updated, create a new record
+      updatedAssessmentAnalyticsData = await AssessmentResult.create({
+        id: uuid(),
+        assessment_id: assessmentId,
+        total_participants: assessmentAnalytics.total_participants,
+        average_marks: assessmentAnalytics.average_marks,
+        average_marks_percentage: assessmentAnalytics.average_marks_percentage,
+        total_marks: totalMarks.total_marks,
+        is_published: false
+      }, { transaction });
+    } else {
+      // If a row was updated, fetch the updated record
+      updatedAssessmentAnalyticsData = await AssessmentResult.findOne({
+        where: { assessment_id: assessmentId },
+        transaction
+      }) as AssessmentResult;
+    }
+
+    if (commitTransaction) {
+      await transaction.commit();
+    }
+
+    return {
+      result: updatedAssessmentAnalyticsData,
       transaction
     }
   } catch (error: any) {
