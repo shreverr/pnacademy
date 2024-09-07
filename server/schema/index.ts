@@ -201,8 +201,7 @@ export const defineCustomRelations = async () => {
   try {
     await sequelize.query(
       // 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY(assessment_id, section) REFERENCES sections(assessment_id, section) ON DELETE CASCADE;',
-      "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_sections') THEN EXECUTE 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY (assessment_id, section) REFERENCES sections (assessment_id, section) ON DELETE CASCADE'; END IF; END $$;",
-      {
+"DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_sections') THEN EXECUTE 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY (assessment_id, section) REFERENCES sections (assessment_id, section) ON DELETE CASCADE ON UPDATE CASCADE'; END IF; END $$;",      {
         type: QueryTypes.RAW,
         transaction: transaction
       }
