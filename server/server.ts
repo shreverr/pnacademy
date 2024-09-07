@@ -34,7 +34,7 @@ void connectDatabase();
 
 void sequelize
   .sync({
-   force: process.env.ENVIRONMENT === "dev",
+   alter: process.env.ENVIRONMENT === "dev",
   })
   .then(async () => {
     await defineCustomRelations()

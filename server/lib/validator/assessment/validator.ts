@@ -517,6 +517,15 @@ export const validateEndAssessment = [
     .withMessage("assessmentId should be a valid UUID v4"),
 ];
 
+export const validateComputeResults = [
+  check("assessmentId")
+    .not()
+    .isEmpty()
+    .withMessage("assessmentId cannot be empty")
+    .isUUID(4)
+    .withMessage("assessmentId should be a valid UUID v4"),
+];
+
 export const validateStartSection = [
   check("assessmentId")
     .not()

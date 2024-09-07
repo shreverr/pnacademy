@@ -38,6 +38,7 @@ import {
   updateTagInDB,
   viewAssignedAssessmentsByUserId,
   getAssessmentAssignedGroups,
+  computeUserResultsByAssessment,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -61,6 +62,7 @@ import { AssessmentAttributes } from "../../schema/assessment/assessment.schema"
 import Question from "../../schema/assessment/question.schema";
 import {
   validateAssessment,
+  validateAssessmentEnd,
   validateAssessmentStatus,
   validateSectionStatus,
 } from "../../lib/assessment/validator";
@@ -800,4 +802,13 @@ export const endSection = async (
   const isSectionEnded = await endSectionById(assessmentId, userId, section);
 
   return isSectionEnded;
+};
+
+export const computeResults = async (
+  assessmentId: string,
+): Promise<boolean> => {
+  await validateAssessmentEnd(assessmentId)
+
+  await computeUserResultsByAssessment(assessmentId, true)
+  return true
 };

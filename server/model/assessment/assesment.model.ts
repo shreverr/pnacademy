@@ -1,4 +1,5 @@
 import { type UUID } from "crypto";
+import { v4 as uuid } from "uuid";
 import {
   type OptionData,
   type QuestionData,
@@ -26,6 +27,8 @@ import {
   FindAndCountOptions,
   fn,
   ForeignKeyConstraintError,
+  QueryTypes,
+  Transaction,
   UniqueConstraintError,
 } from "sequelize";
 import QuestionTag from "../../schema/junction/questionTag.schema";
@@ -41,6 +44,7 @@ import AssessmentStatus, {
 import SectionStatus from "../../schema/assessment/sectionStatus.schema";
 import AssessmentResponse from "../../schema/assessment/assessmentResponse.schema";
 import { GroupData } from "../../types/group.types";
+import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -188,10 +192,10 @@ export const getAllAssessments = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
     const allAssessments = await Assessment.findAndCountAll(findOptions);
     // Convert the data to plain object
@@ -728,10 +732,10 @@ export const getAllTags = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
 
     const allTagsData = await Tag.findAndCountAll(findOptions);
@@ -918,10 +922,10 @@ export const viewAssignedAssessmentsByUserId = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
 
     const assignedAssessments = await Assessment.findAndCountAll({
@@ -1369,7 +1373,7 @@ export const attemptQuestionById = async (
     if (
       error instanceof ForeignKeyConstraintError &&
       (error.parent as any).constraint ===
-        "assessment_responses_question_id_fkey"
+      "assessment_responses_question_id_fkey"
     ) {
       throw new AppError(
         "Question does not exist",
@@ -1390,7 +1394,7 @@ export const attemptQuestionById = async (
     } else if (
       error instanceof ForeignKeyConstraintError &&
       (error.parent as any).constraint ===
-        "assessment_responses_assessment_id_fkey"
+      "assessment_responses_assessment_id_fkey"
     ) {
       throw new AppError(
         "Assessment does not exist",
@@ -1401,7 +1405,7 @@ export const attemptQuestionById = async (
     } else if (
       error instanceof ForeignKeyConstraintError &&
       (error.parent as any).constraint ===
-        "assessment_responses_selected_option_id_fkey"
+      "assessment_responses_selected_option_id_fkey"
     ) {
       throw new AppError(
         "Option does not exist",
@@ -1450,3 +1454,92 @@ export const attemptQuestionDeleteById = async (
     }
   }
 };
+
+export const computeUserResultsByAssessment = async (
+  assessmentId: string,
+  commitTransaction: boolean,
+  transaction?: Transaction
+): Promise<{
+  result: UserAssessmentResult[]
+  transaction: Transaction
+}> => {
+  logger.info(`calculating user results for assessment`);
+  if (!transaction) {
+    transaction = await sequelize.transaction();
+  }
+  try {
+    const userResultsQuery = `
+        SELECT 
+          ar.assessment_id,
+          ar.user_id,
+          SUM(CASE WHEN o.is_correct THEN 1 ELSE 0 END) AS correct_answers_count,
+          SUM(CASE WHEN o.is_correct THEN 0 ELSE 1 END) AS wrong_answers_count,
+          SUM(CASE WHEN o.is_correct THEN q.marks ELSE 0 END) AS marks_scored,
+          (SUM(CASE WHEN o.is_correct THEN 1 ELSE 0 END) * 100.0 / COUNT(q.id)) AS correct_percentage
+        FROM 
+          assessment_responses ar
+        JOIN 
+          questions q ON ar.question_id = q.id
+        JOIN 
+          options o ON ar.selected_option_id = o.id
+        WHERE 
+          ar.assessment_id = :assessmentId
+        GROUP BY 
+          ar.assessment_id, ar.user_id
+      `;
+
+    const userResults = await sequelize.query<{
+      assessment_id: string;
+      user_id: string;
+      correct_answers_count: number;
+      wrong_answers_count: number;
+      marks_scored: number;
+      correct_percentage: number;
+    }>(userResultsQuery, {
+      replacements: { assessmentId },
+      type: QueryTypes.SELECT,
+      transaction
+    });
+
+    const userAssessmentData = userResults.map(item => ({
+      id: uuid(),
+      assessment_id: item.assessment_id,
+      user_id: item.user_id,
+      correct_answers_count: item.correct_answers_count,
+      wrong_answers_count: item.wrong_answers_count,
+      marks_scored: item.marks_scored,
+      correct_percentage: item.correct_percentage,
+    }));
+
+    const updatedUserAssessmentResults = await UserAssessmentResult.bulkCreate(userAssessmentData, {
+      updateOnDuplicate: [
+        'correct_answers_count',
+        'wrong_answers_count',
+        'marks_scored',
+        'correct_percentage',
+        'updatedAt'
+      ],
+      transaction
+    })
+
+    if (commitTransaction) {
+      await transaction.commit();
+    }
+
+    return {
+      result: updatedUserAssessmentResults,
+      transaction
+    }
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "Error calculating results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+}

@@ -4,6 +4,7 @@ import {
   addTag,
   attemptQustion,
   attemptQustionDelete,
+  computeResults,
   createAssessment,
   createOption,
   createQuestion,
@@ -681,6 +682,22 @@ export const endSectionController: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       message: "Section ended",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const computeResultsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await computeResults(req.body.assessmentId);
+
+    return res.status(200).json({
+      status: "success",
     });
   } catch (error) {
     next(error);

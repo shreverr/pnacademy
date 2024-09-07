@@ -9,6 +9,8 @@ export interface UserAssessmentResultAttributes {
   marks_scored: number
   wrong_answers_count: number
   correct_percentage: number
+  createdAt?: Date; // Automatically added by sequelize
+  updatedAt?: Date; // Automatically added by sequelize
 }
 
 class UserAssessmentResult
@@ -57,7 +59,14 @@ UserAssessmentResult.init(
   },
   {
     sequelize,
-    modelName: 'user_assessment_result'
+    modelName: 'user_assessment_result',
+    timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['assessment_id', 'user_id'] // Unique constraint on combo of assessment_id and user_id
+      }
+    ]
   }
 )
 

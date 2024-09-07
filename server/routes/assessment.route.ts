@@ -5,6 +5,7 @@ import {
   addTagController,
   attemptQuestionController,
   attemptQuestionDeleteController,
+  computeResultsController,
   CreateAssessmentController,
   CreateOptionController,
   CreateQuestionController,
@@ -63,6 +64,7 @@ import {
   validateAttemptQuestion,
   validateAttemptQuestionDelete,
   validateBulkAssessment,
+  validateComputeResults,
   validateEndAssessment,
   validateEndSection,
   validateGenerateAssessment,
@@ -70,6 +72,8 @@ import {
   validateStartAssessment,
   validateStartSection,
 } from "../lib/validator/assessment/validator";
+import { validate } from "uuid";
+import { authenticateInternalService } from "../middleware/internalAuth";
 
 const router: Router = express.Router();
 
@@ -2243,3 +2247,11 @@ router.put(
 );
 
 export default router;
+
+router.post(
+  '/compute-results',
+  authenticateInternalService,
+  validateComputeResults,
+  validateRequest,
+  computeResultsController
+);

@@ -37,6 +37,31 @@ export const validateAssessment = async (assessmentId: string): Promise<Assement
   return assessment;
 };
 
+export const validateAssessmentEnd = async (assessmentId: string): Promise<AssementDetailedData> => {
+  const assessment = await getAssessmentById(assessmentId as UUID);
+  if (!assessment) {
+    throw new AppError(
+      "Assessment not found",
+      404,
+      "Assessment with this id does not exist",
+      false
+    );
+  }
+
+  const currentTime = Date.now();
+
+  if (currentTime < assessment.end_at.getTime()) {
+    throw new AppError(
+      "Assessment not ended yet",
+      403,
+      "Assessment not ended yet",
+      false
+    );
+  }
+
+  return assessment;
+};
+
 export const validateAssessmentStatus = async (assessmentId: string, userId: string) => {
   const assessmentStatus = await getAssessmentStatusById(assessmentId, userId);
 
@@ -69,7 +94,7 @@ export const validateSectionStatus = async (
   const sectionStatuses = (await getSectionStatusesById(assessmentId, userId)).rows;
 
   sectionStatuses.forEach((sectionStatus) => {
-    if (sectionStatus.is_submited === true) {
+    if (sectionStatus.section === section && sectionStatus.is_submited === true) {
         throw new AppError(
           'Section already submitted',
           409,
