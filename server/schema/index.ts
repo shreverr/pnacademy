@@ -117,6 +117,10 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "assessment_id",
     onDelete: "CASCADE",
   })
+  
+  AssessmentResult.belongsTo(Assessment, {
+    foreignKey: "assessment_id"
+  })
 
   Question.hasMany(Option, {
     foreignKey: "question_id",
@@ -205,10 +209,10 @@ export const defineCustomRelations = async () => {
   try {
     await sequelize.query(
       // 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY(assessment_id, section) REFERENCES sections(assessment_id, section) ON DELETE CASCADE;',
-"DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_sections') THEN EXECUTE 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY (assessment_id, section) REFERENCES sections (assessment_id, section) ON DELETE CASCADE ON UPDATE CASCADE'; END IF; END $$;",      {
-        type: QueryTypes.RAW,
-        transaction: transaction
-      }
+      "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_sections') THEN EXECUTE 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY (assessment_id, section) REFERENCES sections (assessment_id, section) ON DELETE CASCADE ON UPDATE CASCADE'; END IF; END $$;", {
+      type: QueryTypes.RAW,
+      transaction: transaction
+    }
     );
     await transaction.commit();
   } catch (error: any) {

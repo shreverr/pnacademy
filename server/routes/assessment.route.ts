@@ -18,6 +18,7 @@ import {
   endAssessmentController,
   endSectionController,
   generateAiQuestionsController,
+  getAllAssessmentResultController,
   getResultController,
   publishResultController,
   removeGroupFromAssessmentController,
@@ -70,6 +71,7 @@ import {
   validateEndAssessment,
   validateEndSection,
   validateGenerateAssessment,
+  validateGetAssessmentsResultList,
   validateGetResult,
   validatePublishResult,
   validateSectionDelete,
@@ -2656,4 +2658,161 @@ router.get(
   getResultController
 )
 
+/**
+ * @swagger
+ * /v1/assessment/results:
+ *   get:
+ *     summary: Retrieve a list of assessments with results
+ *     description: This endpoint retrieves a list of assessments with their results, including pagination, sorting, and ordering options.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *       - name: pageSize
+ *         in: query
+ *         required: false
+ *         description: The number of results per page.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 4
+ *       - name: sortBy
+ *         in: query
+ *         required: false
+ *         description: The field by which to sort the results.
+ *         schema:
+ *           type: string
+ *           example: name
+ *           enum:
+ *             - assessment_id
+ *             - total_marks
+ *             - total_participants
+ *             - average_marks
+ *             - average_marks_percentage
+ *             - is_published
+ *             - createdAt
+ *             - updatedAt
+ *             - name
+ *       - name: order
+ *         in: query
+ *         required: false
+ *         description: The order in which to sort the results (ascending or descending).
+ *         schema:
+ *           type: string
+ *           example: DESC
+ *           enum:
+ *             - ASC
+ *             - DESC
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessment results.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     results:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           assessment_id:
+ *                             type: string
+ *                             description: The unique identifier of the assessment.
+ *                             example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *                           total_marks:
+ *                             type: integer
+ *                             description: The total marks available for the assessment.
+ *                             example: 15
+ *                           total_participants:
+ *                             type: integer
+ *                             description: The total number of participants in the assessment.
+ *                             example: 2
+ *                           average_marks:
+ *                             type: number
+ *                             format: float
+ *                             description: The average marks scored by participants.
+ *                             example: 12.5
+ *                           average_marks_percentage:
+ *                             type: number
+ *                             format: float
+ *                             description: The average percentage of marks scored by participants.
+ *                             example: 83.33333333333334
+ *                           is_published:
+ *                             type: boolean
+ *                             description: Indicates whether the assessment result is published.
+ *                             example: false
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp when the assessment was created.
+ *                             example: 2024-09-08T14:58:49.993Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp when the assessment was last updated.
+ *                             example: 2024-09-08T14:58:49.993Z
+ *                           assessment:
+ *                             type: object
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                                 description: The name of the assessment.
+ *                                 example: PNA Testes
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad Request. The input parameters are invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid query parameters
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving assessment results
+ */
+router.get(
+  "/results",
+  authenticateUser(["canManageReports"]),
+  validateGetAssessmentsResultList,
+  validateRequest,
+  getAllAssessmentResultController
+)
 export default router;

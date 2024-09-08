@@ -14,6 +14,7 @@ import {
   AssessmentAssigendGroupData,
   UserResult,
   UserResultAttributes,
+  AssessmentResultListAttributes,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -1751,6 +1752,85 @@ export const getResultsByAssessmentId = async (
     // Convert the data to plain object
     let plainData: {
       rows: UserResult[];
+      count: number;
+    } = {
+      rows: allAssessmentResults.rows.map((assessmentResult: any) =>
+        assessmentResult.get({ plain: true })
+      ),
+      count: allAssessmentResults.count,
+    };
+    return plainData;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting assessment results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getAssessmentResultList = async (
+  offset?: number,
+  pageSize?: number,
+  sortBy?: AssessmentResultListAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: AssessmentResult[];
+  count: number
+}> => {
+  try {
+    let findOptions: FindAndCountOptions = {}
+    if ((offset !== null || offset !== undefined) && pageSize && sortBy && order) {
+      findOptions = {
+        limit: pageSize,
+        offset: offset,
+        order: [[sortBy, order]],
+      }
+
+      if (sortBy === "name") {
+        findOptions.order = [[{ model: Assessment, as: "assessment" }, sortBy, order]];
+      }
+    }
+
+    findOptions = {
+      ...findOptions,
+      include: [
+        {
+          model: Assessment,
+          attributes: ["name"],
+        },
+      ],
+      attributes: [
+        "assessment_id",
+        "total_marks",
+        "total_participants",
+        "average_marks",
+        "average_marks_percentage",
+        "is_published",
+        "createdAt",
+        "updatedAt",
+      ],
+    }
+
+    const allAssessmentResults = await AssessmentResult.findAndCountAll(findOptions);
+
+    if (allAssessmentResults.count === 0) {
+      throw new AppError(
+        "Assessment results not found",
+        404,
+        "Assessment results not found",
+        false
+      );
+    }
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: AssessmentResult[];
       count: number;
     } = {
       rows: allAssessmentResults.rows.map((assessmentResult: any) =>

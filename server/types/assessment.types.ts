@@ -101,4 +101,27 @@ export type UserResult = {
 }
 
 export type UserResultAttributes = "user_id" | "first_name" | "last_name" | "email" | "correct_answers_count"
-    | "marks_scored" | "correct_percentage" | "wrong_answers_count" | "createdAt" | "updatedAt"
+  | "marks_scored" | "correct_percentage" | "wrong_answers_count" | "createdAt" | "updatedAt"
+
+export type AssessmentResultListAttributes =
+  "assessment_id" |
+  "total_marks" |
+  "total_participants"|
+  "average_marks" |
+  "average_marks_percentage" |
+  "is_published" |
+  "createdAt" |
+  "updatedAt"|
+  "name"
+
+export type AssessmentResult = {
+  assessment_id: string
+  total_marks: number
+  total_participants: number
+  average_marks: number
+  average_marks_percentage: number
+  is_published: boolean
+  createdAt: Date
+  updatedAt: Date
+  name: string
+}

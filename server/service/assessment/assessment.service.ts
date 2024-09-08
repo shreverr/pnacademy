@@ -42,6 +42,7 @@ import {
   computeAssessmentAnalytics,
   publishAssessmentResultsByAssessmentId,
   getResultsByAssessmentId,
+  getAssessmentResultList,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -57,6 +58,7 @@ import {
   AssessmentDataBySection,
   UserResult,
   UserResultAttributes,
+  AssessmentResultListAttributes,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -79,6 +81,7 @@ import {
 import logger from "../../config/logger";
 import Group from "../../schema/group/group.schema";
 import { GroupData } from "../../types/group.types";
+import AssessmentResult from "../../schema/assessment/assessmentResult.schema";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -858,6 +861,37 @@ export const viewAssessmentResults = async (
 
   return {
     results: results,
+    totalPages: totalPages,
+  };
+};
+
+export const viewAssessmentResultsList = async (
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: AssessmentResultListAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  results: AssessmentResult[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "name";
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: assessmentResultList, count: allTagsCount } = await getAssessmentResultList(
+    offset,
+    pageSize,
+    sortBy,
+    order
+  );
+
+  const totalPages = Math.ceil(allTagsCount / pageSize);
+
+  return {
+    results: assessmentResultList,
     totalPages: totalPages,
   };
 };

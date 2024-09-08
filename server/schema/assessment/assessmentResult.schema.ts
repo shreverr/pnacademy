@@ -76,8 +76,6 @@ AssessmentResult.init(
     sequelize,
     modelName: 'assessment_result',
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
     indexes: [
       {
         unique: true,
