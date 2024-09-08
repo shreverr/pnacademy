@@ -28,6 +28,7 @@ import {
   updateQuestion,
   updateTag,
   viewAllTags,
+  viewAssessmentAnalytics,
   viewAssessmentBulk,
   viewAssessmentDetails,
   viewAssessmentGroupDetails,
@@ -764,6 +765,25 @@ export const getAllAssessmentResultController: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       data: assessmentResults
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAssessmentAnalytics: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentAnalytics = await viewAssessmentAnalytics(
+      req.params.assessmentId,
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: assessmentAnalytics
     });
   } catch (error) {
     next(error);

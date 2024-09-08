@@ -51,7 +51,7 @@ import AssessmentResponse from "../../schema/assessment/assessmentResponse.schem
 import { GroupData } from "../../types/group.types";
 import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
 import { log } from "console";
-import AssessmentResult from "../../schema/assessment/assessmentResult.schema";
+import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1839,6 +1839,56 @@ export const getAssessmentResultList = async (
       count: allAssessmentResults.count,
     };
     return plainData;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting assessment results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getAssessmentAnalyticsByAssessmentId = async (
+  assessmentId: string,
+): Promise<AssessmentResultAttributes> => {
+  try {
+    const assessmentAnalytics = await AssessmentResult.findOne({
+      include: [
+        {
+          model: Assessment,
+          attributes: ["name", "description"],
+        },
+      ],
+      attributes: [
+        "assessment_id",
+        "total_marks",
+        "total_participants",
+        "average_marks",
+        "average_marks_percentage",
+        "is_published",
+        "createdAt",
+        "updatedAt",
+      ],
+      where: {
+        assessment_id: assessmentId,
+      },
+    });
+
+    if (!assessmentAnalytics) {
+      throw new AppError(
+        "Assessment result not found",
+        404,
+        "Assessment result not found",
+        false
+      );
+    }
+
+    return assessmentAnalytics;
   } catch (error: any) {
     if (error instanceof AppError) {
       throw error;

@@ -19,6 +19,7 @@ import {
   endSectionController,
   generateAiQuestionsController,
   getAllAssessmentResultController,
+  getAssessmentAnalytics,
   getResultController,
   publishResultController,
   removeGroupFromAssessmentController,
@@ -71,6 +72,7 @@ import {
   validateEndAssessment,
   validateEndSection,
   validateGenerateAssessment,
+  validateGetAssessmentAnalytics,
   validateGetAssessmentsResultList,
   validateGetResult,
   validatePublishResult,
@@ -2815,4 +2817,137 @@ router.get(
   validateRequest,
   getAllAssessmentResultController
 )
+
+/**
+ * @swagger
+ * /v1/assessment/{assessmentId}/analytics:
+ *   get:
+ *     summary: Retrieve analytics for a specific assessment
+ *     description: This endpoint retrieves analytics data for a specific assessment, including total marks, total participants, average marks, and more.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: assessmentId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the assessment for which analytics are being retrieved.
+ *         schema:
+ *           type: string
+ *           example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessment analytics.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     assessment_id:
+ *                       type: string
+ *                       description: The unique identifier of the assessment.
+ *                       example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *                     total_marks:
+ *                       type: integer
+ *                       description: The total marks available for the assessment.
+ *                       example: 15
+ *                     total_participants:
+ *                       type: integer
+ *                       description: The total number of participants in the assessment.
+ *                       example: 2
+ *                     average_marks:
+ *                       type: number
+ *                       format: float
+ *                       description: The average marks scored by participants.
+ *                       example: 12.5
+ *                     average_marks_percentage:
+ *                       type: number
+ *                       format: float
+ *                       description: The average percentage of marks scored by participants.
+ *                       example: 83.33333333333334
+ *                     is_published:
+ *                       type: boolean
+ *                       description: Indicates whether the assessment result is published.
+ *                       example: false
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp when the assessment was created.
+ *                       example: 2024-09-08T14:58:49.993Z
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp when the assessment was last updated.
+ *                       example: 2024-09-08T14:58:49.993Z
+ *                     assessment:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                           description: The name of the assessment.
+ *                           example: PNA Testes
+ *                         description:
+ *                           type: string
+ *                           description: A description of the assessment.
+ *                           example: A new project
+ *       '400':
+ *         description: Bad Request. The assessment ID is invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid assessment ID
+ *       '404':
+ *         description: Not Found. The assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the assessment was not found.
+ *                   example: Assessment with this ID does not exist
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving assessment analytics
+ */
+router.get(
+  "/:assessmentId/analytics",
+  authenticateUser(["canManageReports"]),
+  validateGetAssessmentAnalytics,
+  validateRequest,
+  getAssessmentAnalytics
+)
+
 export default router;

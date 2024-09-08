@@ -43,6 +43,7 @@ import {
   publishAssessmentResultsByAssessmentId,
   getResultsByAssessmentId,
   getAssessmentResultList,
+  getAssessmentAnalyticsByAssessmentId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -81,7 +82,7 @@ import {
 import logger from "../../config/logger";
 import Group from "../../schema/group/group.schema";
 import { GroupData } from "../../types/group.types";
-import AssessmentResult from "../../schema/assessment/assessmentResult.schema";
+import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -894,4 +895,12 @@ export const viewAssessmentResultsList = async (
     results: assessmentResultList,
     totalPages: totalPages,
   };
+};
+
+export const viewAssessmentAnalytics = async (
+  assessmentId: string
+): Promise<AssessmentResultAttributes> => {
+  const assessmentAnalytics = await getAssessmentAnalyticsByAssessmentId(assessmentId);
+
+  return assessmentAnalytics;
 };
