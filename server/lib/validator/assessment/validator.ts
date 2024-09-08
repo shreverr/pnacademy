@@ -478,9 +478,9 @@ export const validateGenerateAssessment = [
   check("difficulty")
     .not()
     .isEmpty()
-    .isLength({ min: 2 })
+    .isIn(["easy", "medium", "hard"])
     .escape()
-    .withMessage("difficulty must be a number"),
+    .withMessage("difficulty must be 'easy', 'medium' or 'hard'"),
 ];
 
 export const validateSectionDelete = [
