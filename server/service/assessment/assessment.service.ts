@@ -44,6 +44,7 @@ import {
   getResultsByAssessmentId,
   getAssessmentResultList,
   getAssessmentAnalyticsByAssessmentId,
+  getAssessmentResultAnalyticsByMetric,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -60,6 +61,8 @@ import {
   UserResult,
   UserResultAttributes,
   AssessmentResultListAttributes,
+  AssessmentResultAnalyticsMetric,
+  ChartData,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -901,6 +904,40 @@ export const viewAssessmentAnalytics = async (
   assessmentId: string
 ): Promise<AssessmentResultAttributes> => {
   const assessmentAnalytics = await getAssessmentAnalyticsByAssessmentId(assessmentId);
+
+  return assessmentAnalytics;
+};
+
+export const viewAssessmentAnalyticsChart = async (
+  metric: AssessmentResultAnalyticsMetric,
+  start_at?: string,
+  end_at?: string
+): Promise<ChartData[]> => {
+  let startDate
+  let endDate
+
+  if (start_at) {
+    startDate = new Date(start_at)
+  } else {
+    startDate = new Date(0) // set to oldest date
+  }
+
+  if (end_at) {
+    endDate = new Date(end_at)
+  } else {
+    endDate = new Date() // set to newest date 
+  }
+
+  if (startDate > endDate) {
+    throw new AppError(
+      "Invalid Date Range",
+      400,
+      "Start date should be less than end date",
+      false
+    );
+  }
+
+  const assessmentAnalytics = await getAssessmentResultAnalyticsByMetric(metric, startDate, endDate);
 
   return assessmentAnalytics;
 };

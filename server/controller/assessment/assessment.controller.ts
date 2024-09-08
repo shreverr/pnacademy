@@ -29,6 +29,7 @@ import {
   updateTag,
   viewAllTags,
   viewAssessmentAnalytics,
+  viewAssessmentAnalyticsChart,
   viewAssessmentBulk,
   viewAssessmentDetails,
   viewAssessmentGroupDetails,
@@ -45,6 +46,7 @@ import {
   type Response,
 } from "express";
 import {
+  AssessmentResultAnalyticsMetric,
   AssessmentResultListAttributes,
   UserResultAttributes,
   type AssessmentAttribute,
@@ -784,6 +786,27 @@ export const getAssessmentAnalytics: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       data: assessmentAnalytics
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAssessmentAnalyticsChart: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentAnalyticsChartData = await viewAssessmentAnalyticsChart(
+      req.query.metric as AssessmentResultAnalyticsMetric,
+      req.query.start_date as string,
+      req.query.end_date as string
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: assessmentAnalyticsChartData
     });
   } catch (error) {
     next(error);

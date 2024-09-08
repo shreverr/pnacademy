@@ -20,6 +20,7 @@ import {
   generateAiQuestionsController,
   getAllAssessmentResultController,
   getAssessmentAnalytics,
+  getAssessmentAnalyticsChart,
   getResultController,
   publishResultController,
   removeGroupFromAssessmentController,
@@ -73,6 +74,7 @@ import {
   validateEndSection,
   validateGenerateAssessment,
   validateGetAssessmentAnalytics,
+  validateGetAssessmentAnalyticsChart,
   validateGetAssessmentsResultList,
   validateGetResult,
   validatePublishResult,
@@ -2948,6 +2950,82 @@ router.get(
   validateGetAssessmentAnalytics,
   validateRequest,
   getAssessmentAnalytics
+)
+
+/**
+ * @swagger
+ * /v1/assessment/analytics/chart:
+ *   get:
+ *     summary: Get assessment analytics data in chart format.
+ *     tags:
+ *       - Assessment Analytics
+ *     description: Retrieves the assessment analytics data based on the specified metric and optional date range.
+ *     parameters:
+ *       - in: query
+ *         name: metric
+ *         required: true
+ *         description: The metric for which the analytics data is to be retrieved.
+ *         schema:
+ *           type: string
+ *           enum: [average_marks_percentage, total_participants, average_marks]
+ *       - in: query
+ *         name: start_date
+ *         required: false
+ *         description: The start date for the data range.
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: "2004/10/16"
+ *       - in: query
+ *         name: end_date
+ *         required: false
+ *         description: The end date for the data range.
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the assessment analytics data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-09-08T14:58:49.993Z"
+ *                       metricValue:
+ *                         type: integer
+ *                         example: 2
+ *       400:
+ *         description: Invalid input data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "start_date must be a valid date"
+ */
+router.get(
+  "/analytics/chart",
+  authenticateUser(["canManageReports"]),
+  validateGetAssessmentAnalyticsChart,
+  validateRequest,
+  getAssessmentAnalyticsChart
 )
 
 export default router;

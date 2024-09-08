@@ -15,6 +15,8 @@ import {
   UserResult,
   UserResultAttributes,
   AssessmentResultListAttributes,
+  AssessmentResultAnalyticsMetric,
+  ChartData,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -1889,6 +1891,52 @@ export const getAssessmentAnalyticsByAssessmentId = async (
     }
 
     return assessmentAnalytics;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting assessment results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getAssessmentResultAnalyticsByMetric = async (
+  metric: AssessmentResultAnalyticsMetric,
+  start_date?: Date,
+  end_date?: Date,
+): Promise<ChartData[]> => {
+  try {
+    let whereClause: Record<string, any> = {};
+    if (start_date && end_date) {
+      whereClause.created_at = {
+        [Op.between]: [start_date, end_date],
+      };
+    } else if (start_date) {
+      whereClause.created_at = {
+        [Op.gte]: start_date,
+      };
+    } else if (end_date) {
+      whereClause.created_at = {
+        [Op.lte]: end_date,
+      };
+    }
+
+
+    const assessmentResultAnalytics = await AssessmentResult.findAll({
+      attributes: [metric, "createdAt"],
+      where: whereClause,
+      order: [['created_at', 'ASC']],
+    });
+
+    return assessmentResultAnalytics.map((result: any) => ({
+      createdAt: result.createdAt,
+      metricValue: result[metric],
+    }));
   } catch (error: any) {
     if (error instanceof AppError) {
       throw error;

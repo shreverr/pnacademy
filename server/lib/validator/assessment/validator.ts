@@ -703,3 +703,24 @@ export const validateGetAssessmentAnalytics = [
     .isUUID(4)
     .withMessage("assessmentId should be a valid UUID v4")
 ];
+
+export const validateGetAssessmentAnalyticsChart = [
+  query("metric")
+    .matches("^(average_marks_percentage|total_participants|average_marks)$")
+    .withMessage(
+      `Must match one of the specified options:
+         average_marks_percentage | total_participants | average_marks`
+    ),
+
+  query("start_date")
+    .optional()
+    .isDate()
+    .withMessage("start_date must be a valid date"),
+
+  query("end_date")
+    .optional()
+    .isDate()
+    .withMessage("start_date must be a valid date"),
+
+  // Custom validation to ensure both start_date and end_date are provided together
+];

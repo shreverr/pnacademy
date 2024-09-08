@@ -125,3 +125,10 @@ export type AssessmentResult = {
   updatedAt: Date
   name: string
 }
+
+export type AssessmentResultAnalyticsMetric = 'total_participants' | 'average_marks' | 'average_marks_percentage'
+
+export type ChartData = {
+  createdAt: Date;
+  metricValue: number;
+}
