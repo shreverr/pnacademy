@@ -18,6 +18,7 @@ import {
   endAssessmentController,
   endSectionController,
   generateAiQuestionsController,
+  publishResultController,
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
   startAssessmentController,
@@ -68,6 +69,7 @@ import {
   validateEndAssessment,
   validateEndSection,
   validateGenerateAssessment,
+  validatePublishResult,
   validateSectionDelete,
   validateStartAssessment,
   validateStartSection,
@@ -474,7 +476,7 @@ router.delete(
  * /totalmarks:
  *   get:
  *     tags:
- *       - Assessment view controller
+ *       - Assessment View Controller
  *     summary: Get total marks for an assessment
  *     description: Retrieves the total marks for a specific assessment. Requires authentication and appropriate permissions.
  *     security:
@@ -2245,9 +2247,112 @@ router.put(
   validateRequest,
   endAssessmentController
 );
-
-export default router;
-
+/**
+ * @swagger
+ * /v1/assessment/compute-results:
+ *   post:
+ *     summary: Compute assessment results
+ *     description: This endpoint computes the results of a specific assessment. It is protected and can only be accessed by internal services with valid authorization.
+ *     tags:
+ *       - Internal API for internal services only
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *             required:
+ *               - assessmentId
+ *     responses:
+ *       '200':
+ *         description: Assessment results successfully computed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   description: The computed results of the assessment.
+ *       '400':
+ *         description: Bad Request. The input data is invalid (e.g., assessmentId is missing or not a valid UUID).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: assessmentId should be a valid UUID v4
+ *       '401':
+ *         description: Unauthorized. The request lacks valid authentication credentials.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: A message indicating that authentication is required.
+ *                   example: unauthorized
+ *       '403':
+ *         description: Forbidden. The request is authenticated but does not have permission to access this resource.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: A message indicating that the user is not authorized.
+ *                   example: Not authorized to compute results for this assessment
+ *       '404':
+ *         description: Not Found. The assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the assessment was not found.
+ *                   example: Assessment with this ID does not exist
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error computing results for the assessment
+ */
 router.post(
   '/compute-results',
   authenticateInternalService,
@@ -2255,3 +2360,114 @@ router.post(
   validateRequest,
   computeResultsController
 );
+
+/**
+ * @swagger
+ * /v1/assessment/result/publish:
+ *   post:
+ *     summary: Publish or unpublish an assessment result
+ *     description: This endpoint allows publishing or unpublishing the result of a specific assessment.
+ *     tags:
+ *       - Assessment Controller
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentId:
+ *                 type: string
+ *                 description: The unique identifier of the assessment.
+ *                 example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *               publish:
+ *                 type: boolean
+ *                 description: Flag to either publish (true) or unpublish (false) the assessment result.
+ *                 example: false
+ *             required:
+ *               - assessmentId
+ *               - publish
+ *     responses:
+ *       '200':
+ *         description: Result successfully published/unpublished.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *       '400':
+ *         description: Bad Request. The input data is invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid assessment ID or publish flag
+ *       '403':
+ *         description: Forbidden. The user is not authorized to publish/unpublish the result.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing why the request was forbidden.
+ *                   example: Not authorized to publish/unpublish this assessment result
+ *       '404':
+ *         description: Not Found. The assessment with the specified ID does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the assessment was not found.
+ *                   example: Assessment with this ID does not exist
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error publishing/unpublishing result
+ */
+router.post(
+  '/result/publish',
+  authenticateUser(["canManageReports"]),
+  validatePublishResult,
+  validateRequest,
+  publishResultController
+)
+
+export default router;

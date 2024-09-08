@@ -16,6 +16,7 @@ import {
   endAssessment,
   endSection,
   generateAiQuestionsService,
+  publishResult,
   removeGroupFromAssessment,
   removeSectionFromAssessment,
   removeTagFromQuestion,
@@ -698,6 +699,22 @@ export const computeResultsController: RequestHandler = async (
 
     return res.status(200).json({
       status: "success",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const publishResultController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await publishResult(req.body.assessmentId, req.body.publish);
+
+    return res.status(200).json({
+      status: "success"
     });
   } catch (error) {
     next(error);

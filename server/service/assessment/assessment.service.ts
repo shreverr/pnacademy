@@ -40,6 +40,7 @@ import {
   getAssessmentAssignedGroups,
   computeUserResultsByAssessment,
   computeAssessmentAnalytics,
+  publishAssessmentResultsByAssessmentId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -812,6 +813,15 @@ export const computeResults = async (
 
   const { transaction } = await computeUserResultsByAssessment(assessmentId, false)
   await computeAssessmentAnalytics(assessmentId, true, transaction)
-  
+
+  return true
+};
+
+export const publishResult = async (
+  assessmentId: string,
+  pubilsh: boolean
+): Promise<boolean> => {
+  await publishAssessmentResultsByAssessmentId(assessmentId, pubilsh)
+
   return true
 };

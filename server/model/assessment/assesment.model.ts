@@ -1659,3 +1659,37 @@ export const computeAssessmentAnalytics = async (
     }
   }
 }
+
+export const publishAssessmentResultsByAssessmentId = async (
+  assessmentId: string,
+  pubilsh: boolean,
+): Promise<boolean> => {
+  logger.info(`Attempting question by id`);
+  try {
+    const [affectedCount] = await AssessmentResult.update({
+      assessment_id: assessmentId,
+      is_published: pubilsh,
+    }, {
+      where: {
+        assessment_id: assessmentId,
+      }
+    });
+
+    if (affectedCount === 0) {
+      throw new AppError(
+        "Assessment does not exist",
+        404,
+        "Assessment does not exist",
+        false
+      );
+    }
+
+    return true;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error
+    } else {
+      throw new AppError("Error Updating publish status", 500, error, true);
+    }
+  }
+};

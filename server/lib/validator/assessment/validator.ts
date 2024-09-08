@@ -603,3 +603,19 @@ export const validateEndSection = [
     .matches(/^[1-9]\d*$/)
     .withMessage("section should be >= 1"),
 ];
+
+export const validatePublishResult = [
+  check("assessmentId")
+    .not()
+    .isEmpty()
+    .withMessage("assessmentId cannot be empty")
+    .isUUID(4)
+    .withMessage("assessmentId should be a valid UUID v4"),
+
+  check("publish")
+    .not()
+    .isEmpty()
+    .withMessage("publish cannot be empty")
+    .isBoolean()
+    .withMessage("section should be boolean"),
+];
