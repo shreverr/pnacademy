@@ -12,6 +12,8 @@ import {
   AiQuestions,
   AiQuestionData,
   AssessmentAssigendGroupData,
+  UserResult,
+  UserResultAttributes,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -1690,6 +1692,83 @@ export const publishAssessmentResultsByAssessmentId = async (
       throw error
     } else {
       throw new AppError("Error Updating publish status", 500, error, true);
+    }
+  }
+};
+
+export const getResultsByAssessmentId = async (
+  assessmentId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: UserResultAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: UserResult[];
+  count: number
+}> => {
+  try {
+    let findOptions: FindAndCountOptions = {}
+    if ((offset !== null || offset !== undefined) && pageSize && sortBy && order) {
+      findOptions = {
+        limit: pageSize,
+        offset: offset,
+        order: [[sortBy, order]],
+      }
+
+      if (sortBy === "first_name" || sortBy === "last_name" || sortBy === "email") {
+        findOptions.order = [[{ model: User, as: "user" }, sortBy, order]];
+      }
+    }
+
+    findOptions = {
+      ...findOptions,
+      include: [
+        {
+          model: User,
+          attributes: ["first_name", "last_name", "email"],
+        },
+      ],
+      attributes: [
+        "user_id", "correct_answers_count", "marks_scored", "correct_percentage",
+        "wrong_answers_count", "createdAt", "updatedAt"
+      ],
+      where: {
+        assessment_id: assessmentId,
+      },
+    }
+
+    const allAssessmentResults = await UserAssessmentResult.findAndCountAll(findOptions);
+
+    if (allAssessmentResults.count === 0) {
+      throw new AppError(
+        "Assessment results not found",
+        404,
+        "Assessment results not found",
+        false
+      );
+    }
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: UserResult[];
+      count: number;
+    } = {
+      rows: allAssessmentResults.rows.map((assessmentResult: any) =>
+        assessmentResult.get({ plain: true })
+      ),
+      count: allAssessmentResults.count,
+    };
+    return plainData;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting assessment results",
+        500,
+        error,
+        true
+      );
     }
   }
 };

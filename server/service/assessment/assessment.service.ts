@@ -41,6 +41,7 @@ import {
   computeUserResultsByAssessment,
   computeAssessmentAnalytics,
   publishAssessmentResultsByAssessmentId,
+  getResultsByAssessmentId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -54,6 +55,8 @@ import {
   AiQuestions,
   AssessmentAssigendGroupData,
   AssessmentDataBySection,
+  UserResult,
+  UserResultAttributes,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -824,4 +827,37 @@ export const publishResult = async (
   await publishAssessmentResultsByAssessmentId(assessmentId, pubilsh)
 
   return true
+};
+
+export const viewAssessmentResults = async (
+  assessmentId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: UserResultAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  results: UserResult[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "first_name";
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: results, count: allTagsCount } = await getResultsByAssessmentId(
+    assessmentId,
+    offset,
+    pageSize,
+    sortBy,
+    order
+  );
+
+  const totalPages = Math.ceil(allTagsCount / pageSize);
+
+  return {
+    results: results,
+    totalPages: totalPages,
+  };
 };

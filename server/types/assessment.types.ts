@@ -86,3 +86,19 @@ export type AssessmentAttribute =
 export type AssessmentAssigendGroupData = {
   id: string;
 };
+
+export type UserResult = {
+  user_id: string;
+  correct_answers_count: number;
+  marks_scored: number;
+  correct_percentage: number;
+  wrong_answers_count: number;
+  createdAt: Date;
+  updatedAt: Date;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+export type UserResultAttributes = "user_id" | "first_name" | "last_name" | "email" | "correct_answers_count"
+    | "marks_scored" | "correct_percentage" | "wrong_answers_count" | "createdAt" | "updatedAt"

@@ -31,6 +31,7 @@ import {
   viewAssessmentBulk,
   viewAssessmentDetails,
   viewAssessmentGroupDetails,
+  viewAssessmentResults,
   viewAssignedAssessments,
   viewQuestionDetails,
   viewTag,
@@ -42,6 +43,7 @@ import {
   type Response,
 } from "express";
 import {
+  UserResultAttributes,
   type AssessmentAttribute,
   type TagAttribute,
 } from "../../types/assessment.types";
@@ -715,6 +717,29 @@ export const publishResultController: RequestHandler = async (
 
     return res.status(200).json({
       status: "success"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getResultController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentResults = await viewAssessmentResults(
+      req.params.assessmentId,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as UserResultAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: assessmentResults
     });
   } catch (error) {
     next(error);
