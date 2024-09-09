@@ -1460,7 +1460,7 @@ router.get(
  *                           description:
  *                             type: string
  *                             example: "What is the capital of Bihar?"
- *                           Options:
+ *                           options:
  *                             type: array
  *                             items:
  *                               type: object

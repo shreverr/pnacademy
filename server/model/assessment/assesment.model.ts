@@ -993,8 +993,27 @@ export const generateAiQuestions = async (
   difficulty: string
 ): Promise<AiQuestions | null> => {
   try {
-    const prompt = `Generate ${numberOfQuestions} quiz questions about ${topic} of ${difficulty} difficulty. Format the response as a JSON array where each question object has 'question', 'options' (an array of 4 choices) with  each option is array ( description and is correct boolean ) `;
-
+    // const prompt = `Generate ${numberOfQuestions} quiz questions about 
+    // ${topic} of ${difficulty} difficulty. Format the response as a JSON array where each question object has 'question', 'options' (an array of 4 choices) with  each option is array ( description and is correct boolean ) `;
+    
+    const prompt = `
+    You are tasked with generating exactly ${numberOfQuestions} quiz questions on the topic of "${topic}" with a difficulty level of "${difficulty}".
+    
+    Output the result as a JSON array of ${numberOfQuestions} objects. Each object should have the following structure:
+    - "question": A string containing the question text.
+    - "options": An array of exactly 4 objects, each object having:
+      - "description": A string representing the text of the option.
+      - "isCorrect": A boolean indicating whether the option is correct.
+    
+    Make sure the JSON array contains exactly ${numberOfQuestions} questions, and each question has 4 options with one correct option.
+    
+    Use the following information for context between the triple quotes:
+    """
+    Number of questions: ${numberOfQuestions}
+    Topic: ${topic}
+    Difficulty: ${difficulty}
+    """
+    `;
     const data = await model.generateContent(prompt);
     const responseText = data.response.text();
 
@@ -1023,7 +1042,7 @@ export const generateAiQuestions = async (
 
     const formattedQuestions: AiQuestionData[] = parsedQuestions.map((q) => ({
       description: q.question,
-      Options: q.options,
+      options: q.options,
     }));
 
     return { questions: formattedQuestions };

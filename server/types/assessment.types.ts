@@ -63,7 +63,7 @@ export interface AIOptionData {
 }
 export interface AiQuestionData {
   description: string;
-  Options: AIOptionData[];
+  options: AIOptionData[];
 }
 export interface AiQuestions {
   questions: AiQuestionData[];
