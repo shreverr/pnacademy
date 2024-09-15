@@ -17,6 +17,7 @@ import {
   viewAllRolesController,
   viewAllUsersController,
   viewUserDetailsController,
+  viewUsersByRoleIdController,
 } from "../controller/user/user.controller";
 import {
   validateGetAllRoles,
@@ -37,6 +38,7 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";
+import { validateGetUsersByRoleId } from "../lib/validator/user/validator";
 
 const router: Router = express.Router();
 
@@ -363,7 +365,7 @@ router.post(
  *                     type: string
  *                   phone:
  *                     type: string
- *                   role_id:
+ *                   roleId:
  *                     type: string
  *     responses:
  *       '200':
@@ -395,7 +397,7 @@ router.post(
  *                     phone:
  *                       type: string
  *                       description: The phone number of the updated user.
- *                     role_id:
+ *                     roleId:
  *                       type: string
  *                       description: The role ID of the updated user (if applicable).
  *                     updatedAt:
@@ -898,6 +900,81 @@ router.get(
   validateRequest,
   viewAllRolesController
 );
+
+/**
+ * @swagger
+ * /v1/user/role:
+ *   get:
+ *     summary: Get users by role ID
+ *     tags:
+ *     - User view Controller
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: roleId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: UUID v4 of the role to fetch users for.
+ *     responses:
+ *       '200':
+ *         description: Users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                         description: The unique identifier of the user.
+ *                       username:
+ *                         type: string
+ *                         description: The username of the user.
+ *                       email:
+ *                         type: string
+ *                         format: email
+ *                         description: The email address of the user.
+ *                       roleId:
+ *                         type: string
+ *                         format: uuid
+ *                         description: The ID of the user's role.
+ *             example:
+ *               status: success
+ *               data:
+ *                 - id: "123e4567-e89b-12d3-a456-426614174000"
+ *                   username: "johndoe"
+ *                   email: "john.doe@example.com"
+ *                   roleId: "98765432-e89b-12d3-a456-426614174000"
+ *                 - id: "987e6543-e89b-12d3-a456-426614174001"
+ *                   username: "janedoe"
+ *                   email: "jane.doe@example.com"
+ *                   roleId: "98765432-e89b-12d3-a456-426614174000"
+ *       '400':
+ *         description: Bad Request - Invalid roleId
+ *       '401':
+ *         description: Unauthorized - User doesn't have the required permissions
+ *       '500':
+ *         description: Internal Server Error
+ */
+
+router.get(
+  "/role",
+  authenticateUser(["canManageRole"]),
+  validateGetUsersByRoleId,
+  validateRequest,  
+  viewUsersByRoleIdController
+)
 
 /**
  * @openapi

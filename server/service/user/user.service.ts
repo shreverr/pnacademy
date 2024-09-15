@@ -16,6 +16,7 @@ import {
   removeUsersFromGroupById,
   getAllUsersByGroupId,
   updateRoleInDB,
+  getAllUsersByRoleId,
 } from "../../model/user/user.model";
 import {
   RoleData,
@@ -551,3 +552,10 @@ export const getUsersInGroup = async (
     totalPages: totalPages,
   };
 };
+
+export const getUsersbyroleId = async (
+  roleId: string
+): Promise<UserData[] | null> => {
+ const users = await getAllUsersByRoleId(roleId);
+  return users;
+}

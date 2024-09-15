@@ -10,6 +10,7 @@ import {
   deleteRole,
   deleteUsers,
   exportUsers,
+  getUsersbyroleId,
   getUsersInGroup,
   importUsers,
   loginUser,
@@ -104,7 +105,7 @@ export const UpdateUserController: RequestHandler = async (
       roleId: req.body.dataToUpdate.roleId,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "User Updated successfully",
       data: userData,
     });
@@ -249,6 +250,23 @@ export const viewAllRolesController: RequestHandler = async (
     next(error);
   }
 };
+
+export const  viewUsersByRoleIdController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const users = await getUsersbyroleId(req.query.roleId as string);
+
+    return res.status(200).json({
+      status: "success",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export const importUserController: RequestHandler = async (
   req: Request,

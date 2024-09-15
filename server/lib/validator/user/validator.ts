@@ -123,6 +123,15 @@ export const validateGetAllRoles = [
     ),
 ];
 
+export const validateGetUsersByRoleId = [
+  query("roleId")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+    .escape()
+    .withMessage("RoleId must be a valid UUID v4"),
+];
+
 export const validateUserLogin = [
   check("email")
     .notEmpty()
@@ -192,7 +201,11 @@ export const validateUserUpdate = [
     .isLength({ min: 10, max: 10 })
     .withMessage("Phone number must be a valid phone number"),
 
-  check("role_id").optional().notEmpty(),
+  check("roleId")
+  .optional()
+  .notEmpty()
+  
+  
 ];
 
 export const validateUserRole = [
