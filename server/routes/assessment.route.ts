@@ -21,6 +21,8 @@ import {
   getAllAssessmentResultController,
   getAssessmentAnalytics,
   getAssessmentAnalyticsChart,
+  getAssessmentSectionsController,
+  getAssessmentTimeController,
   getResultController,
   publishResultController,
   removeGroupFromAssessmentController,
@@ -84,6 +86,7 @@ import {
 } from "../lib/validator/assessment/validator";
 import { validate } from "uuid";
 import { authenticateInternalService } from "../middleware/internalAuth";
+import { get } from "http";
 
 const router: Router = express.Router();
 
@@ -2255,6 +2258,7 @@ router.put(
   validateRequest,
   endAssessmentController
 );
+
 /**
  * @swagger
  * /v1/assessment/compute-results:
@@ -3026,6 +3030,173 @@ router.get(
   validateGetAssessmentAnalyticsChart,
   validateRequest,
   getAssessmentAnalyticsChart
+)
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/assessmentdetails/time:
+ *   get:
+ *     summary: Get assessment time data
+ *     tags:
+ *        - Assessment Attempt Controller
+ *     description: Retrieves the assessment time data for a specific assessment and user.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: The UUID of the assessment.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the assessment time data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     duration:
+ *                       type: integer
+ *                       description: Duration in seconds
+ *                       example: 864000
+ *                     server_time:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The current server time
+ *                       example: "2024-09-16T17:15:13.773Z"
+ *                     start_at:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The start time of the assessment
+ *                       example: "2024-09-16T17:13:13.389Z"
+ *       400:
+ *         description: Invalid input data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid UUID. Please provide a valid UUID v4."
+ *       401:
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ * 
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+router.get(
+  "/attempt/assessmentdetails/time",
+  authenticateUser(["canAttemptAssessment"]),
+  validateAssessmentGetId,
+  validateRequest,
+  getAssessmentTimeController
+
+)
+
+/**
+ * @swagger
+ * /v1/assessment/attempt/assessmentdetails/sections:
+ *   get:
+ *     summary: Get assessment sections details
+ *     tags:
+ *       - Assessment Attempt Controller
+ *     description: Retrieves the sections of a specific assessment.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: The UUID of the assessment.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the assessment sections.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 sections:
+ *                   type: array
+ *                   items:
+ *                     type: integer
+ *                   example: [1, 2]
+ *       400:
+ *         description: Invalid input data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid UUID. Please provide a valid UUID v4."
+ *       401:
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ * 
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+router.get(
+  "/attempt/assessmentdetails/sections",
+  authenticateUser(["canAttemptAssessment"]),
+  validateAssessmentGetId,
+  validateRequest,
+  getAssessmentSectionsController,
+
 )
 
 export default router;

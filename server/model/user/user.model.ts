@@ -547,3 +547,27 @@ export const getAllUsersByGroupId = async (
     );
   }
 };
+
+
+export const getAllUsersByRoleId = async (
+  roleid: string,
+): Promise<UserData[] | null> => {
+  try {
+    const allUsersData = await User.findAll({
+      where: {
+        role_id: roleid
+      }
+    });
+
+    return allUsersData.map((user) => user.get({ plain: true }));
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting all users by roleid",
+      500,
+      error,
+      true
+    );
+  }
+
+
+}

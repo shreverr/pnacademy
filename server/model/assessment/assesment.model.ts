@@ -17,6 +17,7 @@ import {
   AssessmentResultListAttributes,
   AssessmentResultAnalyticsMetric,
   ChartData,
+  AssessmentTime,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -54,6 +55,7 @@ import { GroupData } from "../../types/group.types";
 import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
 import { log } from "console";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
+import { serve } from "swagger-ui-express";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1013,6 +1015,7 @@ export const generateAiQuestions = async (
     Topic: ${topic}
     Difficulty: ${difficulty}
     """
+ 
     `;
     const data = await model.generateContent(prompt);
     const responseText = data.response.text();
@@ -1969,3 +1972,84 @@ export const getAssessmentResultAnalyticsByMetric = async (
     }
   }
 };
+
+export const getAssessmentTimeData = async (
+  assessmentId: UUID,
+  userId: string
+): Promise<AssessmentTime | null> => {
+  try {
+    
+    const assessmentStatus = await AssessmentStatus.findOne({
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId,
+      },
+    });
+
+    const assessment = await Assessment.findOne({
+      where: {
+        id: assessmentId,
+      },
+    });
+
+    if (!assessmentStatus || !assessment) {
+      throw new AppError(
+        "Assessment time data not found",
+        404,
+        "Assessment time data not found",
+        false
+      );
+    }
+
+    const serverTime = new Date();
+
+    const assessmentTimeData: AssessmentTime = {
+      duration: assessment.duration,
+      server_time: serverTime,
+      start_at: assessmentStatus.started_at,
+    };
+
+    return assessmentTimeData;
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting assessment time data",
+      500,
+      error.message,
+      true
+    );
+  }
+}
+
+export const getAssessmentSections = async (assessmentId: UUID): Promise<number[]> => {
+  try {
+    const sections = await Section.findAll({
+      attributes: ['section'],
+      where: {
+        assessment_id: assessmentId,
+      },
+      order: [['section', 'ASC']],
+      raw: true 
+    });
+
+    
+    const sectionNumbers = (sections as { section: number }[])
+      .map(s => s.section)
+      .filter((section): section is number => typeof section === 'number');
+
+    if (sectionNumbers.length === 0) {
+      throw new AppError('No sections found for the given assessment', 404, 'NOT_FOUND', false);
+    }
+
+    return sectionNumbers;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(
+      "Error retrieving assessment sections",
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
+      true
+    );
+  }
+}
