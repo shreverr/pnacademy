@@ -189,7 +189,7 @@ export const validateAssessmentId = [
 ];
 
 export const validateAssessmentGetId = [
-  query("id")
+  query("Id")
     .not()
     .isEmpty()
     .isUUID(4)
@@ -724,3 +724,4 @@ export const validateGetAssessmentAnalyticsChart = [
 
   // Custom validation to ensure both start_date and end_date are provided together
 ];
+

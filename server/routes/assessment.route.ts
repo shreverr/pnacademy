@@ -21,6 +21,7 @@ import {
   getAllAssessmentResultController,
   getAssessmentAnalytics,
   getAssessmentAnalyticsChart,
+  getAssessmentTimeController,
   getResultController,
   publishResultController,
   removeGroupFromAssessmentController,
@@ -3029,6 +3030,94 @@ router.get(
   getAssessmentAnalyticsChart
 )
 
+/**
+ * @swagger
+ * /v1/assessment/time:
+ *   get:
+ *     summary: Get assessment time data
+ *     tags:
+ *       - Assessment View Controller
+ *     description: Retrieves the assessment time data for a specific assessment and user.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: The UUID of the assessment.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the assessment time data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     duration:
+ *                       type: integer
+ *                       description: Duration in seconds
+ *                       example: 864000
+ *                     server_time:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The current server time
+ *                       example: "2024-09-16T17:15:13.773Z"
+ *                     start_at:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The start time of the assessment
+ *                       example: "2024-09-16T17:13:13.389Z"
+ *       400:
+ *         description: Invalid input data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid UUID. Please provide a valid UUID v4."
+ *       401:
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ * 
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+router.get(
+  "/time",
+  authenticateUser(["canAttemptAssessment"]),
+  validateAssessmentGetId,
+  validateRequest,
+  getAssessmentTimeController
+
+)
 
 
 export default router;

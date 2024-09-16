@@ -35,6 +35,7 @@ import {
   viewAssessmentGroupDetails,
   viewAssessmentResults,
   viewAssessmentResultsList,
+  viewAssessmentTime,
   viewAssignedAssessments,
   viewQuestionDetails,
   viewTag,
@@ -812,3 +813,20 @@ export const getAssessmentAnalyticsChart: RequestHandler = async (
     next(error);
   }
 };
+
+export const  getAssessmentTimeController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentTime = await viewAssessmentTime(req.query.Id as UUID , req.user.userId as UUID);
+
+    return res.status(200).json({
+      status: "success",
+      data: assessmentTime
+    });
+  } catch (error) {
+    next(error);
+  }
+}

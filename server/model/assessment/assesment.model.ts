@@ -17,6 +17,7 @@ import {
   AssessmentResultListAttributes,
   AssessmentResultAnalyticsMetric,
   ChartData,
+  AssessmentTime,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -54,6 +55,7 @@ import { GroupData } from "../../types/group.types";
 import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
 import { log } from "console";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
+import { serve } from "swagger-ui-express";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1013,6 +1015,7 @@ export const generateAiQuestions = async (
     Topic: ${topic}
     Difficulty: ${difficulty}
     """
+ 
     `;
     const data = await model.generateContent(prompt);
     const responseText = data.response.text();
@@ -1969,3 +1972,49 @@ export const getAssessmentResultAnalyticsByMetric = async (
     }
   }
 };
+
+export const getAssessmentTimeData = async (
+  assessmentId: UUID,
+  userId: string
+): Promise<AssessmentTime | null> => {
+  try {
+    const assessmentStatus = await AssessmentStatus.findOne({
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId,
+      },
+    });
+
+    const assessment = await Assessment.findOne({
+      where: {
+        id: assessmentId,
+      },
+    });
+
+    if (!assessmentStatus || !assessment) {
+      throw new AppError(
+        "Assessment time data not found",
+        404,
+        "Assessment time data not found",
+        false
+      );
+    }
+
+    const serverTime = new Date();
+
+    const assessmentTimeData: AssessmentTime = {
+      duration: assessment.duration,
+      server_time: serverTime,
+      start_at: assessmentStatus.started_at,
+    };
+
+    return assessmentTimeData;
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting assessment time data",
+      500,
+      error.message,
+      true
+    );
+  }
+}

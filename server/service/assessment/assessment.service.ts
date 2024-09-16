@@ -45,6 +45,7 @@ import {
   getAssessmentResultList,
   getAssessmentAnalyticsByAssessmentId,
   getAssessmentResultAnalyticsByMetric,
+  getAssessmentTimeData,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -63,6 +64,7 @@ import {
   AssessmentResultListAttributes,
   AssessmentResultAnalyticsMetric,
   ChartData,
+  AssessmentTime,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -941,3 +943,13 @@ export const viewAssessmentAnalyticsChart = async (
 
   return assessmentAnalytics;
 };
+
+export const viewAssessmentTime = async (
+  assessmentId: UUID,
+  userId: string,
+): Promise<AssessmentTime  | null> => {
+ 
+
+  const assessmentTime = await getAssessmentTimeData(assessmentId, userId);
+  return assessmentTime;
+}

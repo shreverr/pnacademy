@@ -132,3 +132,10 @@ export type ChartData = {
   createdAt: Date;
   metricValue: number;
 }
+
+export interface AssessmentTime {
+  duration: number;
+  server_time: Date;
+  start_at: Date;
+
+}
