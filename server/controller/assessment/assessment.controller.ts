@@ -35,6 +35,7 @@ import {
   viewAssessmentGroupDetails,
   viewAssessmentResults,
   viewAssessmentResultsList,
+  viewAssessmentSections,
   viewAssessmentTime,
   viewAssignedAssessments,
   viewQuestionDetails,
@@ -820,11 +821,29 @@ export const  getAssessmentTimeController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
+   
     const assessmentTime = await viewAssessmentTime(req.query.Id as UUID , req.user.userId as UUID);
 
     return res.status(200).json({
       status: "success",
       data: assessmentTime
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const  getAssessmentSectionsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentSections = await viewAssessmentSections(req.query.Id as UUID, req.user.userId as UUID);
+
+    return res.status(200).json({
+      status: "success",
+      sections: assessmentSections
     });
   } catch (error) {
     next(error);

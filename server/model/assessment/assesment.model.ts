@@ -1978,6 +1978,7 @@ export const getAssessmentTimeData = async (
   userId: string
 ): Promise<AssessmentTime | null> => {
   try {
+    
     const assessmentStatus = await AssessmentStatus.findOne({
       where: {
         assessment_id: assessmentId,
@@ -2014,6 +2015,40 @@ export const getAssessmentTimeData = async (
       "Error getting assessment time data",
       500,
       error.message,
+      true
+    );
+  }
+}
+
+export const getAssessmentSections = async (assessmentId: UUID): Promise<number[]> => {
+  try {
+    const sections = await Section.findAll({
+      attributes: ['section'],
+      where: {
+        assessment_id: assessmentId,
+      },
+      order: [['section', 'ASC']],
+      raw: true 
+    });
+
+    
+    const sectionNumbers = (sections as { section: number }[])
+      .map(s => s.section)
+      .filter((section): section is number => typeof section === 'number');
+
+    if (sectionNumbers.length === 0) {
+      throw new AppError('No sections found for the given assessment', 404, 'NOT_FOUND', false);
+    }
+
+    return sectionNumbers;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(
+      "Error retrieving assessment sections",
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
       true
     );
   }

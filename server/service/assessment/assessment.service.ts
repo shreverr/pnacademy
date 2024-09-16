@@ -46,6 +46,7 @@ import {
   getAssessmentAnalyticsByAssessmentId,
   getAssessmentResultAnalyticsByMetric,
   getAssessmentTimeData,
+  getAssessmentSections,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -948,8 +949,19 @@ export const viewAssessmentTime = async (
   assessmentId: UUID,
   userId: string,
 ): Promise<AssessmentTime  | null> => {
- 
-
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
   const assessmentTime = await getAssessmentTimeData(assessmentId, userId);
   return assessmentTime;
+}
+
+export const  viewAssessmentSections = async (
+  assessmentId: UUID,
+  userId: UUID
+): Promise<number[]> => {
+  await validateAssessment(assessmentId);
+  await validateAssessmentStatus(assessmentId, userId);
+  const sectionStatuses = await getAssessmentSections(assessmentId);
+
+  return sectionStatuses;
 }
