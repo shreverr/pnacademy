@@ -29,7 +29,7 @@ import { v4 as uuid } from "uuid";
 import { AppError } from "../../lib/appError";
 import { hashPassword } from "../../utils/password";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt, { Jwt } from "jsonwebtoken";
 import { UUID } from "crypto";
 import logger from "../../config/logger";

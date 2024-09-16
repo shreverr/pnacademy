@@ -1,7 +1,7 @@
 import { randomBytes, pbkdf2 } from 'crypto';
 import { promisify } from 'util';
 import { AppError } from '../lib/appError';
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 
 const hashPassword = async (password: string): Promise<string> => {
   try {

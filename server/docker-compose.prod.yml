@@ -24,4 +24,5 @@ services:
   pna-webserver:
     build:
       target: production
+    volumes: []
     command: pm2-runtime start ecosystem.config.js

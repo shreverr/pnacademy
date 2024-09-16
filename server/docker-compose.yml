@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: base
-    volumes:
-      - ./:/home/node/app
+    # volumes:
+      # - ./:/home/node/app
     container_name: pna-webserver
     expose:
       - '3000'
