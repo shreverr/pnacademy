@@ -11,8 +11,6 @@ import {
 import logger from "../../config/logger";
 import { AppError } from "../appError";
 import eventBridgeClient from "../../config/eventBridge";
-import lambdaClient from "../../config/lambdaClient";
-import { AddPermissionCommand, AddPermissionCommandInput } from "@aws-sdk/client-lambda";
 
 const assessmentAnalyticsComputeLambdaARN = process.env.AWS_ASSESSMENT_ANALYTICS_COMPUTE_LAMBDA_ARN
 
@@ -58,17 +56,6 @@ export const scheduleAssessmentEndEvent = async (
 
     const putAssessmentEndEventTarget = new PutTargetsCommand(putAssessmentEndEventTargetParams);
     await eventBridgeClient.send(putAssessmentEndEventTarget);
-
-    const addPermissionToLambdaParams: AddPermissionCommandInput = {
-      FunctionName: assessmentAnalyticsComputeLambdaARN,
-      StatementId: `assessment-end-invoke-permission-${assessmentId}`,
-      Action: "lambda:InvokeFunction",
-      Principal: "events.amazonaws.com",
-      SourceArn: assementEventRuleData.RuleArn
-    }
-
-    const addPermissionToLambdaCommand = new AddPermissionCommand(addPermissionToLambdaParams);
-    await lambdaClient.send(addPermissionToLambdaCommand);
 
   } catch (error: any) {
     throw new AppError(

@@ -6,6 +6,7 @@ import instantiateModels from "./schema/index";
 import router from "./routes";
 import { handleError, jsonParseError } from "./middleware/error";
 import cors from 'cors'
+import { addGeneralPermissionToLambda } from "./config/lambdaClient";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use("/v1", router);
 app.use(handleError);
 
 instantiateModels();
+addGeneralPermissionToLambda();
 
 export default app;
