@@ -189,7 +189,7 @@ export const validateAssessmentId = [
 ];
 
 export const validateAssessmentGetId = [
-  query("Id")
+  query("id")
     .not()
     .isEmpty()
     .isUUID(4)
