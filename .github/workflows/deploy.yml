@@ -21,5 +21,5 @@ jobs:
         ssh  ${USER}@${HOST} -i private_key '
           cd /home/ec2-user/pnacademy/server &&
           git pull &&
-          docker-compose docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+          sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
         '
