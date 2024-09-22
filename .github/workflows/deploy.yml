@@ -18,8 +18,8 @@ jobs:
         USER: ${{ secrets.EC2_USERNAME }}
       run: |
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ${USER}@${HOST} '
+        ssh  ${USER}@${HOST} -i private_key '
           cd /home/ec2-user/pnacademy/server &&
           git pull &&
-          docker-compose docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+          docker-compose docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
         '
