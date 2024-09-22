@@ -9,7 +9,7 @@ export interface AssessmentAttributes {
   start_at: Date
   end_at: Date
   duration: number
-  created_by: string
+  created_by: string | null
 }
 class Assessment
   extends Model<AssessmentAttributes>
@@ -21,7 +21,7 @@ class Assessment
   public start_at!: Date
   public end_at!: Date
   public duration!: number
-  public created_by!: string
+  public created_by!: string | null
 }
 Assessment.init(
   {
@@ -56,7 +56,7 @@ Assessment.init(
     },
     created_by: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: true
     }
   },
   {

@@ -26,6 +26,7 @@ export const validateAssessment = [
     .withMessage("duration must be a valid duration"),
 
   check("created_by")
+    .optional()
     .not()
     .isEmpty()
     .isUUID(4)

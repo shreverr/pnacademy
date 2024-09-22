@@ -87,11 +87,11 @@ export const createAssementInDB = async (assessment: {
       }
     );
     return createdAssessment;
-  } catch (error) {
+  } catch (error: any) {
     throw new AppError(
       "Error creating assessment",
       500,
-      "Something went wrong",
+      error,
       false
     );
   }

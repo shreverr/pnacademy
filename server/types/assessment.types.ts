@@ -6,7 +6,7 @@ export interface AssementData {
   start_at: Date;
   end_at: Date;
   duration: number;
-  created_by: string;
+  created_by: string | null;
 }
 export interface QuestionData {
   id: string;
@@ -43,7 +43,7 @@ export interface AssementDetailedData {
   start_at: Date;
   end_at: Date;
   duration: number;
-  created_by: string;
+  created_by: string | null;
   questions: QuestionDetailedData[];
 }
 export interface AssessmentDataBySection {
@@ -54,7 +54,7 @@ export interface AssessmentDataBySection {
   start_at: Date;
   end_at: Date;
   duration: number;
-  created_by: string;
+  created_by: string | null;
   sections: QuestionDetailedData[][]
 }
 export interface AIOptionData {

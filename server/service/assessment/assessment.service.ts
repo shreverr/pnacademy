@@ -100,14 +100,16 @@ export const createAssessment = async (assement: {
   duration: number;
   created_by: UUID;
 }): Promise<AssementData | null> => {
-  const existingUser = await getUserById(assement.created_by);
-  if (existingUser == null) {
-    throw new AppError(
-      "User not found",
-      404,
-      "User with this id does not exist so Can't create assessment",
-      false
-    );
+  if (assement.created_by) {
+    const existingUser = await getUserById(assement.created_by);
+    if (!existingUser) {
+      throw new AppError(
+        "User not found",
+        404,
+        "User with this id does not exist so Can't create assessment",
+        false
+      );
+    }
   }
   const assesmentId = uuid();
   const assementData = await createAssementInDB({
