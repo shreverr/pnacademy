@@ -20,6 +20,7 @@ import {
   removeGroupFromAssessment,
   removeSectionFromAssessment,
   removeTagFromQuestion,
+  saveGeneratedAiQuestions,
   startAssessment,
   startSection,
   totalAssessmentMarks,
@@ -555,6 +556,35 @@ export const generateAiQuestionsController: RequestHandler = async (
   }
 };
 
+export const saveGeneratedAiQuestionsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const savedAssessmentId = await saveGeneratedAiQuestions({
+      name: req.body.name,
+      description: req.body.description,
+      is_active: req.body.is_active,
+      start_at: req.body.start_at,
+      end_at: req.body.end_at,
+      duration: req.body.duration,
+      created_by: req.body.created_by,
+      marks: req.body.marks,
+      questions: req.body.questions,
+    });
+
+    return res.status(201).json({
+      message: "Generated assessment saved successfully",
+      data: {
+        assessmentId: savedAssessmentId,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteSectionController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -815,14 +845,14 @@ export const getAssessmentAnalyticsChart: RequestHandler = async (
   }
 };
 
-export const  getAssessmentTimeController: RequestHandler = async (
+export const getAssessmentTimeController: RequestHandler = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-   
-    const assessmentTime = await viewAssessmentTime(req.query.Id as UUID , req.user.userId as UUID);
+
+    const assessmentTime = await viewAssessmentTime(req.query.Id as UUID, req.user.userId as UUID);
 
     return res.status(200).json({
       status: "success",
@@ -833,7 +863,7 @@ export const  getAssessmentTimeController: RequestHandler = async (
   }
 }
 
-export const  getAssessmentSectionsController: RequestHandler = async (
+export const getAssessmentSectionsController: RequestHandler = async (
   req: Request,
   res: Response,
   next: NextFunction

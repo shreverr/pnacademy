@@ -483,6 +483,57 @@ export const validateGenerateAssessment = [
     .withMessage("difficulty must be 'easy', 'medium' or 'hard'"),
 ];
 
+export const validateGenerateAssessmentSave = [
+  check('marks')
+    .isNumeric()
+    .withMessage('Marks must be a number'),
+
+  check('questions')
+    .isArray()
+    .withMessage('Questions must be an array')
+    .notEmpty()
+    .withMessage('Questions array cannot be empty'),
+
+  check('questions.*.description')
+    .isString()
+    .notEmpty()
+    .withMessage('Question description must be a non-empty string'),
+
+  check('questions.*.options')
+    .isArray({ min: 2 })
+    .withMessage('Each question must have at least two options'),
+
+  check('questions.*.options.*.description')
+    .isString()
+    .notEmpty()
+    .withMessage('Option description must be a non-empty string'),
+
+  check('questions.*.options.*.isCorrect')
+    .isBoolean()
+    .withMessage('isCorrect must be a boolean'),
+
+  check('questions.*.section')
+    .not()
+    .isEmpty()
+    .withMessage("section cannot be empty")
+    .matches(/^[1-9]\d*$/)
+    .withMessage("section should be >= 1"),
+
+  check('questions')
+    .custom((questions) => {
+      for (let question of questions) {
+        const correctOptions = question.options.filter((option: { isCorrect: boolean }) => option.isCorrect);
+        if (correctOptions.length === 0) {
+          throw new Error('Each question must have at least one correct option');
+        }
+      }
+      return true;
+    })
+    .withMessage('Each question must have at least one correct option'),
+
+  ...validateAssessment
+];
+
 export const validateSectionDelete = [
   check("assessmentId")
     .not()

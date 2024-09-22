@@ -27,6 +27,7 @@ import {
   publishResultController,
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
+  saveGeneratedAiQuestionsController,
   startAssessmentController,
   startSectionController,
   totalAssessmentMarksController,
@@ -75,6 +76,7 @@ import {
   validateEndAssessment,
   validateEndSection,
   validateGenerateAssessment,
+  validateGenerateAssessmentSave,
   validateGetAssessmentAnalytics,
   validateGetAssessmentAnalyticsChart,
   validateGetAssessmentsResultList,
@@ -1489,6 +1491,135 @@ router.post(
   validateGenerateAssessment,
   validateRequest,
   generateAiQuestionsController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/generate/save:
+ *   post:
+ *     summary: Save a generated assessment
+ *     tags:
+ *       - Assessment Management
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:  
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *               - is_active
+ *               - start_at
+ *               - end_at
+ *               - duration
+ *               - created_by
+ *               - marks
+ *               - questions
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the assessment
+ *                 example: "PNA Testes"
+ *               description:
+ *                 type: string
+ *                 description: A brief description of the assessment
+ *                 example: "A new project"
+ *               is_active:
+ *                 type: boolean
+ *                 description: Whether the assessment is active or not
+ *                 example: true
+ *               start_at:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The start date and time of the assessment
+ *                 example: "2024-04-16T08:00:00Z"
+ *               end_at:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The end date and time of the assessment
+ *                 example: "2024-09-07T03:35:00"
+ *               duration:
+ *                 type: integer
+ *                 description: The duration of the assessment in milliseconds
+ *                 example: 345600000
+ *               created_by:
+ *                 type: string
+ *                 format: uuid
+ *                 description: The UUID of the user who created the assessment
+ *                 example: "4283a01f-3316-4b0c-8921-7aeee8b49619"
+ *               marks:
+ *                 type: integer
+ *                 description: The total marks for the assessment
+ *                 example: 100
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - description
+ *                     - section
+ *                     - options
+ *                   properties:
+ *                     description:
+ *                       type: string
+ *                       description: The question text
+ *                       example: "What is the capital of France?"
+ *                     section:
+ *                       type: integer
+ *                       description: The section number of the question
+ *                       example: 1
+ *                     options:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         required:
+ *                           - description
+ *                           - isCorrect
+ *                         properties:
+ *                           description:
+ *                             type: string
+ *                             description: The option text
+ *                             example: "Paris"
+ *                           isCorrect:
+ *                             type: boolean
+ *                             description: Whether this option is correct or not
+ *                             example: true
+ *     responses:
+ *       '200':
+ *         description: Successfully saved the assessment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Assessment saved successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *       '400':
+ *         description: Bad request. Invalid input parameters.
+ *       '401':
+ *         description: Unauthorized. JWT token is missing or invalid.
+ *       '403':
+ *         description: Forbidden. User does not have the required permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.post(
+  "/generate/save",
+  authenticateUser(["canManageAssessment"]),
+  validateGenerateAssessmentSave,
+  validateRequest,
+  saveGeneratedAiQuestionsController
 );
 
 /**

@@ -431,6 +431,83 @@ export const createOptionInDB = async (option: {
   }
 };
 
+export const createQuestionsInBulk = async (
+  assessmentId: UUID,
+  questions: Array<{
+    description: string,
+    section: number,
+    options: Array<{
+      description: string,
+      isCorrect: boolean
+    }>
+  }>,
+  marks: number
+): Promise<void> => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const uniqueSections = [...new Set(questions.map(q => q.section))];
+
+    // Fetch existing sections
+    const existingSections = await Section.findAll({
+      where: {
+        assessment_id: assessmentId,
+        section: uniqueSections
+      },
+      attributes: ['section'],
+      transaction
+    });
+    // Determine new sections to create
+    const existingSectionNumbers = existingSections.map(s => s.section);
+    
+    const newSections = uniqueSections
+      .filter(section => !existingSectionNumbers.includes(section))
+      .map(section => ({
+        assessment_id: assessmentId,
+        section: section
+      }));
+
+    // Bulk create new sections if any
+    if (newSections.length > 0) {
+      await Section.bulkCreate(newSections, { transaction });
+    }
+    // Prepare bulk question data
+    const questionData = questions.map(question => ({
+      id: uuid(),
+      assessment_id: assessmentId,
+      description: question.description,
+      marks: marks,
+      section: question.section
+    }));
+
+    // Bulk create questions
+    const createdQuestions = await Question.bulkCreate(questionData, { transaction });
+
+    // Prepare bulk option data
+    const optionData = questions.flatMap((question, index) => 
+      question.options.map(option => ({
+        id: uuid(),
+        question_id: createdQuestions[index].id,
+        description: option.description,
+        is_correct: option.isCorrect
+      }))
+    );
+
+    // Bulk create options
+    await Option.bulkCreate(optionData, { transaction });
+
+    await transaction.commit();
+  } catch (error: any) {
+    await transaction.rollback();
+    throw new AppError(
+      "Error creating questions in bulk",
+      500,
+      error,
+      false
+    );
+  }
+};
+
 export const createTagInDB = async (tag: {
   id: string;
   name: string;

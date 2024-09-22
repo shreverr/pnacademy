@@ -47,6 +47,7 @@ import {
   getAssessmentResultAnalyticsByMetric,
   getAssessmentTimeData,
   getAssessmentSections,
+  createQuestionsInBulk,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -160,17 +161,6 @@ export const createQuestion = async (question: {
   marks: number;
   section: number;
 }): Promise<QuestionData | null> => {
-  // const existingAssessment = await getAssessmentDetailsById(
-  //   question.assessment_id
-  // );
-  // if (existingAssessment == null) {
-  //   throw new AppError(
-  //     "Assessment not found",
-  //     404,
-  //     "Assessment with this id does not exist so Can't create question",
-  //     false
-  //   );
-  // }
   const questionData = await createQuestionInDB({
     id: uuid(),
     assessment_id: question.assessment_id,
@@ -708,6 +698,51 @@ export const generateAiQuestionsService = async (
   return questions;
 };
 
+export const saveGeneratedAiQuestions = async (assessment: {
+  name: string;
+  description: string;
+  is_active: boolean;
+  start_at: Date;
+  end_at: Date;
+  duration: number;
+  created_by: UUID;
+  marks: number,
+  questions: [
+    {
+      description: string,
+      section: number
+      options: [
+        {
+          description: string,
+          isCorrect: boolean
+        },
+      ]
+    },
+  ]
+}): Promise<string | undefined> => {
+  const createdAssessment = await createAssessment({
+    name: assessment.name,
+    description: assessment.description,
+    is_active: assessment.is_active,
+    start_at: assessment.start_at,
+    end_at: assessment.end_at,
+    duration: assessment.duration,
+    created_by: assessment.created_by,
+  })
+
+  if (!createdAssessment) {
+    throw new AppError(
+      "Assessment Creation Failed",
+      500,
+      "Assessment with this name failed to create",
+      false
+    );
+  }
+
+  createQuestionsInBulk(createdAssessment?.id as UUID, assessment.questions, assessment.marks)
+  return createdAssessment?.id;
+};
+
 export const removeSectionFromAssessment = async (
   assessmentId: string,
   section: number
@@ -948,14 +983,14 @@ export const viewAssessmentAnalyticsChart = async (
 export const viewAssessmentTime = async (
   assessmentId: UUID,
   userId: string,
-): Promise<AssessmentTime  | null> => {
+): Promise<AssessmentTime | null> => {
   await validateAssessment(assessmentId);
   await validateAssessmentStatus(assessmentId, userId);
   const assessmentTime = await getAssessmentTimeData(assessmentId, userId);
   return assessmentTime;
 }
 
-export const  viewAssessmentSections = async (
+export const viewAssessmentSections = async (
   assessmentId: UUID,
   userId: UUID
 ): Promise<number[]> => {
