@@ -470,6 +470,10 @@ export const importUsers = async (
   const parsedData = await csvToObjectArray<UserData>(filePath);
   logger.debug(parsedData);
 
+  parsedData.forEach((user) => {
+    if (!user.id) user.id = uuid();
+  });
+
   const result = createBulkUsers(parsedData, updateExisting);
   deleteFileFromDisk(filePath);
 
