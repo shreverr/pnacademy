@@ -19,6 +19,10 @@ const options = {
       {
         url: 'http://localhost:4000/',
         description: 'Local server'
+      },
+      {
+        url: 'https://api.pnacademy.in/',
+        description: 'dev deployment server'
       }
     ]
   },
