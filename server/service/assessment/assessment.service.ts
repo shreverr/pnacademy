@@ -48,6 +48,7 @@ import {
   getAssessmentTimeData,
   getAssessmentSections,
   createQuestionsInBulk,
+  exportAssessmentById,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -90,6 +91,8 @@ import logger from "../../config/logger";
 import Group from "../../schema/group/group.schema";
 import { GroupData } from "../../types/group.types";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
+import { createArchive, deleteFileFromDisk, saveDataToDisk } from "../../lib/file";
+import { nanoid } from "nanoid";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -1002,3 +1005,32 @@ export const viewAssessmentSections = async (
 
   return sectionStatuses;
 }
+
+export const exportAssessments = async (
+  assessmentIds: string[] | '*'
+): Promise<string> => {
+  const assessmentData = await exportAssessmentById(assessmentIds)
+
+  if (!assessmentData) {
+    throw new AppError(
+      "Assessment not found",
+      404,
+      "Assessment with this id does not exist",
+      false
+    )
+  }
+  let savedFilesPath: string[] = []
+
+  await Promise.all(assessmentData.map(async (assessment) => {
+    const savedFilePath = await saveDataToDisk(JSON.stringify(assessment), `${assessment.name}-${nanoid(4)}.json`)
+    savedFilesPath.push(savedFilePath)
+  }));
+
+  const archivePath = await createArchive(savedFilesPath, `exported-assessments-${nanoid(4)}`)
+  
+  await Promise.all(savedFilesPath.map(async (filePath) => {
+    await deleteFileFromDisk(filePath)
+  }));
+
+  return archivePath
+};

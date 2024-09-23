@@ -15,6 +15,7 @@ import {
   deleteTag,
   endAssessment,
   endSection,
+  exportAssessments,
   generateAiQuestionsService,
   publishResult,
   removeGroupFromAssessment,
@@ -55,6 +56,7 @@ import {
   type AssessmentAttribute,
   type TagAttribute,
 } from "../../types/assessment.types";
+import { deleteFileFromDisk } from "../../lib/file";
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -879,3 +881,25 @@ export const getAssessmentSectionsController: RequestHandler = async (
     next(error);
   }
 }
+
+export const exportAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const exportedFilePath = await exportAssessments(
+      req.body.assessmentIds
+    );
+
+    return res.status(200).sendFile(exportedFilePath, (err) => {
+      if (err) {
+        next(err);
+      } else {
+        deleteFileFromDisk(exportedFilePath);
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

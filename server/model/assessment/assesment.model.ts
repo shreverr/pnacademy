@@ -38,6 +38,7 @@ import {
   Op,
   UniqueConstraintError,
   Sequelize,
+  FindOptions,
 } from "sequelize";
 import QuestionTag from "../../schema/junction/questionTag.schema";
 import { sequelize } from "../../config/database";
@@ -459,7 +460,7 @@ export const createQuestionsInBulk = async (
     });
     // Determine new sections to create
     const existingSectionNumbers = existingSections.map(s => s.section);
-    
+
     const newSections = uniqueSections
       .filter(section => !existingSectionNumbers.includes(section))
       .map(section => ({
@@ -484,7 +485,7 @@ export const createQuestionsInBulk = async (
     const createdQuestions = await Question.bulkCreate(questionData, { transaction });
 
     // Prepare bulk option data
-    const optionData = questions.flatMap((question, index) => 
+    const optionData = questions.flatMap((question, index) =>
       question.options.map(option => ({
         id: uuid(),
         question_id: createdQuestions[index].id,
@@ -1074,7 +1075,7 @@ export const generateAiQuestions = async (
   try {
     // const prompt = `Generate ${numberOfQuestions} quiz questions about 
     // ${topic} of ${difficulty} difficulty. Format the response as a JSON array where each question object has 'question', 'options' (an array of 4 choices) with  each option is array ( description and is correct boolean ) `;
-    
+
     const prompt = `
     You are tasked with generating exactly ${numberOfQuestions} quiz questions on the topic of "${topic}" with a difficulty level of "${difficulty}".
     
@@ -2055,7 +2056,7 @@ export const getAssessmentTimeData = async (
   userId: string
 ): Promise<AssessmentTime | null> => {
   try {
-    
+
     const assessmentStatus = await AssessmentStatus.findOne({
       where: {
         assessment_id: assessmentId,
@@ -2105,10 +2106,10 @@ export const getAssessmentSections = async (assessmentId: UUID): Promise<number[
         assessment_id: assessmentId,
       },
       order: [['section', 'ASC']],
-      raw: true 
+      raw: true
     });
 
-    
+
     const sectionNumbers = (sections as { section: number }[])
       .map(s => s.section)
       .filter((section): section is number => typeof section === 'number');
@@ -2130,3 +2131,61 @@ export const getAssessmentSections = async (assessmentId: UUID): Promise<number[
     );
   }
 }
+
+export const exportAssessmentById = async (
+  ids: string[] | '*'
+): Promise<Assessment[] | null> => {
+  logger.info(`Getting assessments`);
+
+  try {
+    let findOptions: FindOptions = {
+      attributes: ["name", "description", "duration", "is_active", "start_at", "end_at"],
+      include: [
+        {
+          model: Question,
+          as: "questions",
+          attributes: ["description", "marks", "section"],
+          include: [
+            {
+              model: Option,
+              as: "options",
+              attributes: ["description", "is_correct"],
+            },
+          ],
+        },
+      ],
+      order: [
+        [{ model: Question, as: "questions" }, "section", "ASC"], // Order questions by section first
+        [{ model: Question, as: "questions" }, "createdAt", "ASC"], // Then order questions by createdAt within each section
+        [
+          { model: Question, as: "questions" },
+          { model: Option, as: "options" },
+          "createdAt",
+          "ASC",
+        ], // Order options by createdAt in descending order
+      ],
+    }
+
+    if (ids !== '*') {
+      findOptions.where = {
+        id: {
+          [Op.in]: ids,
+        }
+      };
+    }
+
+    const assessment = await Assessment.findAll(findOptions);
+    if (!assessment) {
+      return null;
+    }
+    
+    return assessment;
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting assessment",
+      500,
+      error,
+      false
+    );
+  }
+};

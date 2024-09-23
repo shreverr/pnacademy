@@ -17,6 +17,7 @@ import {
   DeleteTagController,
   endAssessmentController,
   endSectionController,
+  exportAssessmentController,
   generateAiQuestionsController,
   getAllAssessmentResultController,
   getAssessmentAnalytics,
@@ -69,6 +70,7 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import {
+  validateAssessmentExport,
   validateAttemptQuestion,
   validateAttemptQuestionDelete,
   validateBulkAssessment,
@@ -3327,7 +3329,56 @@ router.get(
   validateAssessmentGetId,
   validateRequest,
   getAssessmentSectionsController,
-
 )
+
+/**
+ * @swagger
+ * /v1/assessment/export:
+ *   post:
+ *     summary: Export assessments as a zip file
+ *     description: Exports specified assessments or all assessments as a zip file.
+ *     tags:
+ *       - Assessment Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               assessmentIds:
+ *                 oneOf:
+ *                   - type: string
+ *                     enum: ['*']
+ *                     description: Export all assessments
+ *                   - type: array
+ *                     items:
+ *                       type: string
+ *                       format: uuid
+ *                     description: Array of assessment IDs to export
+ *             example:
+ *               assessmentIds: "*"
+ *     responses:
+ *       200:
+ *         description: Successful response with zip file
+ *         content:
+ *           application/zip:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/export",
+  authenticateUser(["canManageAssessment"]),
+  validateAssessmentExport,
+  validateRequest,
+  exportAssessmentController
+);
 
 export default router;

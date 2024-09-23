@@ -1,4 +1,4 @@
-import { check, param, query } from "express-validator";
+import { body, check, param, query } from "express-validator";
 
 export const validateAssessment = [
   check("name")
@@ -777,3 +777,24 @@ export const validateGetAssessmentAnalyticsChart = [
   // Custom validation to ensure both start_date and end_date are provided together
 ];
 
+
+export const validateAssessmentExport = [
+  body('assessmentIds')
+    .custom((value) => {
+      // If it's a wildcard "*", it's valid
+      if (value === '*') {
+        return true;
+      }
+
+      // If it's an array, validate each UUID
+      if (Array.isArray(value)) {
+        return value.every((id) =>
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+        );
+      }
+
+      // Otherwise, it's invalid
+      return false;
+    })
+    .withMessage('assessmentIds must be "*" or an array of valid UUID v4s')
+];

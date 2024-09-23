@@ -3,6 +3,9 @@ import { AppError } from "./appError";
 import s3Client from "../config/s3";
 import { DeleteObjectCommand, DeleteObjectCommandOutput, GetObjectAclCommand, GetObjectAclCommandOutput, GetObjectCommand, GetObjectCommandOutput, PutObjectCommand, PutObjectCommandInput, PutObjectCommandOutput } from "@aws-sdk/client-s3";
 import logger from "../config/logger";
+import path from "path";
+import { createWriteStream } from "fs";
+import archiver from "archiver";
 
 const bucketName = process.env.S3_BUCKET_NAME;
 if (!bucketName) {
@@ -10,6 +13,16 @@ if (!bucketName) {
     "Internal server error",
     500,
     "AWS S3 bucket name not found",
+    false
+  );
+}
+
+const tempStorageDir = process.env.TEMP_DIR;
+if (!tempStorageDir) {
+  throw new AppError(
+    "environment variable not set",
+    500,
+    "TEMP_DIR not set",
     false
   );
 }
@@ -70,4 +83,36 @@ export const deleteFileFromS3 = async (key: string): Promise<DeleteObjectCommand
       true
     )
   }
+}
+
+export const saveDataToDisk = async (data: string, filename: string): Promise<string> => {
+  const filePath = path.join(tempStorageDir, filename);
+
+  await fs.writeFile(filePath, data, 'utf8');
+
+  return filePath;
+};
+
+export const createArchive = async (filePaths: string[], archiveName: string): Promise<string> => {
+  const archivePath = path.join(tempStorageDir, `${archiveName}.zip`);
+  const output = createWriteStream(archivePath);
+  const archive = archiver('zip');
+
+  return new Promise((resolve, reject) => {
+      output.on('close', () => {
+          resolve(archivePath);
+      });
+
+      archive.on('error', (err) => {
+          reject(err);
+      });
+
+      archive.pipe(output);
+
+      filePaths.forEach(filePath => {
+          archive.file(filePath, { name: path.basename(filePath) });
+      });
+
+      archive.finalize();
+  });
 }
