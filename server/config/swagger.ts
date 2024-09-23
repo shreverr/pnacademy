@@ -19,15 +19,14 @@ const options = {
       {
         url: 'http://localhost:4000/',
         description: 'Local server'
-      },
-      {
-        url: 'https://api.pnacademy.in/',
-        description: 'dev deployment server'
       }
     ]
   },
   // looks for configuration in specified directories
-  apis: [path.resolve(__dirname, '../routes/*.ts')]
+  apis: [
+    path.resolve(__dirname, '../routes/*.ts'),
+    path.resolve(__dirname, '../routes/*.js')
+  ]
 }
 const swaggerSpec = swaggerJsdoc(options)
 function swaggerDocs (app: Application): void {
