@@ -19,7 +19,7 @@ const transport = {
     },
     {
       level: 'trace',
-      target: 'pino/file'
+      target: 'pino-pretty', // Pretty logs to the console
     }
   ]
 }
