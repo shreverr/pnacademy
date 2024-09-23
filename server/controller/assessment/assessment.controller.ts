@@ -854,7 +854,7 @@ export const getAssessmentTimeController: RequestHandler = async (
 ) => {
   try {
 
-    const assessmentTime = await viewAssessmentTime(req.query.Id as UUID, req.user.userId as UUID);
+    const assessmentTime = await viewAssessmentTime(req.query.id as UUID, req.user.userId as UUID);
 
     return res.status(200).json({
       status: "success",
