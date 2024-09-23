@@ -85,6 +85,7 @@ export type AssessmentAttribute =
 
 export type AssessmentAssigendGroupData = {
   id: string;
+  name: string;
 };
 
 export type UserResult = {

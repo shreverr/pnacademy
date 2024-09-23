@@ -1169,6 +1169,9 @@ router.delete(
  *                         type: string
  *                         format: uuid
  *                         description: The UUID of the assigned group
+ *                       name:
+ *                          type: string
+ *                          description: The name of the assigned group
  *       '400':
  *         description: Bad Request - Invalid UUID format
  *       '401':

@@ -986,7 +986,16 @@ export const getAssessmentAssignedGroups = async (
       attributes: ["group_id"],
     });
 
-    return assignedGroups.map((group) => ({ id: group.group_id }));
+
+    assignedGroups.map((group) => ({ id: group.group_id  }));
+    const assignedGroupsData = await Group.findAll({
+      where: {
+        id: assignedGroups.map((group) => group.group_id),
+      },
+    });
+
+    return assignedGroupsData.map((group) => ({ id: group.id , name: group.name }));
+
   } catch (error: any) {
     throw new AppError(
       "Error getting groups assigned to assessment",
