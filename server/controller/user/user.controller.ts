@@ -156,7 +156,7 @@ export const createRoleController: RequestHandler = async (
       canViewNotification: req.body.permissions.canViewNotification,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Role Created successfully",
       data: createdRole,
     });
@@ -189,7 +189,7 @@ export const updateRoleController: RequestHandler = async (
     });
 
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Role Updated successfully",
       data: updatedRole,
     });
@@ -245,7 +245,7 @@ export const viewAllRolesController: RequestHandler = async (
       req.query.order as "ASC" | "DESC"
     );
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "success",
       data: rolesData,
     });
