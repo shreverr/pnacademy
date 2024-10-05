@@ -39,7 +39,7 @@ export const createSuperAdminIfNotExists = async () => {
       firstName: 'Super',
       lastName: 'Admin',
       email: 'superadmin@pnacademy.in',
-      password: 'superadmin',
+      password: 'Test@pna12345',
       phone: null,
       roleId: superAdminRoleId,
     })
