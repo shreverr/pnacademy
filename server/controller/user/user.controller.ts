@@ -171,20 +171,23 @@ export const updateRoleController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
+    const { roleId, name, permissions } = req.body;
     const updatedRole = await updateRole({
-      roleId: req.body.id,
-      name: req.body.name,
-      canManageAssessment: req.body.permissions.canManageAssessment,
-      canManageUser: req.body.permissions.canManageUser,
-      canManageRole: req.body.permissions.canManageRole,
-      canManageNotification: req.body.permissions.canManageNotification,
-      canManageLocalGroup: req.body.permissions.canManageLocalGroup,
-      canManageReports: req.body.permissions.canManageReports,
-      canAttemptAssessment: req.body.permissions.canAttemptAssessment,
-      canViewReport: req.body.permissions.canViewReport,
-      canManageMyAccount: req.body.permissions.canManageMyAccount,
-      canViewNotification: req.body.permissions.canViewNotification,
+      roleId,
+      name,
+      
+      canManageAssessment: permissions?.canManageAssessment ?? false,
+      canManageUser: permissions?.canManageUser ?? false,
+      canManageRole: permissions?.canManageRole ?? false,
+      canManageNotification: permissions?.canManageNotification ?? false,
+      canManageLocalGroup: permissions?.canManageLocalGroup ?? false,
+      canManageReports: permissions?.canManageReports ?? false,
+      canAttemptAssessment: permissions?.canAttemptAssessment ?? false,
+      canViewReport: permissions?.canViewReport ?? false,
+      canManageMyAccount: permissions?.canManageMyAccount ?? false,
+      canViewNotification: permissions?.canViewNotification ?? false,
     });
+
 
     return res.status(201).json({
       message: "Role Updated successfully",
