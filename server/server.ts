@@ -5,6 +5,7 @@ import swaggerDocs from "./config/swagger";
 import { AppError } from "./lib/appError";
 import fs from "fs";
 import { defineCustomRelations } from "./schema";
+import { createSuperAdminIfNotExists } from "./utils/serverInit";
 
 logger.info("/////////////////////////////////////////////");
 logger.info("/////////////////////////////////////////////");
@@ -38,10 +39,11 @@ void sequelize
   })
   .then(async () => {
     await defineCustomRelations()
+    await createSuperAdminIfNotExists()
     logger.info("Postgres database synced successfully!");
   })
   .catch((error) => {
-    logger.fatal(`Error in syncing to DB: ${error}`);
+    logger.fatal(error);
   });
 
 const server = app.listen(port, () => {
