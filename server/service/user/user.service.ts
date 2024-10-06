@@ -17,6 +17,7 @@ import {
   getAllUsersByGroupId,
   updateRoleInDB,
   getAllUsersByRoleId,
+  updatePasswordInDb,
 } from "../../model/user/user.model";
 import {
   RoleData,
@@ -563,3 +564,24 @@ export const getUsersbyroleId = async (
  const users = await getAllUsersByRoleId(roleId);
   return users;
 }
+
+export const passwordResetService = async (
+  userId: string,
+  password: string
+): Promise<boolean> => {
+  
+    const user = await getUserById(userId);
+    if (!user) {
+      throw new AppError(
+        "User not found",
+        404,
+        "User with this id does not exist",
+        false
+      );
+    }
+    const hashedPassword = await hashPassword(password);
+    const result = await updatePasswordInDb(userId, hashedPassword);
+
+    return result; 
+  
+};

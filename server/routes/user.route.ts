@@ -1,6 +1,7 @@
 import express from "express";
 import type { Router } from "express";
 import {
+  adminPasswordResetController,
   createRoleController,
   deleteRoleController,
   deleteUserController,
@@ -9,6 +10,7 @@ import {
   importUserController,
   loginUserController,
   newAccessTokenController,
+  passwordResetController,
   registerUserController,
   removeUsersFromGroupController,
   updateRoleController,
@@ -38,7 +40,7 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";
-import { validateGetUsersByRoleId } from "../lib/validator/user/validator";
+import { validateAdminPasswordReset, validateGetUsersByRoleId, validateUserUpdatePassword } from "../lib/validator/user/validator";
 
 const router: Router = express.Router();
 
@@ -1459,5 +1461,146 @@ router.get(
   validateRequest,
   getUsersByGroupController
 );
+
+
+/**
+ * @swagger
+ * /v1/user/password-reset:
+ *   post:
+ *     summary: Reset user password.
+ *     tags:
+ *     - User Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The new password for the user.
+ *                 example: "StrongPass1!"
+ *     security:
+ *       - bearerAuth: []  # Assuming you are using bearer token authentication
+ *     responses:
+ *       '200':
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Response status.
+ *                 message:
+ *                   type: string
+ *                   description: Success message.
+ *             example:
+ *               status: success
+ *               message: Password reset successfully.
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Response status.
+ *                 error:
+ *                   type: string
+ *                   description: Error message.
+ *             example:
+ *               status: error
+ *               error: Password must be more than 8 characters long with at least 1 lowercase, 1 uppercase, 1 number and 1 symbol.
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Server Error
+ */
+router.post(
+  "/password-reset",
+  authenticateUser(),
+  validateUserUpdatePassword,
+  validateRequest,
+  passwordResetController
+);
+
+/**
+ * @swagger
+ * /v1/admin/password-reset:
+ *   post:
+ *     summary: Admin reset user password by user ID.
+ *     tags:
+ *     - User Controller
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: The ID of the user whose password is to be reset.
+ *                 example: "1a77a8e2-6b6a-48f5-9251-c3adfb8c6f24"
+ *               password:
+ *                 type: string
+ *                 description: The new password for the user.
+ *                 example: "StrongPass1!"
+ *     security:
+ *       - bearerAuth: []  # Assuming bearer token authentication
+ *     responses:
+ *       '200':
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Response status.
+ *                 message:
+ *                   type: string
+ *                   description: Success message.
+ *             example:
+ *               status: success
+ *               message: Password reset successfully.
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Response status.
+ *                 error:
+ *                   type: string
+ *                   description: Error message.
+ *             example:
+ *               status: error
+ *               error: Password must be more than 8 characters long with at least 1 lowercase, 1 uppercase, 1 number and 1 symbol.
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: User not found
+ *       '500':
+ *         description: Server Error
+ */
+router.post(
+  "/admin/password-reset",
+  authenticateUser(["canManageUser"]),
+  validateAdminPasswordReset,
+  validateRequest,
+  adminPasswordResetController
+);
+
 
 export default router;

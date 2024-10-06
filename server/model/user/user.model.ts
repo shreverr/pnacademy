@@ -570,6 +570,30 @@ export const getAllUsersByRoleId = async (
       true
     );
   }
-
-
 }
+
+export const updatePasswordInDb = async (
+  userId: string,
+  password: string
+): Promise<boolean> => {
+  logger.info(`Updating password for user with id ${userId}`);
+  
+  try {
+    const [_, [updatedPassword]] = await Password.update(
+      {
+        password: password,
+      },
+      {
+        where: {
+          user_id: userId,
+        },
+        returning: true,
+      }
+    );
+
+    return !!updatedPassword;
+  } catch (error: any) {
+    throw new AppError("Error updating password", 500, error, false);
+  }
+};
+

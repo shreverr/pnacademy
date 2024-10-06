@@ -15,6 +15,7 @@ import {
   importUsers,
   loginUser,
   newAccessToken,
+  passwordResetService,
   registerUser,
   removeUsersFromGroup,
   updateRole,
@@ -384,3 +385,35 @@ export const getUsersByGroupController: RequestHandler = async (
     next(error);
   }
 };
+
+export const  passwordResetController: RequestHandler = async (
+ req: Request,
+ res: Response,
+  next: NextFunction
+) => {
+  try {
+    await passwordResetService(req.user.userId as string, req.body.password);
+    return res.status(200).json({
+      status: "success",
+      message: "Password reset successfully",
+    });
+  }
+  catch (error) {
+    next(error);
+  }
+}
+export const adminPasswordResetController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await passwordResetService(req.body.userId, req.body.password);
+    return res.status(200).json({
+      status: "success",
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
