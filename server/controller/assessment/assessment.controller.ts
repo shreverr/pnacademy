@@ -619,11 +619,12 @@ export const startAssessmentController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    await startAssessment(req.body.assessmentId, req.user.userId);
+    const sections = await startAssessment(req.body.assessmentId, req.user.userId);
 
     return res.status(200).json({
       status: "success",
       message: "Assessment Started",
+      sections: sections,
     });
   } catch (error) {
     next(error);

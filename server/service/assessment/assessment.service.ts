@@ -68,6 +68,7 @@ import {
   AssessmentResultAnalyticsMetric,
   ChartData,
   AssessmentTime,
+  SectionDetailedStatus,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -760,11 +761,41 @@ export const removeSectionFromAssessment = async (
 export const startAssessment = async (
   assessmentId: string,
   userId: string
-): Promise<boolean> => {
+): Promise<SectionDetailedStatus[]> => {
   await validateAssessment(assessmentId);
-  const result = await startAssessmentById(assessmentId, userId);
 
-  return result;
+  const isAssessmentStarted = await startAssessmentById(assessmentId, userId);
+  const sections = await getAssessmentSections(assessmentId as UUID);
+  const sectionStatuses = (await getSectionStatusesById(assessmentId, userId)).rows;
+
+
+  let sectionDetails: SectionDetailedStatus[] = []
+
+  sections.forEach((section, index) => {
+    const sectionStatus = sectionStatuses.find((sectionStatus) => sectionStatus.section === section)
+
+    if (sectionStatus) {
+      if (sectionStatus.is_submited) {
+        sectionDetails.push({
+          section: section,
+          status: "submitted"
+        })
+      } else {
+        sectionDetails.push({
+          section: section,
+          status: "started"
+        })
+      }
+    } else {
+      sectionDetails.push({
+        section: section,
+        status: "not-started"
+      })
+    }
+  });
+  logger.debug(sectionDetails)
+
+  return sectionDetails;
 };
 
 export const endAssessment = async (
@@ -1027,7 +1058,7 @@ export const exportAssessments = async (
   }));
 
   const archivePath = await createArchive(savedFilesPath, `exported-assessments-${nanoid(4)}`)
-  
+
   await Promise.all(savedFilesPath.map(async (filePath) => {
     await deleteFileFromDisk(filePath)
   }));

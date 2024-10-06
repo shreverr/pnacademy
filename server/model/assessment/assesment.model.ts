@@ -987,14 +987,14 @@ export const getAssessmentAssignedGroups = async (
     });
 
 
-    assignedGroups.map((group) => ({ id: group.group_id  }));
+    assignedGroups.map((group) => ({ id: group.group_id }));
     const assignedGroupsData = await Group.findAll({
       where: {
         id: assignedGroups.map((group) => group.group_id),
       },
     });
 
-    return assignedGroupsData.map((group) => ({ id: group.id , name: group.name }));
+    return assignedGroupsData.map((group) => ({ id: group.id, name: group.name }));
 
   } catch (error: any) {
     throw new AppError(
@@ -1203,29 +1203,26 @@ export const startAssessmentById = async (
 
     return true;
   } catch (error: any) {
-    if (
-      error instanceof UniqueConstraintError &&
-      (error.parent as any).table === "assessment_statuses"
-    ) {
-      throw new AppError(
-        "Assessment already started",
-        409,
-        "Assessment already started",
-        false
-      );
-    } else if (
-      error instanceof ForeignKeyConstraintError &&
-      (error.parent as any).constraint === "assessment_statuses_user_id_fkey"
-    ) {
-      throw new AppError(
-        "user does not exist",
-        404,
-        "user does not exist",
-        false
-      );
-    } else {
-      throw new AppError("Error starting test", 500, error, true);
+    if (error instanceof UniqueConstraintError) {
+      if ((error.parent as any).table === "assessment_statuses") {
+        return true;
+      }
+
+      if ((error.parent as any).table === "assessment_statuses_user_id_fkey") {
+        throw new AppError(
+          "user does not exist",
+          404,
+          "user does not exist",
+          false)
+      }
     }
+
+    throw new AppError(
+      "Error starting test",
+      500,
+      error,
+      true
+    );
   }
 };
 
@@ -1441,6 +1438,7 @@ export const getSectionStatusesById = async (
         assessment_id: assessmentId,
         user_id: userId,
       },
+      raw: true
     });
 
     logger.info(sectionStatuses);
@@ -2187,7 +2185,7 @@ export const exportAssessmentById = async (
     if (!assessment) {
       return null;
     }
-    
+
     return assessment;
   } catch (error: any) {
     throw new AppError(

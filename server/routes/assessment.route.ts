@@ -1689,7 +1689,7 @@ router.delete(
  * /v1/assessment/attempt/start:
  *   put:
  *     summary: Start an assessment attempt
- *     description: This endpoint starts an assessment attempt for the user by recording the start time.
+ *     description: This endpoint starts an assessment attempt for the user by recording the start time and returns the status of each section.
  *     tags:
  *       - Assessment Controller
  *     security:
@@ -1723,6 +1723,21 @@ router.delete(
  *                   type: string
  *                   description: A message indicating the success of the operation.
  *                   example: Assessment Started
+ *                 sections:
+ *                   type: array
+ *                   description: An array of section statuses.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       section:
+ *                         type: integer
+ *                         description: The section number.
+ *                         example: 1
+ *                       status:
+ *                         type: string
+ *                         description: The status of the section.
+ *                         enum: [submitted, started, not-started]
+ *                         example: submitted
  *       '403':
  *         description: Forbidden. The assessment has either not started yet or has already ended.
  *         content:
@@ -1753,21 +1768,6 @@ router.delete(
  *                   type: string
  *                   description: A message indicating that the assessment was not found.
  *                   example: Assessment with this id does not exist
- *       '409':
- *         description: Conflict. The assessment has already been started by the user.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   description: The status of the error.
- *                   example: error
- *                 message:
- *                   type: string
- *                   description: A message indicating the assessment has already been started.
- *                   example: Assessment already started
  *       '500':
  *         description: Internal Server Error. An unexpected error occurred.
  *         content:

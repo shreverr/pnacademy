@@ -140,3 +140,8 @@ export interface AssessmentTime {
   start_at: Date;
 
 }
+
+export type SectionDetailedStatus = {
+  section: number,
+  status: 'started' | 'submitted' | 'not-started'
+}
