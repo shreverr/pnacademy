@@ -1,4 +1,4 @@
-import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from "sequelize";
+import { FindAndCountOptions, ForeignKeyConstraintError, Op, UniqueConstraintError } from "sequelize";
 import { sequelize } from "../../config/database";
 import logger from "../../config/logger";
 import { AppError } from "../../lib/appError";
@@ -483,15 +483,17 @@ export const removeUsersFromGroupById = async (data: {
 }[]): Promise<boolean> => {
   logger.info(`Removing usersIds to groups`)
   try {
+    
     const result = await UserGroup.destroy({
-      where: data,
+      where: {
+        [Op.or]: data.map(item => ({
+          user_id: item.user_id, 
+          group_id: item.group_id, 
+        })),
+      },
     })
 
-    if (result === 0) {
-      return false;
-    };
-
-    return true
+    return result > 0;
   } catch (error: any) {
     throw new AppError(
       'Error removing users from group',
