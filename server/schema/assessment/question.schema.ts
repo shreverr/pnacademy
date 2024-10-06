@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../../config/database'
 
-interface QuestionAttributes {
+export interface QuestionAttributes {
   id: string
   assessment_id: string
   description: string

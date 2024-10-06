@@ -1864,6 +1864,11 @@ router.put(
  *                         format: uuid
  *                         description: The ID of the assessment to which this question belongs.
  *                         example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
+ *                       selectedOptionId:
+ *                         type: string
+ *                         format: uuid | null
+ *                         description: The ID of the previously selected option by user. null if not selected.
+ *                         example: f0f4a020-0751-4bfb-be1d-319a3044a9cf
  *                       options:
  *                         type: array
  *                         description: The list of options for the question.

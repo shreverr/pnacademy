@@ -49,6 +49,7 @@ import {
   getAssessmentSections,
   createQuestionsInBulk,
   exportAssessmentById,
+  getUserAssessmentResponsesById,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -76,7 +77,7 @@ import { AppError } from "../../lib/appError";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { TagAttributes } from "../../schema/assessment/tag.schema";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
-import Question from "../../schema/assessment/question.schema";
+import Question, { QuestionAttributes } from "../../schema/assessment/question.schema";
 import {
   validateAssessment,
   validateAssessmentEnd,
@@ -94,6 +95,7 @@ import { GroupData } from "../../types/group.types";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 import { createArchive, deleteFileFromDisk, saveDataToDisk } from "../../lib/file";
 import { nanoid } from "nanoid";
+import consistentRandomizer from "../../utils/shuffel";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -814,7 +816,14 @@ export const startSection = async (
   assessmentId: string,
   userId: string,
   section: number
-): Promise<Question[] | null> => {
+): Promise<{
+  selectedOptionId: string | null;
+  id: string;
+  assessment_id: string;
+  description: string;
+  marks: number;
+  section: number;
+}[] | null> => {
   await validateAssessment(assessmentId);
   await validateAssessmentStatus(assessmentId, userId);
   await validateSectionStatus(assessmentId, userId, section);
@@ -824,9 +833,20 @@ export const startSection = async (
     userId,
     section
   );
+
   if (isSectionStarted) {
-    const questionsBySection = getQuestionsBySection(assessmentId, section);
-    return questionsBySection;
+    const questionsBySection = await getQuestionsBySection(assessmentId, section);
+    const userResponses = await getUserAssessmentResponsesById(assessmentId as UUID, userId as UUID)
+
+    const enrichedQuestions = questionsBySection.map((question) => {
+      const userResponse = userResponses.find((response) => response.question_id === question.id);
+      return {
+        ...question.get({ plain: true }),
+        selectedOptionId: userResponse ? userResponse.selected_option_id : null
+      };
+    });
+
+    return await consistentRandomizer(userId, assessmentId, enrichedQuestions);
   }
 
   return null;

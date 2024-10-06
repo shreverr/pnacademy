@@ -1203,18 +1203,18 @@ export const startAssessmentById = async (
 
     return true;
   } catch (error: any) {
-    if (error instanceof UniqueConstraintError) {
-      if ((error.parent as any).table === "assessment_statuses") {
-        return true;
-      }
-
-      if ((error.parent as any).table === "assessment_statuses_user_id_fkey") {
-        throw new AppError(
-          "user does not exist",
-          404,
-          "user does not exist",
-          false)
-      }
+    if (error instanceof UniqueConstraintError &&
+      (error.parent as any).table === "assessment_statuses") {
+      return true;
+    }
+    if (error instanceof ForeignKeyConstraintError &&
+      (error.parent as any).constraint === "assessment_statuses_user_id_fkey") {
+      throw new AppError(
+        "user does not exist",
+        404,
+        "user does not exist",
+        false
+      );
     }
 
     throw new AppError(
@@ -1393,7 +1393,7 @@ export const endSectionById = async (
 export const getQuestionsBySection = async (
   assessmentId: string,
   section: number
-): Promise<Question[] | null> => {
+): Promise<Question[]> => {
   logger.info(`Getting questios by section`);
   try {
     // Find the question
@@ -1403,19 +1403,19 @@ export const getQuestionsBySection = async (
         section: section,
       },
       attributes: ["id", "description", "marks", "section", "assessment_id"],
+      order: [["createdAt", "ASC"]],
       include: [
         {
           model: Option,
           as: "options",
           attributes: ["id", "description", "question_id"],
+          order: [["createdAt", "ASC"]],
         },
       ],
     });
 
-    logger.info(questions);
-
     if (!questions) {
-      return null;
+      return [];
     }
     return questions;
   } catch (error: any) {
@@ -2134,6 +2134,30 @@ export const getAssessmentSections = async (assessmentId: UUID): Promise<number[
       "Error retrieving assessment sections",
       500,
       error instanceof Error ? error.message : 'Unknown error',
+      true
+    );
+  }
+}
+
+export const getUserAssessmentResponsesById = async (
+  assessmentId: UUID,
+  userId: UUID
+): Promise<AssessmentResponse[]> => {
+  try {
+    const userResponses = await AssessmentResponse.findAll({
+      where: {
+        assessment_id: assessmentId,
+        user_id: userId,
+      },
+      raw: true
+    });
+
+    return userResponses;
+  } catch (error: any) {
+    throw new AppError(
+      "Error retrieving assessment responses",
+      500,
+      error,
       true
     );
   }
