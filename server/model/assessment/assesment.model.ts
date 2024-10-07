@@ -2091,7 +2091,7 @@ export const getAssessmentTimeData = async (
     const assessmentTimeData: AssessmentTime = {
       duration: assessment.duration,
       server_time: serverTime,
-      start_at: assessmentStatus.started_at,
+      started_at: assessmentStatus.started_at,
     };
 
     return assessmentTimeData;

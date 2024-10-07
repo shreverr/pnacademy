@@ -137,7 +137,7 @@ export type ChartData = {
 export interface AssessmentTime {
   duration: number;
   server_time: Date;
-  start_at: Date;
+  started_at: Date;
 
 }
 
