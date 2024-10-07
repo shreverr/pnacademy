@@ -50,6 +50,7 @@ import {
   createQuestionsInBulk,
   exportAssessmentById,
   getUserAssessmentResponsesById,
+  getUserAssessmentResultList,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -70,6 +71,7 @@ import {
   ChartData,
   AssessmentTime,
   SectionDetailedStatus,
+  UserAssessmentResultListAttributes,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -96,6 +98,7 @@ import AssessmentResult, { AssessmentResultAttributes } from "../../schema/asses
 import { createArchive, deleteFileFromDisk, saveDataToDisk } from "../../lib/file";
 import { nanoid } from "nanoid";
 import consistentRandomizer from "../../utils/shuffel";
+import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -980,6 +983,39 @@ export const viewAssessmentResultsList = async (
   const offset = (page - 1) * pageSize;
 
   const { rows: assessmentResultList, count: allTagsCount } = await getAssessmentResultList(
+    offset,
+    pageSize,
+    sortBy,
+    order
+  );
+
+  const totalPages = Math.ceil(allTagsCount / pageSize);
+
+  return {
+    results: assessmentResultList,
+    totalPages: totalPages,
+  };
+};
+
+export const viewUserAssessmentResultsList = async (
+  userId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: UserAssessmentResultListAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  results: UserAssessmentResult[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "createdAt";
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: assessmentResultList, total: allTagsCount } = await getUserAssessmentResultList(
+    userId,
     offset,
     pageSize,
     sortBy,

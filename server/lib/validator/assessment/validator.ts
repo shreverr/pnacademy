@@ -747,6 +747,40 @@ export const validateGetAssessmentsResultList = [
     ),
 ];
 
+export const validateGetMyAssessmentsResultList = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(correct_answers_count|marks_scored|correct_percentage|wrong_answers_count|name|description)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+          correct_answers_count|marks_scored|correct_percentage|wrong_answers_count|name|description`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+         "ASC", "DESC",`
+    ),
+];
+
 export const validateGetAssessmentAnalytics = [
   param("assessmentId")
     .not()

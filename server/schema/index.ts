@@ -113,6 +113,10 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   })
 
+  UserAssessmentResult.belongsTo(Assessment, {
+    foreignKey: "assessment_id"
+  })
+
   Assessment.hasMany(AssessmentResult, {
     foreignKey: "assessment_id",
     onDelete: "CASCADE",

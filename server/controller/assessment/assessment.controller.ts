@@ -42,6 +42,7 @@ import {
   viewAssignedAssessments,
   viewQuestionDetails,
   viewTag,
+  viewUserAssessmentResultsList,
 } from "../../service/assessment/assessment.service";
 import {
   type NextFunction,
@@ -52,6 +53,7 @@ import {
 import {
   AssessmentResultAnalyticsMetric,
   AssessmentResultListAttributes,
+  UserAssessmentResultListAttributes,
   UserResultAttributes,
   type AssessmentAttribute,
   type TagAttribute,
@@ -796,6 +798,29 @@ export const getAllAssessmentResultController: RequestHandler = async (
       req.query.page as string,
       req.query.pageSize as string,
       req.query.sortBy as AssessmentResultListAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: assessmentResults
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserAssessmentsResultListController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentResults = await viewUserAssessmentResultsList(
+      req.user.userId as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as UserAssessmentResultListAttributes,
       req.query.order as "ASC" | "DESC"
     );
 

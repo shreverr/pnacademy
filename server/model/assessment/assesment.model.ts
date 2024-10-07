@@ -18,6 +18,7 @@ import {
   AssessmentResultAnalyticsMetric,
   ChartData,
   AssessmentTime,
+  UserAssessmentResultListAttributes,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -1948,6 +1949,107 @@ export const getAssessmentResultList = async (
       count: allAssessmentResults.count,
     };
     return plainData;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting assessment results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getUserAssessmentResultList = async (
+  userId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: UserAssessmentResultListAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: any[];
+  total: number
+}> => {
+  try {
+    const limit = pageSize || 10;
+    const sqlOffset = offset || 0;
+    const sqlOrder = order || "ASC";
+    const sqlSortBy = sortBy === "name" ? "a.name" : `uar.${sortBy}`;
+
+    const query = `
+      WITH published_assessments AS (
+          SELECT DISTINCT ar.assessment_id
+          FROM assessment_results ar
+          WHERE ar.is_published = true
+      )
+      SELECT 
+          uar.id,
+          uar.correct_answers_count,
+          uar.marks_scored,
+          uar.correct_percentage,
+          uar.wrong_answers_count,
+          a.id AS "assessment.id",
+          a.name AS "assessment.name",
+          a.description AS "assessment.description"
+      FROM 
+          user_assessment_results uar
+      INNER JOIN 
+          assessments a ON uar.assessment_id = a.id
+      INNER JOIN 
+          published_assessments pa ON a.id = pa.assessment_id
+      WHERE 
+          uar.user_id = :userId
+      ORDER BY 
+          ${sqlSortBy} ${sqlOrder}
+      LIMIT :limit OFFSET :offset;
+    `;
+
+    const results = await sequelize.query(query, {
+      replacements: { userId, limit, offset: sqlOffset },
+      type: QueryTypes.SELECT
+    });
+
+    // Get total count for pagination
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM user_assessment_results uar
+      INNER JOIN assessments a ON uar.assessment_id = a.id
+      INNER JOIN assessment_results ar ON a.id = ar.assessment_id
+      WHERE uar.user_id = :userId AND ar.is_published = true
+    `;
+
+    const [{ total }] = await sequelize.query<{ total: number }>(countQuery, {
+      replacements: { userId },
+      type: QueryTypes.SELECT
+    });
+
+    if (total === 0) {
+      throw new AppError(
+        "Assessment results not found",
+        404,
+        "Assessment results not found",
+        false
+      );
+    }
+
+    // Convert the results to match the UserAssessmentResult structure
+    const rows = results.map((result: any) => ({
+      id: result.id,
+      correct_answers_count: result.correct_answers_count,
+      marks_scored: result.marks_scored,
+      correct_percentage: result.correct_percentage,
+      wrong_answers_count: result.wrong_answers_count,
+      assessment: {
+        id: result['assessment.id'],
+        name: result['assessment.name'],
+        description: result['assessment.description']
+      }
+    }));
+
+    return { rows, total };
   } catch (error: any) {
     if (error instanceof AppError) {
       throw error;

@@ -107,13 +107,15 @@ export type UserResultAttributes = "user_id" | "first_name" | "last_name" | "ema
 export type AssessmentResultListAttributes =
   "assessment_id" |
   "total_marks" |
-  "total_participants"|
+  "total_participants" |
   "average_marks" |
   "average_marks_percentage" |
   "is_published" |
   "createdAt" |
-  "updatedAt"|
+  "updatedAt" |
   "name"
+
+export type UserAssessmentResultListAttributes = "correct_answers_count" | "marks_scored" | "correct_percentage" | "wrong_answers_count" | "name" | "description" | "createdAt"
 
 export type AssessmentResult = {
   assessment_id: string

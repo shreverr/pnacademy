@@ -25,6 +25,7 @@ import {
   getAssessmentSectionsController,
   getAssessmentTimeController,
   getResultController,
+  getUserAssessmentsResultListController,
   publishResultController,
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
@@ -82,6 +83,7 @@ import {
   validateGetAssessmentAnalytics,
   validateGetAssessmentAnalyticsChart,
   validateGetAssessmentsResultList,
+  validateGetMyAssessmentsResultList,
   validateGetResult,
   validatePublishResult,
   validateSectionDelete,
@@ -2963,6 +2965,144 @@ router.get(
   validateGetAssessmentsResultList,
   validateRequest,
   getAllAssessmentResultController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/my-results:
+ *   get:
+ *     summary: Retrieve the list of your assessment results
+ *     description: This endpoint retrieves a paginated list of assessment results for the current user, with options for sorting and ordering.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *       - name: pageSize
+ *         in: query
+ *         required: false
+ *         description: The number of results per page.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 10
+ *       - name: sortBy
+ *         in: query
+ *         required: false
+ *         description: The field by which to sort the results.
+ *         schema:
+ *           type: string
+ *           example: name
+ *           enum:
+ *             - name
+ *             - correct_answers_count
+ *             - marks_scored
+ *             - correct_percentage
+ *             - wrong_answers_count
+ *       - name: order
+ *         in: query
+ *         required: false
+ *         description: The order in which to sort the results (ascending or descending).
+ *         schema:
+ *           type: string
+ *           example: ASC
+ *           enum:
+ *             - ASC
+ *             - DESC
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved user assessment results.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     results:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           correct_answers_count:
+ *                             type: integer
+ *                             description: The number of correct answers.
+ *                             example: 1
+ *                           marks_scored:
+ *                             type: number
+ *                             description: The total marks scored by the user.
+ *                             example: 5
+ *                           correct_percentage:
+ *                             type: number
+ *                             description: The percentage of correct answers.
+ *                             example: 33.333333333333336
+ *                           wrong_answers_count:
+ *                             type: integer
+ *                             description: The number of wrong answers.
+ *                             example: 2
+ *                           assessment:
+ *                             type: object
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                                 description: The name of the assessment.
+ *                                 example: PNA Testes
+ *                               description:
+ *                                 type: string
+ *                                 description: A description of the assessment.
+ *                                 example: A new project
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad Request. The input parameters are invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid query parameters
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving assessment results
+ */
+router.get(
+  "/my-results",
+  authenticateUser(["canViewReport"]),
+  validateGetMyAssessmentsResultList,
+  validateRequest,
+  getUserAssessmentsResultListController
 )
 
 /**
