@@ -22,4 +22,5 @@ jobs:
           cd /home/ec2-user/pnacademy/server &&
           git pull &&
           sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+          sudo docker image prune -f
         '
