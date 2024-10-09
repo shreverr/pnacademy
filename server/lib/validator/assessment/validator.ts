@@ -4,15 +4,13 @@ export const validateAssessment = [
   check("name")
     .not()
     .isEmpty()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
     .withMessage("Assessment name must be more than 2 characters long"),
 
   check("description")
     .optional()
 
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
     .withMessage("Assessment description must be more than 2 characters long"),
 
   check("is_active").isBoolean().withMessage("isActive must be a boolean"),
@@ -30,7 +28,6 @@ export const validateAssessment = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -39,14 +36,12 @@ export const validateQuestion = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
     .withMessage("Should be a valid uuid v4"),
 
   check("description")
     .not()
     .isEmpty()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
     .withMessage("Question description must be more than 2 characters long"),
 
   check("marks").isNumeric().withMessage("marks must be a valid number"),
@@ -58,14 +53,14 @@ export const validateOption = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("description")
     .not()
     .isEmpty()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
+
     .withMessage("Option description must be more than 2 characters long"),
 
   check("is_correct").isBoolean().withMessage("Must be a boolean"),
@@ -76,7 +71,7 @@ export const validateTag = [
     .not()
     .isEmpty()
     .isLength({ min: 2 })
-    .escape()
+
     .withMessage("Tag name must be more than 2 characters long")
     .isLowercase(),
 ];
@@ -86,19 +81,19 @@ export const validateAssessmentUpdate = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("name")
     .optional()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
+
     .withMessage("Assessment name must be more than 2 characters long"),
 
   check("description")
     .optional()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
+
     .withMessage("Assessment description must be more than 2 characters long"),
 
   check("is_active")
@@ -127,13 +122,13 @@ export const validateQuestionUpdate = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("description")
     .optional()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
+
     .withMessage("Question description must be more than 2 characters long"),
 
   check("marks")
@@ -152,13 +147,13 @@ export const validateOptionUpdate = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("description")
     .optional()
-    .isLength({ min: 2 })
-    .escape()
+    .isLength({ min: 1 })
+
     .withMessage("Option description must be more than 2 characters long"),
 
   check("is_correct").optional().isBoolean().withMessage("Must be a boolean"),
@@ -169,13 +164,13 @@ export const validateTagUpdate = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("name")
     .optional()
     .isLength({ min: 2 })
-    .escape()
+
     .withMessage("Tag name must be more than 2 characters long")
     .isLowercase(),
 ];
@@ -185,7 +180,7 @@ export const validateAssessmentId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -194,7 +189,7 @@ export const validateAssessmentGetId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -237,7 +232,7 @@ export const validateQuestionId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -246,7 +241,7 @@ export const validateQuestionGetId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -255,7 +250,7 @@ export const validateOptionId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -264,7 +259,7 @@ export const validateTagId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -273,7 +268,7 @@ export const validateGetTag = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -330,13 +325,13 @@ export const validateGroupUpdate = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("name")
     .optional()
     .isLength({ min: 2 })
-    .escape()
+
     .withMessage("Group name must be more than 2 characters long"),
 ];
 
@@ -345,7 +340,7 @@ export const validateGroupsId = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -387,14 +382,14 @@ export const validateRemoveTagFromQuestion = [
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 
   check("tagId")
     .not()
     .isEmpty()
     .isUUID(4)
-    .escape()
+
     .withMessage("Should be a valid uuid v4"),
 ];
 
@@ -469,7 +464,7 @@ export const validateGenerateAssessment = [
     .not()
     .isEmpty()
     .isLength({ min: 2 })
-    .escape()
+
     .withMessage("Topic must be more than 2 characters long"),
   check("numberOfQuestions")
     .not()
@@ -480,7 +475,7 @@ export const validateGenerateAssessment = [
     .not()
     .isEmpty()
     .isIn(["easy", "medium", "hard"])
-    .escape()
+
     .withMessage("difficulty must be 'easy', 'medium' or 'hard'"),
 ];
 
