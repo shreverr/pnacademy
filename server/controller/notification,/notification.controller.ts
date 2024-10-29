@@ -6,6 +6,7 @@ import {
 } from "express";
 import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, updateGroup, viewAllGroups, viewAllNotifications, viewAssignedNotifications } from "../../service/notification/notification.service";
 import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
+import { AppError } from "../../lib/appError";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -35,6 +36,15 @@ export const CreateNotificationController: RequestHandler = async (
     }
 
     const notification = await createNotification(notificationArgs);
+
+    if (!notification) {
+      throw new AppError(
+        "someting went wrong",
+        500,
+        "Notification not created",
+        true
+      )
+    }
 
     return res.status(201).json({
       status: "success",

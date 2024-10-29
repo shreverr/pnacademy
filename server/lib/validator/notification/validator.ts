@@ -10,8 +10,8 @@ export const validateNotification = [
   check("title")
     .not()
     .isEmpty()
-    .isLength({ min: 2 })
-    .withMessage("Title must be at least 2 characters long"),
+    .isLength({ min: 2, max: 255 })
+    .withMessage("Title must be at least 2 - 255 characters long"),
 
   check("image_url")
     .optional()
