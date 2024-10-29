@@ -4,14 +4,13 @@ export const validateAssessment = [
   check("name")
     .not()
     .isEmpty()
-    .isLength({ min: 1 })
-    .withMessage("Assessment name must be more than 2 characters long"),
+    .isLength({ min: 1, max: 255 })
+    .withMessage("Assessment name must be 2 - 255 characters long"),
 
   check("description")
     .optional()
-
     .isLength({ min: 1 })
-    .withMessage("Assessment description must be more than 2 characters long"),
+    .withMessage("Assessment description must be more than 1 characters long"),
 
   check("is_active").isBoolean().withMessage("isActive must be a boolean"),
 
@@ -70,9 +69,9 @@ export const validateTag = [
   check("name")
     .not()
     .isEmpty()
-    .isLength({ min: 2 })
+    .isLength({ min: 2, max: 255 })
 
-    .withMessage("Tag name must be more than 2 characters long")
+    .withMessage("Tag name must be 2 - 255 characters long")
     .isLowercase(),
 ];
 
@@ -86,9 +85,9 @@ export const validateAssessmentUpdate = [
 
   check("name")
     .optional()
-    .isLength({ min: 1 })
+    .isLength({ min: 1, max: 255 })
 
-    .withMessage("Assessment name must be more than 2 characters long"),
+    .withMessage("Assessment name must be 1 - 255 characters long"),
 
   check("description")
     .optional()
@@ -129,7 +128,7 @@ export const validateQuestionUpdate = [
     .optional()
     .isLength({ min: 1 })
 
-    .withMessage("Question description must be more than 2 characters long"),
+    .withMessage("Question description must be more than 1 characters long"),
 
   check("marks")
     .optional()
@@ -154,7 +153,7 @@ export const validateOptionUpdate = [
     .optional()
     .isLength({ min: 1 })
 
-    .withMessage("Option description must be more than 2 characters long"),
+    .withMessage("Option description must be more than 1 characters long"),
 
   check("is_correct").optional().isBoolean().withMessage("Must be a boolean"),
 ];
@@ -169,9 +168,9 @@ export const validateTagUpdate = [
 
   check("name")
     .optional()
-    .isLength({ min: 2 })
+    .isLength({ min: 2, max: 255 })
 
-    .withMessage("Tag name must be more than 2 characters long")
+    .withMessage("Tag name must be 2 - 255 characters long")
     .isLowercase(),
 ];
 
@@ -330,9 +329,9 @@ export const validateGroupUpdate = [
 
   check("name")
     .optional()
-    .isLength({ min: 2 })
+    .isLength({ min: 2, max: 255 })
 
-    .withMessage("Group name must be more than 2 characters long"),
+    .withMessage("Group name must be 2 - 255 characters long"),
 ];
 
 export const validateGroupsId = [
