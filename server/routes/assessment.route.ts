@@ -24,7 +24,12 @@ import {
   getAssessmentAnalyticsChart,
   getAssessmentSectionsController,
   getAssessmentTimeController,
+  getAssessmentTotalController,
+  getDraftAssessmentCountController,
+  getOngoingAssessmentController,
+  getPastAssessmentController,
   getResultController,
+  getScheduledAssessmentController,
   getUserAssessmentsResultListController,
   publishResultController,
   removeGroupFromAssessmentController,
@@ -3528,5 +3533,178 @@ router.post(
   validateRequest,
   exportAssessmentController
 );
+
+
+/**
+ * @swagger
+ * /v1/assessment/total:
+ *   get:
+ *     summary: Get total number of assessments
+ *     description: Retrieves the total count of assessments in the system.
+ *     tags:
+ *       - Assessment Dashboard Controller
+ *     security:
+ *       - bearerAuth: []  # Token-based authentication
+ *     responses:
+ *       200:
+ *         description: Successful response with the total number of assessments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalAssessments:
+ *                   type: integer
+ *                   description: The total number of assessments
+ *             example:
+ *               totalAssessments: 25
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/total",
+  authenticateUser(["canManageAssessment"]),
+  getAssessmentTotalController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/ongoing:
+ *   get:
+ *     summary: Get count of ongoing assessments
+ *     description: Retrieves the count of ongoing assessments in the system.
+ *     tags:
+ *       - Assessment Dashboard Controller
+ *     security:
+ *       - bearerAuth: []  # Token-based authentication
+ *     responses:
+ *       200:
+ *         description: Successful response with the count of ongoing assessments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ongoingAssessmentsCount:
+ *                   type: integer
+ *                   description: The total number of ongoing assessments
+ *             example:
+ *               ongoingAssessmentsCount: 10
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/ongoing",
+  authenticateUser(["canManageAssessment"]),
+  getOngoingAssessmentController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/scheduled:
+ *   get:
+ *     summary: Get count of scheduled assessments
+ *     description: Retrieves the count of scheduled assessments in the system.
+ *     tags:
+ *       - Assessment Dashboard Controller
+ *     security:
+ *       - bearerAuth: []  # Token-based authentication
+ *     responses:
+ *       200:
+ *         description: Successful response with the count of scheduled assessments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 scheduledAssessmentsCount:
+ *                   type: integer
+ *                   description: The total number of scheduled assessments
+ *             example:
+ *               scheduledAssessmentsCount: 15
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/scheduled",
+  authenticateUser(["canManageAssessment"]),
+  getScheduledAssessmentController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/past:
+ *   get:
+ *     summary: Get count of past assessments
+ *     description: Retrieves the count of past assessments in the system.
+ *     tags:
+ *       - Assessment Dashboard Controller
+ *     security:
+ *       - bearerAuth: []  # Token-based authentication
+ *     responses:
+ *       200:
+ *         description: Successful response with the count of past assessments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pastAssessmentsCount:
+ *                   type: integer
+ *                   description: The total number of past assessments
+ *             example:
+ *               pastAssessmentsCount: 20
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/past",
+  authenticateUser(["canManageAssessment"]),
+  getPastAssessmentController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/draft:
+ *   get:
+ *     summary: Get count of draft assessments
+ *     description: Retrieves the count of draft assessments in the system.
+ *     tags:
+ *       - Assessment Dashboard Controller
+ *     security:
+ *       - bearerAuth: []  # Token-based authentication
+ *     responses:
+ *       200:
+ *         description: Successful response with the count of draft assessments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalDraftAssessments:
+ *                   type: integer
+ *                   description: The total number of draft assessments
+ *             example:
+ *               totalDraftAssessments: 10
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/draft",
+  authenticateUser(["canManageAssessment"]),
+  getDraftAssessmentCountController
+);
+
+
 
 export default router;

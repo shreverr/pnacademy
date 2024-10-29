@@ -24,7 +24,12 @@ import {
   saveGeneratedAiQuestions,
   startAssessment,
   startSection,
+  totalAssessmentCount,
   totalAssessmentMarks,
+  totalDraftAssessmentCount,
+  totalOngoingAssessmentCount,
+  totalPastAssessmentCount,
+  totalScheduledAssessmentCount,
   updateAssessment,
   updateOption,
   updateQuestion,
@@ -929,3 +934,84 @@ export const exportAssessmentController: RequestHandler = async (
     next(error);
   }
 };
+export const getAssessmentTotalController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const totalAssessments = await totalAssessmentCount();
+
+    return res.status(200).json({
+      status: "success",
+      totalAssessments : totalAssessments ,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getOngoingAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const ongoingAssessment = await totalOngoingAssessmentCount();
+
+    return res.status(200).json({
+      status: "success",
+      totalAssessments: ongoingAssessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getScheduledAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const scheduledAssessment = await totalScheduledAssessmentCount();
+
+    return res.status(200).json({
+      status: "success",
+      totalAssessments: scheduledAssessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getPastAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const pastAssessment = await totalPastAssessmentCount();
+
+    return res.status(200).json({
+      status: "success",
+      totalAssessments: pastAssessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getDraftAssessmentCountController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const draftAssessment = await totalDraftAssessmentCount();
+
+    return res.status(200).json({
+      status: "success",
+      totalAssessments: draftAssessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
