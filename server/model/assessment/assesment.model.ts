@@ -1048,6 +1048,7 @@ export const viewAssignedAssessmentsByUserId = async (
           required: true,
         },
       ],
+      attributes: { exclude: ["created_by"] },
       ...findOptions,
     });
 
@@ -1293,6 +1294,29 @@ export const getAssessmentStatusById = async (
       throw error;
     } else {
       throw new AppError("Error getting assessment", 500, error, true);
+    }
+  }
+};
+
+export const getAssessmentStatusesByUserId = async (
+  userId: string
+): Promise<AssessmentStatusAttributes[]> => {
+  logger.info(`Getting assessment statuses by user id`);
+
+  try {
+    const assessmentStatuses = await AssessmentStatus.findAll({
+      where: {
+        user_id: userId,
+      },
+      raw: true,
+    });
+
+    return assessmentStatuses;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError("Error getting assessment statuses by user id", 500, error, true);
     }
   }
 };

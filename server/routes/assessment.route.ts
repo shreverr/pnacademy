@@ -1360,11 +1360,11 @@ router.delete(
  *                           id:
  *                             type: string
  *                             description: The unique identifier of the assessment.
- *                             example: aaf2cd85-0b42-4b2d-943a-575203e57744
+ *                             example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
  *                           name:
  *                             type: string
  *                             description: The name of the assessment.
- *                             example: Project X
+ *                             example: PNA Testes
  *                           description:
  *                             type: string
  *                             description: A brief description of the assessment.
@@ -1382,25 +1382,25 @@ router.delete(
  *                             type: string
  *                             format: date-time
  *                             description: The end time of the assessment.
- *                             example: 2024-04-20T17:00:00.000Z
+ *                             example: 2024-01-28T01:10:00.000Z
  *                           duration:
  *                             type: integer
  *                             description: The duration of the assessment in milliseconds.
  *                             example: 345600000
- *                           created_by:
- *                             type: string
- *                             description: The unique identifier of the creator of the assessment.
- *                             example: 1a77a8e2-6b6a-48f5-9251-c3adfb8c6f24
+ *                           isSubmitted:
+ *                             type: boolean
+ *                             description: Indicates if the assessment has been submitted.
+ *                             example: true
  *                           createdAt:
  *                             type: string
  *                             format: date-time
  *                             description: The timestamp when the assessment was created.
- *                             example: 2024-08-08T21:11:36.081Z
+ *                             example: 2024-09-06T21:54:43.310Z
  *                           updatedAt:
  *                             type: string
  *                             format: date-time
  *                             description: The timestamp when the assessment was last updated.
- *                             example: 2024-08-08T21:11:36.081Z
+ *                             example: 2024-10-07T13:34:51.542Z
  *                     totalPages:
  *                       type: integer
  *                       description: The total number of pages available.
