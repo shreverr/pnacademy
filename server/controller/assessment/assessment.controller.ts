@@ -578,8 +578,7 @@ export const saveGeneratedAiQuestionsController: RequestHandler = async (
       start_at: req.body.start_at,
       end_at: req.body.end_at,
       duration: req.body.duration,
-      created_by: req.body.created_by,
-      marks: req.body.marks,
+      created_by: req.user.userId,
       questions: req.body.questions,
     });
 

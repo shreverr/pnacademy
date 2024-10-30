@@ -21,13 +21,6 @@ export const validateAssessment = [
   check("duration")
     .isNumeric()
     .withMessage("duration must be a valid duration"),
-
-  check("created_by")
-    .optional()
-    .not()
-    .isEmpty()
-    .isUUID(4)
-    .withMessage("Should be a valid uuid v4"),
 ];
 
 export const validateQuestion = [
@@ -479,7 +472,7 @@ export const validateGenerateAssessment = [
 ];
 
 export const validateGenerateAssessmentSave = [
-  check('marks')
+  check('questions.*.marks')
     .isNumeric()
     .withMessage('Marks must be a number'),
 

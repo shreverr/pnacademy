@@ -1517,7 +1517,7 @@ router.post(
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:  
+ *         application/json:
  *           schema:
  *             type: object
  *             required:
@@ -1527,18 +1527,16 @@ router.post(
  *               - start_at
  *               - end_at
  *               - duration
- *               - created_by
- *               - marks
  *               - questions
  *             properties:
  *               name:
  *                 type: string
  *                 description: The name of the assessment
- *                 example: "PNA Testes"
+ *                 example: "Sample Assessment"
  *               description:
  *                 type: string
  *                 description: A brief description of the assessment
- *                 example: "A new project"
+ *                 example: "An example assessment for testing"
  *               is_active:
  *                 type: boolean
  *                 description: Whether the assessment is active or not
@@ -1547,31 +1545,23 @@ router.post(
  *                 type: string
  *                 format: date-time
  *                 description: The start date and time of the assessment
- *                 example: "2024-04-16T08:00:00Z"
+ *                 example: "2024-05-01T08:00:00Z"
  *               end_at:
  *                 type: string
  *                 format: date-time
  *                 description: The end date and time of the assessment
- *                 example: "2024-09-07T03:35:00"
+ *                 example: "2024-05-01T10:00:00Z"
  *               duration:
  *                 type: integer
  *                 description: The duration of the assessment in milliseconds
- *                 example: 345600000
- *               created_by:
- *                 type: string
- *                 format: uuid
- *                 description: The UUID of the user who created the assessment
- *                 example: "4283a01f-3316-4b0c-8921-7aeee8b49619"
- *               marks:
- *                 type: integer
- *                 description: The total marks for the assessment
- *                 example: 100
+ *                 example: 7200000
  *               questions:
  *                 type: array
  *                 items:
  *                   type: object
  *                   required:
  *                     - description
+ *                     - marks
  *                     - section
  *                     - options
  *                   properties:
@@ -1579,6 +1569,10 @@ router.post(
  *                       type: string
  *                       description: The question text
  *                       example: "What is the capital of France?"
+ *                     marks:
+ *                       type: integer
+ *                       description: Marks assigned to this question
+ *                       example: 10
  *                     section:
  *                       type: integer
  *                       description: The section number of the question

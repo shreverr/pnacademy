@@ -717,10 +717,10 @@ export const saveGeneratedAiQuestions = async (assessment: {
   end_at: Date;
   duration: number;
   created_by: UUID;
-  marks: number,
   questions: [
     {
       description: string,
+      marks: number,
       section: number
       options: [
         {
@@ -750,7 +750,7 @@ export const saveGeneratedAiQuestions = async (assessment: {
     );
   }
 
-  createQuestionsInBulk(createdAssessment?.id as UUID, assessment.questions, assessment.marks)
+  createQuestionsInBulk(createdAssessment?.id as UUID, assessment.questions)
   return createdAssessment?.id;
 };
 

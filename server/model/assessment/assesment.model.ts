@@ -437,13 +437,13 @@ export const createQuestionsInBulk = async (
   assessmentId: UUID,
   questions: Array<{
     description: string,
+    marks: number,
     section: number,
     options: Array<{
       description: string,
       isCorrect: boolean
     }>
   }>,
-  marks: number
 ): Promise<void> => {
   const transaction = await sequelize.transaction();
 
@@ -478,7 +478,7 @@ export const createQuestionsInBulk = async (
       id: uuid(),
       assessment_id: assessmentId,
       description: question.description,
-      marks: marks,
+      marks: question.marks,
       section: question.section
     }));
 
