@@ -511,7 +511,7 @@ router.get(
  *                 data:
  *                   type: object
  *                   properties:
- *                     notifications:
+ *                     searchResults:
  *                       type: array
  *                       description: A list of groups.
  *                       items:

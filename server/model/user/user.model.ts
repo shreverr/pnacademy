@@ -1,4 +1,4 @@
-import { FindAndCountOptions, ForeignKeyConstraintError, Op, UniqueConstraintError } from "sequelize";
+import { FindAndCountOptions, ForeignKeyConstraintError, literal, Op, UniqueConstraintError } from "sequelize";
 import { sequelize } from "../../config/database";
 import logger from "../../config/logger";
 import { AppError } from "../../lib/appError";
@@ -16,6 +16,7 @@ import {
 import UserGroup from "../../schema/junction/userGroup.schema";
 import { group } from "console";
 import Group from "../../schema/group/group.schema";
+import { isValidUUID } from "../../utils/validator";
 
 export const getUserByEmail = async (
   email: string
@@ -597,3 +598,48 @@ export const updatePasswordInDb = async (
   }
 };
 
+
+export const searchUsersByQuery = async (
+  query: string,
+  offset?: number,
+  pageSize?: number,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: (User & { searchRank: number })[];
+  count: number;
+}> => {
+  try {
+    const searchResults = await User.findAndCountAll({
+      attributes: [
+        'id',
+        'name',
+        [
+          literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`),
+          'searchRank'
+        ]
+      ],
+      where: {
+        [Op.or]: [
+          literal(`search_vector @@ plainto_tsquery('english', :query)`),
+          // Only include the id condition if the query is a valid UUID
+          ...(isValidUUID(query) ? [{ id: query }] : [])
+        ],
+      },
+      order: [
+        [literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`), 'DESC']
+      ],
+      replacements: { query },
+      limit: pageSize,
+      offset,
+      distinct: true,
+    }) as { rows: (User & { searchRank: number })[], count: number };
+    return searchResults;
+  } catch (error: any) {
+      throw new AppError(
+        "someting went wrong",
+        500,
+        "someting went wrong",
+        true
+      );
+  }
+}

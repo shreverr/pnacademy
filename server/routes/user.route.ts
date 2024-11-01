@@ -13,6 +13,7 @@ import {
   passwordResetController,
   registerUserController,
   removeUsersFromGroupController,
+  searchUsersController,
   updateRoleController,
   UpdateUserController,
   UserAddToGroupController,
@@ -40,7 +41,7 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";
-import { validateAdminPasswordReset, validateGetUsersByRoleId, validateUserUpdatePassword } from "../lib/validator/user/validator";
+import { validateAdminPasswordReset, validateGetUsersByRoleId, validateUsersSearch, validateUserUpdatePassword } from "../lib/validator/user/validator";
 
 const router: Router = express.Router();
 
@@ -1602,5 +1603,116 @@ router.post(
   adminPasswordResetController
 );
 
+/**
+ * @swagger
+ * /v1/user/search:
+ *   get:
+ *     summary: Search for users based on the provided query.
+ *     tags:
+ *       - User view Controller
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *           example: admin
+ *         required: true
+ *         description: The query string to search for users. Can match first name, last name, email, or phone.
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *         required: false
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 10
+ *         required: false
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *         required: false
+ *         description: The sort order, either ascending (ASC) or descending (DESC).
+ *     responses:
+ *       '200':
+ *         description: A list of searched users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     searchResults:
+ *                       type: array
+ *                       description: A list of users matching the search criteria.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the user.
+ *                             example: 27c710c1-53db-48c8-b8c4-13f35ec769a5
+ *                           role_id:
+ *                             type: string
+ *                             description: The role identifier of the user.
+ *                             example: 0878d868-52b1-4838-8e75-b0ec02b69977
+ *                           first_name:
+ *                             type: string
+ *                             description: The first name of the user.
+ *                             example: admin
+ *                           last_name:
+ *                             type: string
+ *                             description: The last name of the user.
+ *                             example: asdsa
+ *                           email:
+ *                             type: string
+ *                             description: The email address of the user.
+ *                             example: din1@psss.com
+ *                           phone:
+ *                             type: string
+ *                             nullable: true
+ *                             description: The phone number of the user.
+ *                             example: 9876543210
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The creation timestamp of the user record.
+ *                             example: 2024-09-06T15:15:38.967Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The last update timestamp of the user record.
+ *                             example: 2024-09-06T15:15:38.967Z
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad request. Invalid query parameters.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/search",
+  authenticateUser(["canManageUser"]),
+  validateUsersSearch,
+  validateRequest,
+  searchUsersController
+);
 
 export default router;

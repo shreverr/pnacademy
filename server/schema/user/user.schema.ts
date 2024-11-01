@@ -8,6 +8,7 @@ interface UserAttributes {
   last_name: string
   email: string
   phone: string | null
+  search_vector: any; // tsvector type
 }
 
 class User extends Model<UserAttributes> implements UserAttributes {
@@ -17,6 +18,7 @@ class User extends Model<UserAttributes> implements UserAttributes {
   public role_id!: string | null
   public email!: string
   public phone!: string | null
+  public search_vector: any; // tsvector type
 }
 
 User.init(
@@ -46,12 +48,20 @@ User.init(
     phone: {
       type: DataTypes.STRING,
       allowNull: true
-    }
+    },
+    search_vector: {
+      type: DataTypes.TSVECTOR,
+      allowNull: true,
+    },
   },
   {
     sequelize,
     modelName: 'user'
   }
 )
+
+User.addHook('beforeFind', (options) => {
+  options.attributes = { exclude: ['search_vector'] };  
+});
 
 export default User

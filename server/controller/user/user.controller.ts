@@ -18,6 +18,7 @@ import {
   passwordResetService,
   registerUser,
   removeUsersFromGroup,
+  searchUsers,
   updateRole,
   updateUser,
   viewAllRoles,
@@ -415,5 +416,26 @@ export const adminPasswordResetController: RequestHandler = async (
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export const searchUsersController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const searchResults = await searchUsers(
+      req.query.query as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.order as 'ASC' | 'DESC'
+    )
+    return res.status(200).json({
+      message: 'success',
+      data: searchResults
+    })
+  } catch (error) {
+    next(error)
   }
 }

@@ -464,3 +464,31 @@ export const validateGetUsersByGroup = [
     .escape()
     .withMessage("Should be a valid uuid v4"),
 ];
+
+export const validateUsersSearch = [
+  query("query")
+    .not()
+    .isEmpty()
+    .withMessage("Query cannot be empty")
+    .isString()
+    .withMessage("Query must be a string"),
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+       "ASC", "DESC",`
+    ),
+]

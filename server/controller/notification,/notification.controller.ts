@@ -235,7 +235,7 @@ export const searchGroupsController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const assignedNotifications = await searchGroups(
+    const searchResults = await searchGroups(
       req.query.query as string,
       req.query.page as string,
       req.query.pageSize as string,
@@ -244,7 +244,7 @@ export const searchGroupsController: RequestHandler = async (
 
     return res.status(200).json({
       message: 'success',
-      data: assignedNotifications
+      data: searchResults
     })
   } catch (error) {
     next(error)

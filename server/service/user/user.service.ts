@@ -18,6 +18,7 @@ import {
   updateRoleInDB,
   getAllUsersByRoleId,
   updatePasswordInDb,
+  searchUsersByQuery,
 } from "../../model/user/user.model";
 import {
   RoleData,
@@ -37,6 +38,7 @@ import { UUID } from "crypto";
 import logger from "../../config/logger";
 import { csvToObjectArray, objectArrayToCSV } from "../../utils/csvParser";
 import { deleteFileFromDisk } from "../../lib/file";
+import User from "../../schema/user/user.schema";
 
 export const viewUserDetails = async (
   userId: string
@@ -584,4 +586,39 @@ export const passwordResetService = async (
 
     return result; 
   
+};
+
+export const searchUsers = async (
+  query: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  order?: "ASC" | "DESC"
+): Promise<{
+  searchResults: (User & { searchRank: number })[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  order = order ?? "DESC";
+  const offset = (page - 1) * pageSize;
+  const { rows: searchResults, count: searchResultsCount } =
+    await searchUsersByQuery(
+      query,
+      offset,
+      pageSize,
+      order
+    );
+  if (!searchResults) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "someting went wrong",
+      false
+    );
+  }
+  const totalPages = Math.ceil(searchResultsCount / pageSize);
+  return {
+    searchResults: searchResults,
+    totalPages: totalPages,
+  };
 };

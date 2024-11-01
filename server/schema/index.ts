@@ -121,7 +121,7 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "assessment_id",
     onDelete: "CASCADE",
   })
-  
+
   AssessmentResult.belongsTo(Assessment, {
     foreignKey: "assessment_id"
   })
@@ -242,12 +242,38 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
+    await sequelize.query(`
+      CREATE INDEX IF NOT EXISTS users_search_idx 
+      ON users 
+      USING GIN (search_vector);
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
     // Create or replace the trigger function
     await sequelize.query(`
       CREATE OR REPLACE FUNCTION groups_search_vector_update() RETURNS trigger AS $func$
       BEGIN
         NEW.search_vector := 
           setweight(to_tsvector('english', COALESCE(NEW.name, '')), 'A');
+        RETURN NEW;
+      END;
+      $func$ LANGUAGE plpgsql;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await sequelize.query(`
+      CREATE OR REPLACE FUNCTION users_search_vector_update() RETURNS trigger AS $func$
+      BEGIN
+        NEW.search_vector := 
+          setweight(to_tsvector('english', COALESCE(NEW.first_name, '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.last_name, '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.email, '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.phone, '')), 'A')
+          ;
         RETURN NEW;
       END;
       $func$ LANGUAGE plpgsql;
@@ -265,10 +291,28 @@ export const initFullTextSearch = async () => {
     });
 
     await sequelize.query(`
+      DROP TRIGGER IF EXISTS users_search_vector_update ON users;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+
+    await sequelize.query(`
       CREATE TRIGGER groups_search_vector_update
       BEFORE INSERT OR UPDATE ON groups
       FOR EACH ROW
       EXECUTE FUNCTION groups_search_vector_update();
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await sequelize.query(`
+      CREATE TRIGGER users_search_vector_update
+      BEFORE INSERT OR UPDATE ON users
+      FOR EACH ROW
+      EXECUTE FUNCTION users_search_vector_update();
     `, {
       type: QueryTypes.RAW,
       transaction
@@ -279,6 +323,19 @@ export const initFullTextSearch = async () => {
       UPDATE groups SET
       search_vector = 
         setweight(to_tsvector('english', COALESCE(name, '')), 'A')
+      WHERE search_vector IS NULL;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await sequelize.query(`
+      UPDATE users SET
+      search_vector = 
+        setweight(to_tsvector('english', COALESCE(first_name, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(last_name, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(email, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(phone, '')), 'A')
       WHERE search_vector IS NULL;
     `, {
       type: QueryTypes.RAW,

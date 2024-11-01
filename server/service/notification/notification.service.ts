@@ -388,7 +388,7 @@ export const searchGroups = async (
   pageSizeStr?: string,
   order?: "ASC" | "DESC"
 ): Promise<{
-  notifications: (Group & { searchRank: number })[];
+  searchResults: (Group & { searchRank: number })[];
   totalPages: number;
 }> => {
   const page = parseInt(pageStr ?? "1");
@@ -418,7 +418,7 @@ export const searchGroups = async (
   const totalPages = Math.ceil(searchResultsCount / pageSize);
 
   return {
-    notifications: searchResults,
+    searchResults: searchResults,
     totalPages: totalPages,
   };
 };
