@@ -53,6 +53,7 @@ import {
   getUserAssessmentResultList,
   getAssessmentStatusesByUserId,
   getAssessmentCountByType,
+  searchAssesmentsByQuery,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -80,7 +81,7 @@ import { getUserById } from "../../model/user/user.model";
 import { AppError } from "../../lib/appError";
 import commonErrorsDictionary from "../../utils/error/commonErrors";
 import { TagAttributes } from "../../schema/assessment/tag.schema";
-import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
+import Assessment, { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import Question, { QuestionAttributes } from "../../schema/assessment/question.schema";
 import {
   validateAssessment,
@@ -1176,3 +1177,38 @@ export const totalDraftAssessmentCount = async (): Promise<number> => {
   const assessmentCount = await getAssessmentCountByType({type: 'draft'});
   return assessmentCount;
 }
+
+export const searchAssesments = async (
+  query: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  order?: "ASC" | "DESC"
+): Promise<{
+  searchResults: (Assessment & { searchRank: number })[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  order = order ?? "DESC";
+  const offset = (page - 1) * pageSize;
+  const { rows: searchResults, count: searchResultsCount } =
+    await searchAssesmentsByQuery(
+      query,
+      offset,
+      pageSize,
+      order
+    );
+  if (!searchResults) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "someting went wrong",
+      false
+    );
+  }
+  const totalPages = Math.ceil(searchResultsCount / pageSize);
+  return {
+    searchResults: searchResults,
+    totalPages: totalPages,
+  };
+};

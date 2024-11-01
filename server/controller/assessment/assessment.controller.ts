@@ -22,6 +22,7 @@ import {
   removeSectionFromAssessment,
   removeTagFromQuestion,
   saveGeneratedAiQuestions,
+  searchAssesments,
   startAssessment,
   startSection,
   totalAssessmentCount,
@@ -1012,5 +1013,26 @@ export const getDraftAssessmentCountController: RequestHandler = async (
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export const searchAssesmentsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const searchResults = await searchAssesments(
+      req.query.query as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.order as 'ASC' | 'DESC'
+    )
+    return res.status(200).json({
+      message: 'success',
+      data: searchResults
+    })
+  } catch (error) {
+    next(error)
   }
 }

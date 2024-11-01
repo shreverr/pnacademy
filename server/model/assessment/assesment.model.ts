@@ -42,6 +42,7 @@ import {
   Sequelize,
   FindOptions,
   WhereOptions,
+  literal,
 } from "sequelize";
 import QuestionTag from "../../schema/junction/questionTag.schema";
 import { sequelize } from "../../config/database";
@@ -60,6 +61,7 @@ import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.s
 import { log } from "console";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 import { serve } from "swagger-ui-express";
+import { isValidUUID } from "../../utils/validator";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -2428,3 +2430,47 @@ export const getAssessmentCountByType = async ({
   }
 };
 
+export const searchAssesmentsByQuery = async (
+  query: string,
+  offset?: number,
+  pageSize?: number,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: (Assessment & { searchRank: number })[];
+  count: number;
+}> => {
+  try {
+    const searchResults = await Assessment.findAndCountAll({
+      attributes: [
+        'id',
+        'name',
+        [
+          literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`),
+          'searchRank'
+        ]
+      ],
+      where: {
+        [Op.or]: [
+          literal(`search_vector @@ plainto_tsquery('english', :query)`),
+          // Only include the id condition if the query is a valid UUID
+          ...(isValidUUID(query) ? [{ id: query }] : [])
+        ],
+      },
+      order: [
+        [literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`), 'DESC']
+      ],
+      replacements: { query },
+      limit: pageSize,
+      offset,
+      distinct: true,
+    }) as { rows: (Assessment & { searchRank: number })[], count: number };
+    return searchResults;
+  } catch (error: any) {
+      throw new AppError(
+        "someting went wrong",
+        500,
+        "someting went wrong",
+        true
+      );
+  }
+}

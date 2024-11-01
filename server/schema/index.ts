@@ -251,6 +251,15 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
+    await sequelize.query(`
+      CREATE INDEX IF NOT EXISTS assessments_search_idx 
+      ON assessments 
+      USING GIN (search_vector);
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
     // Create or replace the trigger function
     await sequelize.query(`
       CREATE OR REPLACE FUNCTION groups_search_vector_update() RETURNS trigger AS $func$
@@ -282,6 +291,21 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
+    await sequelize.query(`
+      CREATE OR REPLACE FUNCTION assessments_search_vector_update() RETURNS trigger AS $func$
+      BEGIN
+        NEW.search_vector := 
+          setweight(to_tsvector('english', COALESCE(NEW.name, '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'A')
+          ;
+        RETURN NEW;
+      END;
+      $func$ LANGUAGE plpgsql;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
     // Drop and recreate trigger
     await sequelize.query(`
       DROP TRIGGER IF EXISTS groups_search_vector_update ON groups;
@@ -292,6 +316,13 @@ export const initFullTextSearch = async () => {
 
     await sequelize.query(`
       DROP TRIGGER IF EXISTS users_search_vector_update ON users;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await sequelize.query(`
+      DROP TRIGGER IF EXISTS assessments_search_vector_update ON assessments;
     `, {
       type: QueryTypes.RAW,
       transaction
@@ -318,6 +349,16 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
+    await sequelize.query(`
+      CREATE TRIGGER assessments_search_vector_update
+      BEFORE INSERT OR UPDATE ON assessments
+      FOR EACH ROW
+      EXECUTE FUNCTION assessments_search_vector_update();
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
     // Update existing records
     await sequelize.query(`
       UPDATE groups SET
@@ -336,6 +377,17 @@ export const initFullTextSearch = async () => {
         setweight(to_tsvector('english', COALESCE(last_name, '')), 'A') ||
         setweight(to_tsvector('english', COALESCE(email, '')), 'A') ||
         setweight(to_tsvector('english', COALESCE(phone, '')), 'A')
+      WHERE search_vector IS NULL;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await sequelize.query(`
+      UPDATE assessments SET
+      search_vector = 
+        setweight(to_tsvector('english', COALESCE(name, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(description, '')), 'A')
       WHERE search_vector IS NULL;
     `, {
       type: QueryTypes.RAW,

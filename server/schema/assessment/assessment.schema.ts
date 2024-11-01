@@ -10,6 +10,7 @@ export interface AssessmentAttributes {
   end_at: Date
   duration: number
   created_by: string | null
+  search_vector?: any; // tsvector type
 }
 class Assessment
   extends Model<AssessmentAttributes>
@@ -22,6 +23,7 @@ class Assessment
   public end_at!: Date
   public duration!: number
   public created_by!: string | null
+  public search_vector?: any; // tsvector type
 }
 Assessment.init(
   {
@@ -57,12 +59,20 @@ Assessment.init(
     created_by: {
       type: DataTypes.UUID,
       allowNull: true
-    }
+    },
+    search_vector: {
+      type: DataTypes.TSVECTOR,
+      allowNull: true,
+    },
   },
   {
     sequelize,
     modelName: 'assessment'
   }
 )
+
+Assessment.addHook('beforeFind', (options) => {
+  options.attributes = { exclude: ['search_vector'] };  
+});
 
 export default Assessment

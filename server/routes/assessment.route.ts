@@ -35,6 +35,7 @@ import {
   removeGroupFromAssessmentController,
   removeTagFromQuestionController,
   saveGeneratedAiQuestionsController,
+  searchAssesmentsController,
   startAssessmentController,
   startSectionController,
   totalAssessmentMarksController,
@@ -76,6 +77,7 @@ import {
 import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import {
+  validateAssesmentsSearch,
   validateAssessmentExport,
   validateAttemptQuestion,
   validateAttemptQuestionDelete,
@@ -3704,6 +3706,125 @@ router.get(
   getDraftAssessmentCountController
 );
 
-
+/**
+ * @swagger
+ * /v1/assessment/search:
+ *   get:
+ *     summary: Search for assessments based on the provided query.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *           example: pna
+ *         required: true
+ *         description: The query string to search for assessments. Can match assessment name or description.
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *         required: false
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 10
+ *         required: false
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *         required: false
+ *         description: The sort order, either ascending (ASC) or descending (DESC).
+ *     responses:
+ *       '200':
+ *         description: A list of searched assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     searchResults:
+ *                       type: array
+ *                       description: A list of assessments matching the search criteria.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the assessment.
+ *                             example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *                           name:
+ *                             type: string
+ *                             description: The name of the assessment.
+ *                             example: PNA Testes
+ *                           description:
+ *                             type: string
+ *                             description: The description of the assessment.
+ *                             example: A new project
+ *                           is_active:
+ *                             type: boolean
+ *                             description: Indicates whether the assessment is active.
+ *                             example: true
+ *                           start_at:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The start date and time of the assessment.
+ *                             example: 2024-04-16T08:00:00.000Z
+ *                           end_at:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The end date and time of the assessment.
+ *                             example: 2024-01-28T01:10:00.000Z
+ *                           duration:
+ *                             type: integer
+ *                             description: The duration of the assessment in milliseconds.
+ *                             example: 345600000
+ *                           created_by:
+ *                             type: string
+ *                             description: The ID of the user who created the assessment.
+ *                             example: 27c710c1-53db-48c8-b8c4-13f35ec769a5
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The creation timestamp of the assessment record.
+ *                             example: 2024-09-06T21:54:43.310Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The last update timestamp of the assessment record.
+ *                             example: 2024-10-07T13:34:51.542Z
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad request. Invalid query parameters.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/search",
+  authenticateUser(["canManageAssessment"]),
+  validateAssesmentsSearch,
+  validateRequest,
+  searchAssesmentsController
+);
 
 export default router;
