@@ -19,6 +19,7 @@ import {
   ChartData,
   AssessmentTime,
   UserAssessmentResultListAttributes,
+  AssessmentCountParams,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -40,6 +41,7 @@ import {
   UniqueConstraintError,
   Sequelize,
   FindOptions,
+  WhereOptions,
 } from "sequelize";
 import QuestionTag from "../../schema/junction/questionTag.schema";
 import { sequelize } from "../../config/database";
@@ -2346,3 +2348,83 @@ export const exportAssessmentById = async (
     );
   }
 };
+
+export const getAssessmentCountByType = async ({
+  type,
+  user_id,
+}: AssessmentCountParams): Promise<number> => {
+  const currentDate = new Date();
+
+  let whereClause: WhereOptions<AssessmentAttributes> = {
+    is_active: true, 
+  };
+
+  // Add type-specific conditions
+  switch (type) {
+    case 'scheduled':
+      whereClause.start_at = { [Op.gt]: currentDate };
+      break;
+
+    case 'past':
+      whereClause.end_at = { [Op.lt]: currentDate };
+      break;
+
+    case 'ongoing':
+      whereClause.start_at = { [Op.lte]: currentDate };
+      whereClause.end_at = { [Op.gt]: currentDate };
+      break;
+
+    case 'draft':
+      whereClause.is_active = false;
+      break;
+
+    case 'total':
+     
+      break;
+
+    default:
+      throw new AppError("Invalid assessment count type", 400, '0', false);
+  }
+
+  try {
+    if (user_id) {
+      logger.info(`Getting assessment count for user ${user_id}`);
+      const assignedAssessments = await Assessment.findAndCountAll({
+        where: whereClause,
+        include: [
+          {
+            model: Group,
+            include: [
+              {
+                model: User,
+                where: { id: user_id }, 
+                attributes: [],
+                required: true,
+              },
+            ],
+            attributes: [],
+            required: true,
+          },
+        ],
+      });
+
+      return assignedAssessments.count; 
+    } else {
+     
+      const count = await Assessment.count({
+        where: whereClause,
+      });
+
+      return count;
+    }
+
+  } catch (error: any) {
+    throw new AppError(
+      "Error getting assessment count",
+      500,
+      error,
+      false
+    );
+  }
+};
+

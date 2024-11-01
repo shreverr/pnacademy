@@ -38,6 +38,7 @@ import { UUID } from "crypto";
 import logger from "../../config/logger";
 import { csvToObjectArray, objectArrayToCSV } from "../../utils/csvParser";
 import { deleteFileFromDisk } from "../../lib/file";
+import { getAssessmentCountByType } from "../../model/assessment/assesment.model";
 import User from "../../schema/user/user.schema";
 
 export const viewUserDetails = async (
@@ -636,3 +637,4 @@ export const totalscheduledUserAssessmentCount= async (userId: string): Promise<
   const assessmentCount = await getAssessmentCountByType({type: 'scheduled',user_id: userId});
   return assessmentCount;;
 }
+

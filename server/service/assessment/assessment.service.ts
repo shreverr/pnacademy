@@ -52,6 +52,7 @@ import {
   getUserAssessmentResponsesById,
   getUserAssessmentResultList,
   getAssessmentStatusesByUserId,
+  getAssessmentCountByType,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -1149,98 +1150,29 @@ export const exportAssessments = async (
 };
 
 export const totalAssessmentCount = async (): Promise<number> => {
-
-  const assessmentCount = await getAllAssessments(0, 1000000, "name", "ASC");
-
-  if (!assessmentCount) {
-    throw new AppError(
-      commonErrorsDictionary.internalServerError.name,
-      commonErrorsDictionary.internalServerError.httpCode,
-      "Someting went wrong",
-      false
-    );
-  }
-
-  return assessmentCount.count;
+  
+  const assessmentCount = await getAssessmentCountByType({type: 'total',});
+  return assessmentCount;
 }
 export const totalOngoingAssessmentCount = async (): Promise<number> => {
 
-  const assessmentCount = await getAllAssessments(0, 1000000, "name", "ASC");
-
-  if (!assessmentCount) {
-    throw new AppError(
-      commonErrorsDictionary.internalServerError.name,
-      commonErrorsDictionary.internalServerError.httpCode,
-      "Someting went wrong",
-      false
-    );
-  }
-
-  const ongoingAssessmentCount = assessmentCount.rows.filter((assessment) => {
-    const currentDate = new Date();
-    return assessment.is_active && assessment.start_at < currentDate && assessment.end_at > currentDate && assessment.is_active === true;
-  });
-
-  return ongoingAssessmentCount.length;
+  const assessmentCount = await getAssessmentCountByType({type: 'ongoing',});
+  return assessmentCount;
 }
 
 export const totalScheduledAssessmentCount = async (): Promise<number> => {
-
-  const assessmentCount = await getAllAssessments(0, 1000000, "name", "ASC");
-
-  if (!assessmentCount) {
-    throw new AppError(
-      commonErrorsDictionary.internalServerError.name,
-      commonErrorsDictionary.internalServerError.httpCode,
-      "Someting went wrong",
-      false
-    );
-  }
-
-  const scheduledAssessmentCount = assessmentCount.rows.filter((assessment) => {
-    const currentDate = new Date();
-    return assessment.is_active && assessment.start_at > currentDate && assessment.is_active === true;
-  });
-
-  return scheduledAssessmentCount.length;
+  
+  const assessmentCount = await getAssessmentCountByType({type: 'scheduled',});
+  return assessmentCount;
 }
 
 export const totalPastAssessmentCount = async (): Promise<number> => {
 
-  const assessmentCount = await getAllAssessments(0, 1000000, "name", "ASC");
-
-  if (!assessmentCount) {
-    throw new AppError(
-      commonErrorsDictionary.internalServerError.name,
-      commonErrorsDictionary.internalServerError.httpCode,
-      "Someting went wrong",
-      false
-    );
-  }
-
-  const pastAssessmentCount = assessmentCount.rows.filter((assessment) => {
-    const currentDate = new Date();
-    return assessment.is_active && assessment.end_at < currentDate && assessment.is_active === true;
-  });
-
-  return pastAssessmentCount.length;
+  const assessmentCount = await getAssessmentCountByType({type: 'past',});
+  return assessmentCount;
 }
 export const totalDraftAssessmentCount = async (): Promise<number> => {
 
-  const assessmentCount = await getAllAssessments(0, 1000000, "name", "ASC");
-
-  if (!assessmentCount) {
-    throw new AppError(
-      commonErrorsDictionary.internalServerError.name,
-      commonErrorsDictionary.internalServerError.httpCode,
-      "Someting went wrong",
-      false
-    );
-  }
-
-  const draftAssessmentCount = assessmentCount.rows.filter((assessment) => {
-    return !assessment.is_active;
-  });
-
-  return draftAssessmentCount.length;
+  const assessmentCount = await getAssessmentCountByType({type: 'draft'});
+  return assessmentCount;
 }

@@ -448,7 +448,7 @@ export const getuserAssessmentTotalController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const assessmentCount = await totalUserAssessmentCount(req.body.userId);
+    const assessmentCount = await totalUserAssessmentCount(req.user.userId);
     return res.status(200).json({
       status: "success",
       data: assessmentCount,
@@ -463,7 +463,7 @@ export const  getuserAssessmentOngoingController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const assessmentCount = await totalOngoingUserAssessmentCount(req.body.userId);
+    const assessmentCount = await totalOngoingUserAssessmentCount(req.user.userId);
     return res.status(200).json({
       status: "success",
       data: assessmentCount,
@@ -479,37 +479,7 @@ export const getuserAssessmentScheduledController:RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    const assessmentCount = await totalscheduledUserAssessmentCount(req.body.userId);
-    return res.status(200).json({
-      status: "success",
-      data: assessmentCount,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-export const getuserAssessmentUnattemptedController: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const assessmentCount = await totalUserAssessmentCount(req.body.userId);
-    return res.status(200).json({
-      status: "success",
-      data: assessmentCount,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-export const getuserAssessmentCompletedController: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const assessmentCount = await totalUserAssessmentCount(req.body.userId);
+    const assessmentCount = await totalscheduledUserAssessmentCount(req.user.userId);
     return res.status(200).json({
       status: "success",
       data: assessmentCount,

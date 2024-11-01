@@ -45,6 +45,7 @@ import { validateRequest } from "../utils/validateRequest";
 import { authenticateUser } from "../middleware/Auth";
 import { upload } from "../middleware/multer";
 import { validateAdminPasswordReset, validateGetUsersByRoleId, validateUsersSearch, validateUserUpdatePassword } from "../lib/validator/user/validator";
+import { validate } from "uuid";
 
 const router: Router = express.Router();
 
@@ -1718,40 +1719,113 @@ router.get(
   searchUsersController
 );
 
+/**
+ * @swagger
+ * /v1/user/assessment/total:
+ *   get:
+ *     summary: Retrieve the total number of assessments for the user.
+ *     tags:
+ *       - User Dashboard Routes
+ *     responses:
+ *       '200':
+ *         description: The total number of assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 total:
+ *                   type: integer
+ *                   description: The total number of assessments.
+ *                   example: 5
+ *       '403':
+ *         description: Forbidden. User does not have permission to view the report.
+ *       '500':
+ *         description: Internal server error.
+ */
 router.get(
   "/assessment/total",
   authenticateUser(["canViewReport"]),
   validateRequest,
-  getuserAssessmentTotalController,
+  getuserAssessmentTotalController
+);
 
-)
+/**
+ * @swagger
+ * /v1/user/assessment/ongoing:
+ *   get:
+ *     summary: Retrieve the number of ongoing assessments for the user.
+ *     tags:
+ *       - User Dashboard Routes
+ *     responses:
+ *       '200':
+ *         description: The number of ongoing assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 ongoing:
+ *                   type: integer
+ *                   description: The number of ongoing assessments.
+ *                   example: 3
+ *       '403':
+ *         description: Forbidden. User does not have permission to view the report.
+ *       '500':
+ *         description: Internal server error.
+ */
 router.get(
   "/assessment/ongoing",
   authenticateUser(["canViewReport"]),
   validateRequest,
-  getuserAssessmentOngoingController,
+  getuserAssessmentOngoingController
+);
 
-)
+/**
+ * @swagger
+ * /v1/user/assessment/scheduled:
+ *   get:
+ *     summary: Retrieve the number of scheduled assessments for the user.
+ *     tags:
+ *       - User Dashboard Routes
+ *     responses:
+ *       '200':
+ *         description: The number of scheduled assessments.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 scheduled:
+ *                   type: integer
+ *                   description: The number of scheduled assessments.
+ *                   example: 2
+ *       '403':
+ *         description: Forbidden. User does not have permission to view the report.
+ *       '500':
+ *         description: Internal server error.
+ */
 router.get(
   "/assessment/scheduled",
   authenticateUser(["canViewReport"]),
   validateRequest,
-  getuserAssessmentScheduledController,
+  getuserAssessmentScheduledController
+);
 
-)
-router.get(
-  "/assessment/unattempted",
-  authenticateUser(["canViewReport"]),
-  validateRequest,
-  getuserAssessmentTotalController,
 
-)
-router.get(
-  "/assessment/attempted",
-  authenticateUser(["canViewReport"]),
-  validateRequest,
-  getuserAssessmentTotalController,
-)
+
 
 
 export default router;

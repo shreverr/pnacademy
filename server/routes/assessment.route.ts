@@ -3560,6 +3560,7 @@ router.post(
 router.get(
   "/total",
   authenticateUser(["canManageAssessment"]),
+  validateRequest,
   getAssessmentTotalController
 );
 
@@ -3594,6 +3595,7 @@ router.get(
 router.get(
   "/ongoing",
   authenticateUser(["canManageAssessment"]),
+  validateRequest,
   getOngoingAssessmentController
 );
 
@@ -3628,6 +3630,7 @@ router.get(
 router.get(
   "/scheduled",
   authenticateUser(["canManageAssessment"]),
+  validateRequest,
   getScheduledAssessmentController
 );
 
@@ -3662,6 +3665,7 @@ router.get(
 router.get(
   "/past",
   authenticateUser(["canManageAssessment"]),
+  validateRequest,
   getPastAssessmentController
 );
 
@@ -3696,6 +3700,7 @@ router.get(
 router.get(
   "/draft",
   authenticateUser(["canManageAssessment"]),
+  validateRequest,
   getDraftAssessmentCountController
 );
 

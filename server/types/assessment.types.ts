@@ -147,3 +147,10 @@ export type SectionDetailedStatus = {
   section: number,
   status: 'started' | 'submitted' | 'not-started'
 }
+export type CountType = 'scheduled' | 'past' | 'ongoing' | 'total' | 'draft';
+
+
+export interface AssessmentCountParams  {
+  type: CountType;
+  user_id?: string;
+}
