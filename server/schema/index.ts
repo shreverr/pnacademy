@@ -212,7 +212,6 @@ export const defineCustomRelations = async () => {
   const transaction = await sequelize.transaction();
   try {
     await sequelize.query(
-      // 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY(assessment_id, section) REFERENCES sections(assessment_id, section) ON DELETE CASCADE;',
       "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_sections') THEN EXECUTE 'ALTER TABLE questions ADD CONSTRAINT fk_sections FOREIGN KEY (assessment_id, section) REFERENCES sections (assessment_id, section) ON DELETE CASCADE ON UPDATE CASCADE'; END IF; END $$;", {
       type: QueryTypes.RAW,
       transaction: transaction
@@ -229,5 +228,73 @@ export const defineCustomRelations = async () => {
     )
   }
 }
+
+export const initFullTextSearch = async () => {
+  const transaction = await sequelize.transaction();
+  try {
+    // Create GIN index if it doesn't exist
+    await sequelize.query(`
+      CREATE INDEX IF NOT EXISTS groups_search_idx 
+      ON groups 
+      USING GIN (search_vector);
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    // Create or replace the trigger function
+    await sequelize.query(`
+      CREATE OR REPLACE FUNCTION groups_search_vector_update() RETURNS trigger AS $func$
+      BEGIN
+        NEW.search_vector := 
+          setweight(to_tsvector('english', COALESCE(NEW.name, '')), 'A');
+        RETURN NEW;
+      END;
+      $func$ LANGUAGE plpgsql;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    // Drop and recreate trigger
+    await sequelize.query(`
+      DROP TRIGGER IF EXISTS groups_search_vector_update ON groups;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await sequelize.query(`
+      CREATE TRIGGER groups_search_vector_update
+      BEFORE INSERT OR UPDATE ON groups
+      FOR EACH ROW
+      EXECUTE FUNCTION groups_search_vector_update();
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    // Update existing records
+    await sequelize.query(`
+      UPDATE groups SET
+      search_vector = 
+        setweight(to_tsvector('english', COALESCE(name, '')), 'A')
+      WHERE search_vector IS NULL;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
+
+    await transaction.commit();
+  } catch (error: any) {
+    await transaction.rollback();
+    throw new AppError(
+      'Error initializing full text search',
+      500,
+      error,
+      true
+    );
+  }
+};
 
 export default instantiateModels;

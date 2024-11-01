@@ -9,6 +9,7 @@ import {
   DeleteNotificationController,
   getAllNotificationsController,
   removeGroupFromNotificationController,
+  searchGroupsController,
   viewAssignedNotificationsController,
 } from "../controller/notification,/notification.controller";
 import { upload } from "../middleware/multer";
@@ -16,7 +17,7 @@ import {
   validateNotification,
   validateNotificationDelete,
 } from "../lib/validator/index";
-import { validateAddGroupToNotification, validateGetAllNotifications, validateRemoveGroupFromNotification, validateViewAssignedNotifications } from "../lib/validator/notification/validator";
+import { validateAddGroupToNotification, validateGetAllNotifications, validateGroupSearch, validateRemoveGroupFromNotification, validateViewAssignedNotifications } from "../lib/validator/notification/validator";
 
 const router: Router = express.Router();
 
@@ -294,7 +295,7 @@ router.get(
  */
 router.post(
   "/add-group",
-  authenticateUser(["canManageNotification", "canManageLocalGroup"]),
+  authenticateUser(["canManageLocalGroup"]),
   validateAddGroupToNotification,
   validateRequest,
   addGroupToNotificationController
@@ -347,7 +348,7 @@ router.post(
  */
 router.delete(
   "/remove-group",
-  authenticateUser(["canManageAssessment", "canManageLocalGroup"]),
+  authenticateUser(["canManageLocalGroup"]),
   validateRemoveGroupFromNotification,
   validateRequest,
   removeGroupFromNotificationController
@@ -456,6 +457,99 @@ router.get(
   validateViewAssignedNotifications,
   validateRequest,
   viewAssignedNotificationsController
+);
+
+/**
+ * @swagger
+ * /v1/notification/group/search:
+ *   get:
+ *     summary: Search for groups based on the provided query.
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *           example: hehe
+ *         required: true
+ *         description: The query string to search for groups. Can be a UUID or a search term.
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: false
+ *         description: The page number for pagination.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         required: false
+ *         description: The number of items per page.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *         required: false
+ *         description: The sort order, either ascending (ASC) or descending (DESC).
+ *     responses:
+ *       '200':
+ *         description: A list of searched groups.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     notifications:
+ *                       type: array
+ *                       description: A list of groups.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier of the group.
+ *                             example: caed107f-b90e-4488-a7f9-cc9319244c06
+ *                           name:
+ *                             type: string
+ *                             description: The name of the group.
+ *                             example: hehe
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The creation timestamp of the group.
+ *                             example: 2024-11-01T14:59:46.314Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The last update timestamp of the group.
+ *                             example: 2024-11-01T14:59:46.314Z
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad request. Invalid query parameters.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/group/search",
+  authenticateUser(["canManageLocalGroup"]),
+  validateGroupSearch,
+  validateRequest,
+  searchGroupsController
 );
 
 export default router;

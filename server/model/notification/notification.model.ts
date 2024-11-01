@@ -1,4 +1,4 @@
-import { FindAndCountOptions, ForeignKeyConstraintError, UniqueConstraintError } from 'sequelize'
+import { FindAndCountOptions, ForeignKeyConstraintError, literal, Op, UniqueConstraintError } from 'sequelize'
 import logger from '../../config/logger'
 import { AppError } from '../../lib/appError'
 import Group from '../../schema/group/group.schema'
@@ -7,6 +7,7 @@ import { type GroupData } from '../../types/group.types'
 import { groupAttributes, NotificationSortBy } from '../../types/notification.types'
 import NotificationGroup from '../../schema/junction/notificationGroup.schema'
 import User from '../../schema/user/user.schema'
+import { isValidUUID } from '../../utils/validator'
 
 export const createNotificationInDB = async (notification: {
   id: string
@@ -414,5 +415,51 @@ export const viewAssignedNotificationsByUserId = async (
     }
 
     throw new AppError("error getting all notifications", 500, error, true);
+  }
+};
+
+export const searchGroupsByQuery = async (
+  query: string,
+  offset?: number,
+  pageSize?: number,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: (Group & { searchRank: number })[];
+  count: number;
+}> => {
+  try {
+    const searchResults = await Group.findAndCountAll({
+      attributes: [
+        'id',
+        'name',
+        [
+          literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`),
+          'searchRank'
+        ]
+      ],
+      where: {
+        [Op.or]: [
+          literal(`search_vector @@ plainto_tsquery('english', :query)`),
+          // Only include the id condition if the query is a valid UUID
+          ...(isValidUUID(query) ? [{ id: query }] : [])
+        ],
+      },
+      order: [
+        [literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`), 'DESC']
+      ],
+      replacements: { query },
+      limit: pageSize,
+      offset,
+      distinct: true,
+    }) as { rows: (Group & { searchRank: number })[], count: number };
+
+    return searchResults;
+  } catch (error: any) {
+      throw new AppError(
+        "someting went wrong",
+        500,
+        "someting went wrong",
+        true
+      );
   }
 };

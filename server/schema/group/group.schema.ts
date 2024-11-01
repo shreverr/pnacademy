@@ -1,14 +1,17 @@
-import { DataTypes, Model } from 'sequelize'
+import { DataTypes, Model, Sequelize } from 'sequelize'
 import { sequelize } from '../../config/database'
 
 interface GroupAttributes {
   id: string
   name: string
+  search_vector: any; // tsvector type
 }
 class Group extends Model<GroupAttributes> implements GroupAttributes {
   public id!: string
   public name!: string
+  public search_vector: any; // tsvector type
 }
+
 Group.init(
   {
     id: {
@@ -19,12 +22,20 @@ Group.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
-    }
+    },
+    search_vector: {
+      type: DataTypes.TSVECTOR,
+      allowNull: true,
+    },
   },
   {
     sequelize,
     modelName: 'group'
   }
 )
+
+Group.addHook('beforeFind', (options) => {
+    options.attributes = { exclude: ['search_vector'] };  
+});
 
 export default Group

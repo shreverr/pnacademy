@@ -14,6 +14,7 @@ import {
   getGroupByName,
   getnotificationById,
   removeGroupFromNotificationById,
+  searchGroupsByQuery,
   updateGroupInDB,
   viewAssignedNotificationsByUserId,
 } from "../../model/notification/notification.model";
@@ -32,6 +33,7 @@ import {
 import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
 import { NotificationAttributes } from "../../schema/group/notification.schema";
+import Group from "../../schema/group/group.schema";
 
 export const createNotification = async (notification: {
   description: string;
@@ -376,6 +378,47 @@ export const viewAssignedNotifications = async (
 
   return {
     notifications: assignedNotificationsData,
+    totalPages: totalPages,
+  };
+};
+
+export const searchGroups = async (
+  query: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  order?: "ASC" | "DESC"
+): Promise<{
+  notifications: (Group & { searchRank: number })[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+
+  order = order ?? "DESC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: searchResults, count: searchResultsCount } =
+    await searchGroupsByQuery(
+      query,
+      offset,
+      pageSize,
+      order
+    );
+
+  if (!searchResults) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "someting went wrong",
+      false
+    );
+  }
+
+  const totalPages = Math.ceil(searchResultsCount / pageSize);
+
+  return {
+    notifications: searchResults,
     totalPages: totalPages,
   };
 };
