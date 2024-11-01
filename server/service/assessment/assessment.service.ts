@@ -54,6 +54,7 @@ import {
   getAssessmentStatusesByUserId,
   getAssessmentCountByType,
   searchAssesmentsByQuery,
+  searchAssignedAssesmentsByQuery,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -1193,6 +1194,43 @@ export const searchAssesments = async (
   const offset = (page - 1) * pageSize;
   const { rows: searchResults, count: searchResultsCount } =
     await searchAssesmentsByQuery(
+      query,
+      offset,
+      pageSize,
+      order
+    );
+  if (!searchResults) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "someting went wrong",
+      false
+    );
+  }
+  const totalPages = Math.ceil(searchResultsCount / pageSize);
+  return {
+    searchResults: searchResults,
+    totalPages: totalPages,
+  };
+};
+
+export const searchAssignedAssesments = async (
+  userId: string,
+  query: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  order?: "ASC" | "DESC"
+): Promise<{
+  searchResults: (Assessment & { searchRank: number })[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  order = order ?? "DESC";
+  const offset = (page - 1) * pageSize;
+  const { rows: searchResults, count: searchResultsCount } =
+    await searchAssignedAssesmentsByQuery(
+      userId,
       query,
       offset,
       pageSize,

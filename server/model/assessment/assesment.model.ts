@@ -2358,7 +2358,7 @@ export const getAssessmentCountByType = async ({
   const currentDate = new Date();
 
   let whereClause: WhereOptions<AssessmentAttributes> = {
-    is_active: true, 
+    is_active: true,
   };
 
   // Add type-specific conditions
@@ -2381,7 +2381,7 @@ export const getAssessmentCountByType = async ({
       break;
 
     case 'total':
-     
+
       break;
 
     default:
@@ -2399,7 +2399,7 @@ export const getAssessmentCountByType = async ({
             include: [
               {
                 model: User,
-                where: { id: user_id }, 
+                where: { id: user_id },
                 attributes: [],
                 required: true,
               },
@@ -2410,9 +2410,9 @@ export const getAssessmentCountByType = async ({
         ],
       });
 
-      return assignedAssessments.count; 
+      return assignedAssessments.count;
     } else {
-     
+
       const count = await Assessment.count({
         where: whereClause,
       });
@@ -2441,14 +2441,6 @@ export const searchAssesmentsByQuery = async (
 }> => {
   try {
     const searchResults = await Assessment.findAndCountAll({
-      attributes: [
-        'id',
-        'name',
-        [
-          literal(`ts_rank(search_vector, plainto_tsquery('english', :query))`),
-          'searchRank'
-        ]
-      ],
       where: {
         [Op.or]: [
           literal(`search_vector @@ plainto_tsquery('english', :query)`),
@@ -2466,11 +2458,73 @@ export const searchAssesmentsByQuery = async (
     }) as { rows: (Assessment & { searchRank: number })[], count: number };
     return searchResults;
   } catch (error: any) {
-      throw new AppError(
-        "someting went wrong",
-        500,
-        "someting went wrong",
-        true
-      );
+    throw new AppError(
+      "someting went wrong",
+      500,
+      "someting went wrong",
+      true
+    );
+  }
+}
+
+export const searchAssignedAssesmentsByQuery = async (
+  userId: string,
+  query: string,
+  offset?: number,
+  pageSize?: number,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: (Assessment & { searchRank: number })[];
+  count: number;
+}> => {
+  try {
+    const searchResults = await Assessment.findAndCountAll({
+      where: {
+        [Op.and]: [
+          { is_active: true },
+          {
+            [Op.or]: [
+              literal(`"assessment".search_vector @@ plainto_tsquery('english', :query)`),
+              ...(isValidUUID(query) ? [{ id: query }] : [])
+            ],
+          }
+        ]
+      },
+      include: [
+        {
+          model: Group,
+          include: [
+            {
+              model: User,
+              where: {
+                id: userId,
+              },
+              attributes: [],
+              required: true,
+            },
+          ],
+          attributes: [],
+          required: true,
+        },
+      ],
+      order: [
+        [literal(`ts_rank("assessment".search_vector, plainto_tsquery('english', :query))`), 'DESC']
+      ],
+      replacements: { query },
+      limit: pageSize,
+      offset,
+      distinct: true,
+      attributes: { exclude: ["created_by"] },
+      subQuery: false  // This tells Sequelize not to wrap the query in a subquery do not change this
+    }) as { rows: (Assessment & { searchRank: number })[], count: number };
+
+    return searchResults;
+  } catch (error: any) {
+    throw new AppError(
+      "someting went wrong",
+      500,
+      error,
+      true
+    );
   }
 }

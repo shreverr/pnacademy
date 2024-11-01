@@ -23,6 +23,7 @@ import {
   removeTagFromQuestion,
   saveGeneratedAiQuestions,
   searchAssesments,
+  searchAssignedAssesments,
   startAssessment,
   startSection,
   totalAssessmentCount,
@@ -1023,6 +1024,28 @@ export const searchAssesmentsController: RequestHandler = async (
 ) => {
   try {
     const searchResults = await searchAssesments(
+      req.query.query as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.order as 'ASC' | 'DESC'
+    )
+    return res.status(200).json({
+      message: 'success',
+      data: searchResults
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const searchAssignedAssesmentsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const searchResults = await searchAssignedAssesments(
+      req.user.userId as string,
       req.query.query as string,
       req.query.page as string,
       req.query.pageSize as string,
