@@ -622,3 +622,17 @@ export const searchUsers = async (
     totalPages: totalPages,
   };
 };
+
+
+export const totalUserAssessmentCount= async (userId: string): Promise<number> => {
+  const assessmentCount = await getAssessmentCountByType({type: 'total',user_id: userId});
+  return assessmentCount;;
+}
+export const totalOngoingUserAssessmentCount= async (userId: string): Promise<number> => {
+  const assessmentCount = await getAssessmentCountByType({type: 'ongoing',user_id: userId});
+  return assessmentCount;;
+}
+export const totalscheduledUserAssessmentCount= async (userId: string): Promise<number> => {
+  const assessmentCount = await getAssessmentCountByType({type: 'scheduled',user_id: userId});
+  return assessmentCount;;
+}

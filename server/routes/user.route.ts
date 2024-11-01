@@ -6,6 +6,9 @@ import {
   deleteRoleController,
   deleteUserController,
   exportUserController,
+  getuserAssessmentOngoingController,
+  getuserAssessmentScheduledController,
+  getuserAssessmentTotalController,
   getUsersByGroupController,
   importUserController,
   loginUserController,
@@ -1714,5 +1717,41 @@ router.get(
   validateRequest,
   searchUsersController
 );
+
+router.get(
+  "/assessment/total",
+  authenticateUser(["canViewReport"]),
+  validateRequest,
+  getuserAssessmentTotalController,
+
+)
+router.get(
+  "/assessment/ongoing",
+  authenticateUser(["canViewReport"]),
+  validateRequest,
+  getuserAssessmentOngoingController,
+
+)
+router.get(
+  "/assessment/scheduled",
+  authenticateUser(["canViewReport"]),
+  validateRequest,
+  getuserAssessmentScheduledController,
+
+)
+router.get(
+  "/assessment/unattempted",
+  authenticateUser(["canViewReport"]),
+  validateRequest,
+  getuserAssessmentTotalController,
+
+)
+router.get(
+  "/assessment/attempted",
+  authenticateUser(["canViewReport"]),
+  validateRequest,
+  getuserAssessmentTotalController,
+)
+
 
 export default router;

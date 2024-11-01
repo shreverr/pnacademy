@@ -19,6 +19,9 @@ import {
   registerUser,
   removeUsersFromGroup,
   searchUsers,
+  totalOngoingUserAssessmentCount,
+  totalscheduledUserAssessmentCount,
+  totalUserAssessmentCount,
   updateRole,
   updateUser,
   viewAllRoles,
@@ -437,5 +440,81 @@ export const searchUsersController: RequestHandler = async (
     })
   } catch (error) {
     next(error)
+  }
+}
+export const getuserAssessmentTotalController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentCount = await totalUserAssessmentCount(req.body.userId);
+    return res.status(200).json({
+      status: "success",
+      data: assessmentCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const  getuserAssessmentOngoingController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentCount = await totalOngoingUserAssessmentCount(req.body.userId);
+    return res.status(200).json({
+      status: "success",
+      data: assessmentCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+
+}
+export const getuserAssessmentScheduledController:RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentCount = await totalscheduledUserAssessmentCount(req.body.userId);
+    return res.status(200).json({
+      status: "success",
+      data: assessmentCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getuserAssessmentUnattemptedController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentCount = await totalUserAssessmentCount(req.body.userId);
+    return res.status(200).json({
+      status: "success",
+      data: assessmentCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getuserAssessmentCompletedController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentCount = await totalUserAssessmentCount(req.body.userId);
+    return res.status(200).json({
+      status: "success",
+      data: assessmentCount,
+    });
+  } catch (error) {
+    next(error);
   }
 }
