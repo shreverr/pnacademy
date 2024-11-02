@@ -26,6 +26,7 @@ import {
   updateUser,
   viewAllRoles,
   viewAllUsers,
+  viewAllUsersCount,
   viewUserDetails,
 } from "../../service/user/user.service";
 import { roleAttributes, userAttributes } from "../../types/user.types";
@@ -483,6 +484,21 @@ export const getuserAssessmentScheduledController:RequestHandler = async (
     return res.status(200).json({
       status: "success",
       data: assessmentCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getTotalUsersController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const totalUsers = await viewAllUsersCount();
+    return res.status(200).json({
+      status: "success",
+      data: totalUsers,
     });
   } catch (error) {
     next(error);

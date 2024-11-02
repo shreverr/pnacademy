@@ -19,6 +19,7 @@ import {
   getAllUsersByRoleId,
   updatePasswordInDb,
   searchUsersByQuery,
+  getAllUserCount,
 } from "../../model/user/user.model";
 import {
   RoleData,
@@ -637,4 +638,8 @@ export const totalscheduledUserAssessmentCount= async (userId: string): Promise<
   const assessmentCount = await getAssessmentCountByType({type: 'scheduled',user_id: userId});
   return assessmentCount;;
 }
+export const viewAllUsersCount= async (): Promise<number> => {
+  const allUsersCount = await getAllUserCount();
 
+  return allUsersCount;
+}

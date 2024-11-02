@@ -463,3 +463,16 @@ export const searchGroupsByQuery = async (
       );
   }
 };
+export const viewGroupCount = async (): Promise<number> => {
+  try {
+    const groupCount = await Group.count();
+    return groupCount;
+  } catch (error: any) {
+    throw new AppError(
+      "someting went wrong",
+      500,
+      "someting went wrong",
+      true
+    );
+  }
+}

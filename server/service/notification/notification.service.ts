@@ -17,6 +17,7 @@ import {
   searchGroupsByQuery,
   updateGroupInDB,
   viewAssignedNotificationsByUserId,
+  viewGroupCount,
 } from "../../model/notification/notification.model";
 import {
   groupAttributes,
@@ -421,4 +422,9 @@ export const searchGroups = async (
     searchResults: searchResults,
     totalPages: totalPages,
   };
+};
+
+export const viewAllGroupsCount = async (): Promise<number> => {
+  const allGroupsCount = await viewGroupCount();
+  return allGroupsCount;
 };

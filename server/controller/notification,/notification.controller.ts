@@ -4,7 +4,7 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, searchGroups, updateGroup, viewAllGroups, viewAllNotifications, viewAssignedNotifications } from "../../service/notification/notification.service";
+import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, searchGroups, updateGroup, viewAllGroups, viewAllGroupsCount, viewAllNotifications, viewAssignedNotifications } from "../../service/notification/notification.service";
 import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
 import { AppError } from "../../lib/appError";
 
@@ -248,5 +248,21 @@ export const searchGroupsController: RequestHandler = async (
     })
   } catch (error) {
     next(error)
+  }
+}
+export const getAllGroupsCountController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const groupsCount = await viewAllGroupsCount();
+
+    return res.status(201).json({
+      message: "success",
+      data: groupsCount,
+    });
+  } catch (error) {
+    next(error);
   }
 }

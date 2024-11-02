@@ -643,3 +643,17 @@ export const searchUsersByQuery = async (
       );
   }
 }
+
+export const getAllUserCount = async (): Promise<number> => {
+  try {
+    const count = await User.count();
+    return count;
+  } catch (error: any) {
+    throw new AppError(
+      "someting went wrong",
+      500,
+      "someting went wrong",
+      true
+    );
+  }
+}

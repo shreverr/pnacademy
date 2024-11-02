@@ -6,6 +6,7 @@ import {
   deleteRoleController,
   deleteUserController,
   exportUserController,
+  getTotalUsersController,
   getuserAssessmentOngoingController,
   getuserAssessmentScheduledController,
   getuserAssessmentTotalController,
@@ -1824,6 +1825,40 @@ router.get(
   getuserAssessmentScheduledController
 );
 
+/**
+ * @swagger
+ * /v1/user/total:
+ *   get:
+ *     summary: Retrieve the total number of users.
+ *     tags:
+ *       - Admin Dashboard Routes
+ *     responses:
+ *       '200':
+ *         description: The total number of users in the system.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 total:
+ *                   type: integer
+ *                   description: The total number of users.
+ *                   example: 150
+ *       '403':
+ *         description: Forbidden. User does not have permission to view the total user count.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/total",
+  authenticateUser(["canManageUser"]),
+  validateRequest,
+  getTotalUsersController
+);
 
 
 

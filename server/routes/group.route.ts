@@ -12,6 +12,7 @@ import {
   CreateGroupController,
   deleteGroupController,
   getAllGroupsController,
+  getAllGroupsCountController,
   UpdateGroupController,
 } from "../controller/notification,/notification.controller";
 
@@ -399,41 +400,14 @@ router.delete(
 
 /**
  * @swagger
- * /v1/groups:
+ * /v1/group/total:
  *   get:
- *     summary: Get notification groups
+ *     summary: Retrieve the total number of groups.
  *     tags:
- *       - Group
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         required: false
- *         description: Page number for pagination.
- *       - in: query
- *         name: pageSize
- *         schema:
- *           type: integer
- *         required: false
- *         description: Number of items per page for pagination.
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [id, name, createdAt, updatedAt]
- *         required: false
- *         description: Field to sort by.
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *         required: false
- *         description: Sort order (ASC or DESC).
+ *       - Admin Dashboard Routes
  *     responses:
  *       '200':
- *         description: Group groups retrieved successfully
+ *         description: The total number of groups in the system.
  *         content:
  *           application/json:
  *             schema:
@@ -441,53 +415,23 @@ router.delete(
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A message indicating the success of retrieving notification groups.
- *                 data:
- *                   type: object
- *                   properties:
- *                     groups:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                             description: The unique identifier of the group.
- *                           name:
- *                             type: string
- *                             description: The name of the notification group.
- *                           createdAt:
- *                             type: string
- *                             format: date-time
- *                             description: The timestamp of when the group was created.
- *                           updatedAt:
- *                             type: string
- *                             format: date-time
- *                             description: The timestamp of when the group was last updated.
- *                     totalPages:
- *                       type: integer
- *                       description: The total number of pages for pagination.
- *             example:
- *               message: success
- *               data:
- *                 groups:
- *                   - id: "67811411-966c-4b68-8451-db573c07b2b3"
- *                     name: "sfff33fdffffwffffff"
- *                     createdAt: "2024-08-08T10:24:57.536Z"
- *                     updatedAt: "2024-08-08T10:24:57.536Z"
- *                 totalPages: 3
- *       '401':
- *         description: Unauthorized
+ *                   description: A message indicating the success of the operation.
+ *                   example: success
+ *                 total:
+ *                   type: integer
+ *                   description: The total number of groups.
+ *                   example: 25
+ *       '403':
+ *         description: Forbidden. User does not have permission to view the total group count.
  *       '500':
- *         description: Server Error
+ *         description: Internal server error.
  */
 router.get(
-  "/groups",
+  "/group/total",
   authenticateUser(["canManageLocalGroup"]),
-  validateGetAllGroups,
   validateRequest,
-  getAllGroupsController
-)
+  getAllGroupsCountController
+);
 
 
 export default router;

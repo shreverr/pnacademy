@@ -3539,7 +3539,7 @@ router.post(
  *     summary: Get total number of assessments
  *     description: Retrieves the total count of assessments in the system.
  *     tags:
- *       - Assessment Dashboard Controller
+ *       - Admin Dashboard Routes
  *     security:
  *       - bearerAuth: []  # Token-based authentication
  *     responses:
@@ -3574,7 +3574,7 @@ router.get(
  *     summary: Get count of ongoing assessments
  *     description: Retrieves the count of ongoing assessments in the system.
  *     tags:
- *       - Assessment Dashboard Controller
+ *       - Admin Dashboard Routes
  *     security:
  *       - bearerAuth: []  # Token-based authentication
  *     responses:
@@ -3609,7 +3609,7 @@ router.get(
  *     summary: Get count of scheduled assessments
  *     description: Retrieves the count of scheduled assessments in the system.
  *     tags:
- *       - Assessment Dashboard Controller
+ *       - Admin Dashboard Routes
  *     security:
  *       - bearerAuth: []  # Token-based authentication
  *     responses:
@@ -3644,7 +3644,7 @@ router.get(
  *     summary: Get count of past assessments
  *     description: Retrieves the count of past assessments in the system.
  *     tags:
- *       - Assessment Dashboard Controller
+ *       - Admin Dashboard Routes
  *     security:
  *       - bearerAuth: []  # Token-based authentication
  *     responses:
@@ -3679,7 +3679,7 @@ router.get(
  *     summary: Get count of draft assessments
  *     description: Retrieves the count of draft assessments in the system.
  *     tags:
- *       - Assessment Dashboard Controller
+ *       - Admin Dashboard Routes
  *     security:
  *       - bearerAuth: []  # Token-based authentication
  *     responses:
