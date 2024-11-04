@@ -675,14 +675,14 @@ export const viewAssignedAssessments = async (
       order
     );
 
-    if (!assignedAssessments) {
-      throw new AppError(
-        commonErrorsDictionary.internalServerError.name,
-        commonErrorsDictionary.internalServerError.httpCode,
-        "Someting went wrong",
-        false
-      );
-    }
+  if (!assignedAssessments) {
+    throw new AppError(
+      commonErrorsDictionary.internalServerError.name,
+      commonErrorsDictionary.internalServerError.httpCode,
+      "Someting went wrong",
+      false
+    );
+  }
 
   const assessmentStatuses = await getAssessmentStatusesByUserId(userId);
 
@@ -697,6 +697,11 @@ export const viewAssignedAssessments = async (
     );
 
     if (status && status.submitted_at) {
+      assignedAssessmentsWithStatus.push({
+        ...assessment,
+        isSubmitted: true,
+      })
+    } else if (status && assessment.end_at < new Date()) {
       assignedAssessmentsWithStatus.push({
         ...assessment,
         isSubmitted: true,
@@ -1152,30 +1157,30 @@ export const exportAssessments = async (
 };
 
 export const totalAssessmentCount = async (): Promise<number> => {
-  
-  const assessmentCount = await getAssessmentCountByType({type: 'total',});
+
+  const assessmentCount = await getAssessmentCountByType({ type: 'total', });
   return assessmentCount;
 }
 export const totalOngoingAssessmentCount = async (): Promise<number> => {
 
-  const assessmentCount = await getAssessmentCountByType({type: 'ongoing',});
+  const assessmentCount = await getAssessmentCountByType({ type: 'ongoing', });
   return assessmentCount;
 }
 
 export const totalScheduledAssessmentCount = async (): Promise<number> => {
-  
-  const assessmentCount = await getAssessmentCountByType({type: 'scheduled',});
+
+  const assessmentCount = await getAssessmentCountByType({ type: 'scheduled', });
   return assessmentCount;
 }
 
 export const totalPastAssessmentCount = async (): Promise<number> => {
 
-  const assessmentCount = await getAssessmentCountByType({type: 'past',});
+  const assessmentCount = await getAssessmentCountByType({ type: 'past', });
   return assessmentCount;
 }
 export const totalDraftAssessmentCount = async (): Promise<number> => {
 
-  const assessmentCount = await getAssessmentCountByType({type: 'draft'});
+  const assessmentCount = await getAssessmentCountByType({ type: 'draft' });
   return assessmentCount;
 }
 
