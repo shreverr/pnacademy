@@ -2470,61 +2470,92 @@ export const searchAssesmentsByQuery = async (
 export const searchAssignedAssesmentsByQuery = async (
   userId: string,
   query: string,
-  offset?: number,
-  pageSize?: number,
-  order?: "ASC" | "DESC"
+  offset: number = 0,
+  pageSize: number = 10,
+  order: "ASC" | "DESC" = "DESC"
 ): Promise<{
-  rows: (Assessment & { searchRank: number })[];
+  rows: (Assessment & { searchRank: number; isSubmitted: boolean })[];
   count: number;
 }> => {
   try {
-    const searchResults = await Assessment.findAndCountAll({
-      where: {
-        [Op.and]: [
-          { is_active: true },
-          {
-            [Op.or]: [
-              literal(`"assessment".search_vector @@ plainto_tsquery('english', :query)`),
-              ...(isValidUUID(query) ? [{ id: query }] : [])
-            ],
-          }
-        ]
-      },
-      include: [
-        {
-          model: Group,
-          include: [
-            {
-              model: User,
-              where: {
-                id: userId,
-              },
-              attributes: [],
-              required: true,
-            },
-          ],
-          attributes: [],
-          required: true,
-        },
-      ],
-      order: [
-        [literal(`ts_rank("assessment".search_vector, plainto_tsquery('english', :query))`), 'DESC']
-      ],
-      replacements: { query },
-      limit: pageSize,
-      offset,
-      distinct: true,
-      attributes: { exclude: ["created_by"] },
-      subQuery: false  // This tells Sequelize not to wrap the query in a subquery do not change this
-    }) as { rows: (Assessment & { searchRank: number })[], count: number };
+    const sqlQuery = `
+      WITH filtered_assessments AS (
+          SELECT DISTINCT ON ("assessment"."id")
+              "assessment"."id",
+              "assessment"."name",
+              "assessment"."description",
+              "assessment"."is_active",
+              "assessment"."start_at",
+              "assessment"."end_at",
+              "assessment"."duration",
+              "assessment"."created_by",
+              "assessment"."createdAt",
+              "assessment"."updatedAt",
+              CASE 
+                  WHEN "assessment_statuses"."submitted_at" IS NOT NULL 
+                  OR (
+                      "assessment_statuses"."started_at" IS NOT NULL 
+                      AND (EXTRACT(EPOCH FROM NOW()) * 1000 - EXTRACT(EPOCH FROM "assessment_statuses"."started_at") * 1000) > "assessment"."duration"
+                  )
+                  OR (
+                      "assessment_statuses"."started_at" IS NOT NULL 
+                      AND EXTRACT(EPOCH FROM NOW()) > EXTRACT(EPOCH FROM "assessment"."end_at")
+                  )
+                  THEN true 
+                  ELSE false 
+              END as "isSubmitted",
+              ts_rank("assessment".search_vector, plainto_tsquery('english', :query)) as "searchRank"
+          FROM 
+              "assessments" AS "assessment"
+              INNER JOIN (
+                  "assessment_groups" AS "groups->assessment_group"
+                  INNER JOIN "groups" AS "groups" 
+                  ON "groups"."id" = "groups->assessment_group"."group_id"
+              ) ON "assessment"."id" = "groups->assessment_group"."assessment_id"
+              INNER JOIN (
+                  "user_groups" AS "groups->users->user_group"
+                  INNER JOIN "users" AS "groups->users" 
+                  ON "groups->users"."id" = "groups->users->user_group"."user_id"
+              ) ON "groups"."id" = "groups->users->user_group"."group_id"
+              AND "groups->users"."id" = :userId
+              LEFT OUTER JOIN "assessment_statuses" AS "assessment_statuses" 
+              ON "assessment"."id" = "assessment_statuses"."assessment_id"
+              AND "assessment_statuses"."user_id" = :userId
+          WHERE 
+              ("assessment"."is_active" = true 
+              AND ("assessment".search_vector @@ plainto_tsquery('english', :query)))
+      )
+      SELECT 
+          (SELECT COUNT(*) FROM filtered_assessments) AS total_count,
+          *
+      FROM filtered_assessments
+      ORDER BY "searchRank" DESC
+      LIMIT :pageSize
+      OFFSET :offset;
+    `;
 
-    return searchResults;
+    const results: any = await sequelize.query(sqlQuery, {
+      replacements: { userId, query, pageSize, offset },
+      type: QueryTypes.SELECT,
+    });
+
+    if (results.length === 0) {
+      return { rows: [], count: 0 };
+    }
+
+    const count = parseInt(results[0].total_count as string, 10);
+    const rows = results.map((result: any) => {
+      const { total_count, ...rest } = result;
+      return rest as Assessment & { searchRank: number; isSubmitted: boolean };
+    });
+
+    return { rows, count };
   } catch (error: any) {
     throw new AppError(
-      "someting went wrong",
+      "Something went wrong",
       500,
       error,
       true
     );
   }
-}
+};
