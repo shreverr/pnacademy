@@ -4,13 +4,15 @@ import logger from './logger'
 const sequelize = new Sequelize(process.env.DB_URI ?? '', {
   logging: (msg) => { logger.info(msg) },
   dialect: "postgres",
+  timezone: '+00:00',
   ssl: process.env.ENVIRONMENT === 'prod' ? true : false,
-  dialectOptions: process.env.ENVIRONMENT === 'prod'? {
+  dialectOptions: process.env.ENVIRONMENT === 'prod' ? {
     ssl: {
       require: true,
       rejectUnauthorized: false
-    }
-  } : {}
+    },
+    useUTC: true,
+  } : { useUTC: true, }
 })
 
 const connectDatabase = async (): Promise<void> => {

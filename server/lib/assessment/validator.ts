@@ -14,9 +14,9 @@ export const validateAssessment = async (assessmentId: string): Promise<Assement
     );
   }
 
-  const currentTime = Date.now();
+  const currentTimeUTC = new Date().getTime();
 
-  if (currentTime < assessment.start_at.getTime()) {
+  if (currentTimeUTC < assessment.start_at.getTime()) {
     throw new AppError(
       "Assessment not started",
       403,
@@ -25,7 +25,7 @@ export const validateAssessment = async (assessmentId: string): Promise<Assement
     );
   }
 
-  if (currentTime > assessment.end_at.getTime()) {
+  if (currentTimeUTC > assessment.end_at.getTime()) {
     throw new AppError(
       "Assessment ended",
       403,
@@ -48,9 +48,9 @@ export const validateAssessmentEnd = async (assessmentId: string): Promise<Assem
     );
   }
 
-  const currentTime = Date.now();
+  const currentTimeUTC = new Date().getTime();
 
-  if (currentTime < assessment.end_at.getTime()) {
+  if (currentTimeUTC < assessment.end_at.getTime()) {
     throw new AppError(
       "Assessment not ended yet",
       403,
