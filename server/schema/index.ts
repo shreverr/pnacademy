@@ -197,7 +197,9 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "assessment_id",
     onDelete: "CASCADE",
   });
-
+  AssessmentGroup.belongsTo(Assessment, {
+    foreignKey: 'assessment_id'
+  })
   Group.belongsToMany(Assessment, {
     through: AssessmentGroup,
     foreignKey: "group_id",

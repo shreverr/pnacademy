@@ -13,8 +13,11 @@ import {
   deleteGroupController,
   getAllGroupsController,
   getAllGroupsCountController,
+  getAssessmentByGroupIdController,
   UpdateGroupController,
 } from "../controller/notification,/notification.controller";
+import { validateGetAssessmentbyGroupId } from "../lib/validator/assessment/validator";
+import { getAssessmentAnalytics } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -432,6 +435,78 @@ router.get(
   validateRequest,
   getAllGroupsCountController
 );
+
+
+/**
+ * @swagger
+ * /v1/groups/assessment:
+ *   get:
+ *     summary: Get assessments by group ID
+ *     tags:
+ *       - Group
+ *     parameters:
+ *       - in: query
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: ID of the group to retrieve assessments for.
+ *     responses:
+ *       '200':
+ *         description: Assessments retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 assessments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       is_active:
+ *                         type: boolean
+ *                       start_at:
+ *                         type: string
+ *                         format: date-time
+ *                       end_at:
+ *                         type: string
+ *                         format: date-time
+ *                       duration:
+ *                         type: number
+ *                       search_vector:
+ *                         type: string
+ *                     required:
+ *                       - id
+ *                       - name
+ *                       - description
+ *                       - is_active
+ *                       - start_at
+ *                       - end_at
+ *                       - duration
+ *                 totalPages:
+ *                   type: integer
+ *       '400':
+ *         description: Bad request. Invalid data provided.
+ *       '404':
+ *         description: Group not found.
+ *       '500':
+ *         description: Internal server error.
+ */
+router.get(
+  "/groups/assessment",
+  authenticateUser(["canViewReport"]),
+  validateGetAssessmentbyGroupId,
+  validateRequest,
+  getAssessmentByGroupIdController
+)
 
 
 export default router;

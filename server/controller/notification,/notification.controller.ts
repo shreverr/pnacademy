@@ -4,9 +4,10 @@ import {
   type RequestHandler,
   type Response,
 } from "express";
-import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, removeGroupFromNotification, searchGroups, updateGroup, viewAllGroups, viewAllGroupsCount, viewAllNotifications, viewAssignedNotifications } from "../../service/notification/notification.service";
+import { addGroupToNotification, createGroup, createNotification, deleteGroups, deleteNotification, getAssessmentByGroupId, removeGroupFromNotification, searchGroups, updateGroup, viewAllGroups, viewAllGroupsCount, viewAllNotifications, viewAssignedNotifications } from "../../service/notification/notification.service";
 import { groupAttributes, NotificationSortBy } from "../../types/notification.types";
 import { AppError } from "../../lib/appError";
+import { AssessmentAttribute } from "../../types/assessment.types";
 
 export const CreateNotificationController: RequestHandler = async (
   req: Request,
@@ -261,6 +262,28 @@ export const getAllGroupsCountController: RequestHandler = async (
     return res.status(201).json({
       message: "success",
       data: groupsCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+export const getAssessmentByGroupIdController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessments = await getAssessmentByGroupId(
+      req.query.groupId as string,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as Exclude<AssessmentAttribute, "created_by" | "createdAt" | "updatedAt">,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      message: "success",
+      data: assessments,
     });
   } catch (error) {
     next(error);

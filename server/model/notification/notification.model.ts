@@ -8,6 +8,10 @@ import { groupAttributes, NotificationSortBy } from '../../types/notification.ty
 import NotificationGroup from '../../schema/junction/notificationGroup.schema'
 import User from '../../schema/user/user.schema'
 import { isValidUUID } from '../../utils/validator'
+import { AssementData, AssessmentAttribute } from '../../types/assessment.types'
+import Assessment, { AssessmentAttributes } from '../../schema/assessment/assessment.schema'
+import AssessmentGroup from '../../schema/junction/assessmentGroup.schema'
+import { log } from 'console'
 
 export const createNotificationInDB = async (notification: {
   id: string
@@ -29,7 +33,7 @@ export const createNotificationInDB = async (notification: {
         raw: true,
       }
     )
-    
+
     return notificationData.dataValues
   } catch (error: any) {
     throw new AppError(
@@ -161,7 +165,7 @@ export const updateGroupInDB = async (
     const [_, [updatedTag]] = await Group.update({
       id: id,
       name: name
-      }, {
+    }, {
       where: {
         id: id
       },
@@ -178,7 +182,7 @@ export const updateGroupInDB = async (
         false
       );
     }
-    
+
     throw new AppError(
       'Error updating tag',
       500,
@@ -222,7 +226,7 @@ export const getAllGroups = async (
   count: number
 }> => {
   try {
-    const findOptions: FindAndCountOptions = (offset!== null || offset !== undefined) && pageSize && sortBy && order ? {
+    const findOptions: FindAndCountOptions = (offset !== null || offset !== undefined) && pageSize && sortBy && order ? {
       limit: pageSize,
       offset: offset,
       order: [[sortBy, order]]
@@ -262,10 +266,10 @@ export const getAllNotifications = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
 
     const allNotifications = await Notification.findAndCountAll(findOptions);
@@ -365,10 +369,10 @@ export const viewAssignedNotificationsByUserId = async (
     const findOptions: FindAndCountOptions =
       (offset !== null || offset !== undefined) && pageSize && sortBy && order
         ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
+          limit: pageSize,
+          offset: offset,
+          order: [[sortBy, order]],
+        }
         : {};
 
     const assignedNotifications = await Notification.findAndCountAll({
@@ -455,12 +459,12 @@ export const searchGroupsByQuery = async (
 
     return searchResults;
   } catch (error: any) {
-      throw new AppError(
-        "someting went wrong",
-        500,
-        "someting went wrong",
-        true
-      );
+    throw new AppError(
+      "someting went wrong",
+      500,
+      "someting went wrong",
+      true
+    );
   }
 };
 export const viewGroupCount = async (): Promise<number> => {
@@ -472,6 +476,59 @@ export const viewGroupCount = async (): Promise<number> => {
       "someting went wrong",
       500,
       "someting went wrong",
+      true
+    );
+  }
+}
+export const getAssessmentByGroupIdInDB = async (
+  groupId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: Exclude<keyof AssessmentAttributes, "created_by">,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: Omit<AssessmentAttributes, "created_by">[];
+  count: number;
+}> => {
+  try {
+    const findOptions: FindAndCountOptions = 
+      (offset !== undefined) && pageSize && sortBy && order
+        ? {
+            limit: pageSize,
+            offset: offset,
+            order: [[sortBy, order]],
+          }
+        : {};
+        logger.info("this is it", findOptions);
+    const allAssessments = await AssessmentGroup.findAndCountAll({
+      where: {
+        group_id: groupId,
+      },
+      include: [
+        {
+          model: Assessment,
+          attributes: {
+            exclude: ["created_by"],
+          },
+        },
+      ],
+      ...findOptions,
+    });
+    
+    // Transform the data to match the expected type
+    const plainData = {
+      rows: allAssessments.rows.map((assessmentGroup) => 
+        (assessmentGroup.get({ plain: true }) as any).assessment
+      ),
+      count: allAssessments.count,
+    };
+
+    return plainData;
+  } catch (error: any) {
+    throw new AppError(
+      "error getting all assessments",
+      500,
+      error,
       true
     );
   }
