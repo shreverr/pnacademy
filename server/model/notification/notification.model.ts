@@ -491,30 +491,31 @@ export const getAssessmentByGroupIdInDB = async (
   count: number;
 }> => {
   try {
-    const findOptions: FindAndCountOptions = 
-      (offset !== undefined) && pageSize && sortBy && order
-        ? {
-            limit: pageSize,
-            offset: offset,
-            order: [[sortBy, order]],
-          }
-        : {};
-        logger.info("this is it", findOptions);
-    const allAssessments = await AssessmentGroup.findAndCountAll({
+    const findOptions: FindAndCountOptions = {
       where: {
         group_id: groupId,
       },
       include: [
         {
           model: Assessment,
+          required: true, // Use INNER JOIN for better performance
           attributes: {
             exclude: ["created_by"],
           },
         },
       ],
-      ...findOptions,
-    });
-    
+    };
+
+    // Add sorting and pagination if provided
+    if (offset !== undefined && pageSize && sortBy && order) {
+      findOptions.limit = pageSize;
+      findOptions.offset = offset;
+      // Fix: Sort by the assessment model's column instead of assessment_group
+      findOptions.order = [[{ model: Assessment, as: 'Assessment' }, sortBy, order]];
+    }
+
+    const allAssessments = await AssessmentGroup.findAndCountAll(findOptions);
+
     // Transform the data to match the expected type
     const plainData = {
       rows: allAssessments.rows.map((assessmentGroup) => 
@@ -532,4 +533,4 @@ export const getAssessmentByGroupIdInDB = async (
       true
     );
   }
-}
+};
