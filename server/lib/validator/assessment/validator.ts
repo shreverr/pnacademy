@@ -372,10 +372,6 @@ export const validateGetAssessmentbyGroupId = [
       `Must match one of the specified options:
        "ASC", "DESC",`
     ),
-
-  
-
-
 ];
 
 export const validateGetAllGroups = [
