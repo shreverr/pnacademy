@@ -21,14 +21,6 @@ import { getAssessmentAnalytics } from "../controller/assessment/assessment.cont
 
 const router: Router = express.Router();
 
-router.post(
-  "/create-group",
-  authenticateUser(["canManageLocalGroup"]),
-  validateGroup,
-  validateRequest,
-  CreateGroupController
-);
-
 /**
  * @openapi
  * /v1/group:
