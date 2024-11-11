@@ -2523,7 +2523,9 @@ export const searchAssignedAssesmentsByQuery = async (
               AND "assessment_statuses"."user_id" = :userId
           WHERE 
               ("assessment"."is_active" = true 
-              AND ("assessment".search_vector @@ plainto_tsquery('english', :query)))
+              AND 
+              ${isValidUUID(query) ? `"assessment"."id" = :query` : `("assessment".search_vector @@ plainto_tsquery('english', :query))`}
+              )
       )
       SELECT 
           (SELECT COUNT(*) FROM filtered_assessments) AS total_count,
