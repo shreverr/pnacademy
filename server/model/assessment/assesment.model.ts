@@ -478,12 +478,15 @@ export const createQuestionsInBulk = async (
       await Section.bulkCreate(newSections, { transaction });
     }
     // Prepare bulk question data
-    const questionData = questions.map(question => ({
+    const time = new Date();
+    const questionData = questions.map((question, index) => ({
       id: uuid(),
       assessment_id: assessmentId,
       description: question.description,
       marks: question.marks,
-      section: question.section
+      section: question.section,
+      createdAt: new Date(time.getTime() + index), // Adds 1 ms per index
+      updatedAt: new Date(time.getTime() + index),
     }));
 
     // Bulk create questions
@@ -491,11 +494,13 @@ export const createQuestionsInBulk = async (
 
     // Prepare bulk option data
     const optionData = questions.flatMap((question, index) =>
-      question.options.map(option => ({
+      question.options.map((option, optionIndex) => ({
         id: uuid(),
         question_id: createdQuestions[index].id,
         description: option.description,
-        is_correct: option.isCorrect
+        is_correct: option.isCorrect,
+        createdAt: new Date(time.getTime() + optionIndex), // Adds 1 ms per index
+        updatedAt: new Date(time.getTime() + optionIndex),
       }))
     );
 
