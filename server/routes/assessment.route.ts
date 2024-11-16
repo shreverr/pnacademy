@@ -101,6 +101,7 @@ import {
 import { validate } from "uuid";
 import { authenticateInternalService } from "../middleware/internalAuth";
 import { get } from "http";
+import { upload } from "../middleware/multer";
 
 const router: Router = express.Router();
 
@@ -187,9 +188,77 @@ router.post(
  *               section:
  *                 type: number
  *                 description: The section of the question.
+ *               type:
+ *                 type: string
+ *                 enum: [MCQ, CODE]
+ *                 description: The type of question, either 'MCQ' or 'CODE'.
+ *               time_limit:
+ *                 type: number
+ *                 description: The time limit for the question in milliseconds. Optional.
+ *               allowed_languages:
+ *                 type: array
+ *                 description: Array of allowed programming languages for 'CODE' questions. Optional.
+ *                 items:
+ *                   type: string
+ *                   enum: [java, python, c, cpp, nodejs, javascript, haskell, lua, elixir, php, python2, csharp, perl, ruby, go, r, bash, typescript, kotlin, rust, swift, objectivec]
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: An optional image for the question.
  *     responses:
  *       '200':
  *         description: Successfully created question.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Question created successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       description: The UUID of the newly created question.
+ *                     assessment_id:
+ *                       type: string
+ *                       format: uuid
+ *                       description: The UUID of the assessment the question belongs to.
+ *                     description:
+ *                       type: string
+ *                       description: The description of the created question.
+ *                     marks:
+ *                       type: number
+ *                       description: The marks allocated for the question.
+ *                     section:
+ *                       type: number
+ *                       description: The section of the question.
+ *                     type:
+ *                       type: string
+ *                       enum: [MCQ, CODE]
+ *                       description: The type of question.
+ *                     time_limit:
+ *                       type: number
+ *                       description: The time limit for the question in milliseconds.
+ *                     allowed_languages:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         description: Allowed programming languages for 'CODE' questions.
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp of when the question was last updated.
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp of when the question was created.
+ *                     image_url:
+ *                       type: string
+ *                       description: The URL of the image associated with the question (if any).
  *       '400':
  *         description: Bad request. Invalid data provided.
  *       '500':
@@ -199,6 +268,7 @@ router.post(
 router.post(
   "/question",
   authenticateUser(["canManageAssessment"]),
+  upload.single("image"),
   validateQuestion,
   validateRequest,
   CreateQuestionController

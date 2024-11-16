@@ -66,6 +66,7 @@ import {
   type TagAttribute,
 } from "../../types/assessment.types";
 import { deleteFileFromDisk } from "../../lib/file";
+import { AppError } from "../../lib/appError";
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -103,6 +104,10 @@ export const CreateQuestionController: RequestHandler = async (
       description: req.body.description,
       marks: req.body.marks,
       section: req.body.section,
+      type: req.body.type,
+      time_limit: req.body.time_limit,
+      allowed_languages: req.body.allowed_languages,
+      image: req.file
     });
 
     return res.status(201).json({

@@ -76,6 +76,8 @@ import {
   AssessmentTime,
   SectionDetailedStatus,
   UserAssessmentResultListAttributes,
+  QuestionType,
+  ProgrammingLanguage,
 } from "../../types/assessment.types";
 import { v4 as uuid } from "uuid";
 import { getUserById } from "../../model/user/user.model";
@@ -99,10 +101,12 @@ import logger from "../../config/logger";
 import Group from "../../schema/group/group.schema";
 import { GroupData } from "../../types/group.types";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
-import { createArchive, deleteFileFromDisk, saveDataToDisk } from "../../lib/file";
+import { createArchive, deleteFileFromDisk, deleteFileFromS3, saveDataToDisk, uploadFileToS3 } from "../../lib/file";
 import { nanoid } from "nanoid";
 import consistentRandomizer from "../../utils/shuffel";
 import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
+import path from "path";
+import { generatePresignedUrl } from "../../utils/s3";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -175,15 +179,63 @@ export const createQuestion = async (question: {
   description: string;
   marks: number;
   section: number;
+  type: QuestionType
+  time_limit: number
+  allowed_languages: ProgrammingLanguage[]
+  image?: Express.Multer.File;
 }): Promise<QuestionData | null> => {
-  const questionData = await createQuestionInDB({
-    id: uuid(),
-    assessment_id: question.assessment_id,
-    description: question.description,
-    marks: question.marks,
-    section: question.section,
-  });
-  return questionData;
+  let questionImageKey: string | null = null;
+
+  try {
+    if (question.image) {
+      questionImageKey = `question-images/${uuid()}${path.extname(
+        question.image.path
+      )}`;
+
+      await uploadFileToS3(
+        question.image.path,
+        questionImageKey,
+        "image"
+      );
+
+      deleteFileFromDisk(question.image.path);
+    }
+
+    const questionDataInDB = await createQuestionInDB({
+      id: uuid(),
+      assessment_id: question.assessment_id,
+      description: question.description,
+      marks: question.marks,
+      section: question.section,
+      type: question.type,
+      time_limit: question.time_limit,
+      allowed_languages: question.allowed_languages,
+      image_key: questionImageKey
+    });
+
+    let questionData: any = questionDataInDB;
+    delete questionData.image_key;
+
+    logger.debug(questionData);
+    logger.debug(questionImageKey);
+
+    if (questionImageKey) {
+      questionData.image_url = await generatePresignedUrl(
+        questionImageKey,
+        60 * 60
+      );
+    }
+
+    return questionData;
+  } catch (error: any) {
+    try {
+      await deleteFileFromS3(questionImageKey as string);
+    } catch (error) {
+      throw error;
+    }
+
+    throw error;
+  }
 };
 
 export const createOption = async (option: {

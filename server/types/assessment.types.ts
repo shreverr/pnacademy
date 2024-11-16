@@ -35,6 +35,8 @@ export interface QuestionDetailedData {
   options: OptionData[];
 }
 
+export type QuestionType = "MCQ" | "CODE";
+
 export interface AssementDetailedData {
   id: string;
   name: string;
@@ -154,3 +156,31 @@ export interface AssessmentCountParams  {
   type: CountType;
   user_id?: string;
 }
+
+// Define the language enum type
+export const ProgrammingLanguages = [
+  'java',
+  'python',
+  'c',
+  'cpp',
+  'nodejs',
+  'javascript',
+  'haskell',
+  'lua',
+  'elixir',
+  'php',
+  'python2',
+  'csharp',
+  'perl',
+  'ruby',
+  'go',
+  'r',
+  'bash',
+  'typescript',
+  'kotlin',
+  'rust',
+  'swift',
+  'objectivec'
+] as const;
+
+export type ProgrammingLanguage = typeof ProgrammingLanguages[number];

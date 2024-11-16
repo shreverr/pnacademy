@@ -1,4 +1,5 @@
 import { body, check, param, query } from "express-validator";
+import { ProgrammingLanguage, ProgrammingLanguages } from "../../../types/assessment.types";
 
 export const validateAssessment = [
   check("name")
@@ -36,9 +37,44 @@ export const validateQuestion = [
     .isLength({ min: 1 })
     .withMessage("Question description must be more than 2 characters long"),
 
-  check("marks").isNumeric().withMessage("marks must be a valid number"),
-  check("section").isNumeric().withMessage("section must be a valid number"),
-];
+  check("marks")
+    .isNumeric()
+    .withMessage("marks must be a valid number"),
+
+  check("section")
+    .isNumeric()
+    .withMessage("section must be a valid number"),
+  
+  check("type")
+    .isIn(["MCQ", "CODE"])
+    .withMessage("type must be 'MCQ' or 'CODE'"),
+
+  check("time_limit")
+    .optional()
+    .isNumeric()
+    .withMessage("time_limit must be a valid number in milliseconds"),
+
+  check("allowed_languages")
+    .optional()
+    .isArray()
+    .withMessage("allowed_languages must be an array")
+    .custom((value) => {
+      return value.every((language: ProgrammingLanguage) => ProgrammingLanguages.includes(language));
+    })
+    .withMessage("allowed_languages must be an array of 'java', 'python', 'c', 'cpp', 'nodejs', 'javascript', 'haskell', 'lua', 'elixir', 'php', 'python2', 'csharp', 'perl', 'ruby', 'go', 'r', 'bash', 'typescript', 'kotlin', 'rust', 'swift', 'objectivec'"),
+
+    check("image")
+    .custom((value, { req }) => {
+      // Check if the MIME type is one of the allowed image formats
+      const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"];
+      if (req.file && allowedMimeTypes.includes(req.file.mimetype)) {
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .withMessage("Please only upload image files (JPEG, PNG, GIF, WEBP, BMP)"),
+  ];
 
 export const validateOption = [
   check("question_id")

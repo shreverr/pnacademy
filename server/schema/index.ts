@@ -21,6 +21,7 @@ import { QueryTypes } from "sequelize";
 import { AppError } from "../lib/appError";
 import UserAssessmentResult from './assessment/userAssessmentResult.schema'
 import AssessmentResult from "./assessment/assessmentResult.schema";
+import TestCase from "./assessment/testCase.schema";
 
 const models = [
   "./user/user.schema",
@@ -42,6 +43,7 @@ const models = [
   "./assessment/assessmentResponse.schema",
   "./assessment/userAssessmentResult.schema",
   "./assessment/assessmentResult.schema",
+  "./assessment/testCase.schema",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -206,6 +208,10 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
+  Question.hasMany(TestCase, {
+    foreignKey: "question_id",
+    onDelete: "CASCADE",
+  });
 
 }
 

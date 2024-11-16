@@ -20,6 +20,8 @@ import {
   AssessmentTime,
   UserAssessmentResultListAttributes,
   AssessmentCountParams,
+  QuestionType,
+  ProgrammingLanguage,
 } from "../../types/assessment.types";
 import { AppError } from "../../lib/appError";
 import logger from "../../config/logger";
@@ -264,24 +266,25 @@ export const getQuestionAndOptionsById = async (
 ): Promise<QuestionDetailedData | null> => {
   logger.info(`Getting question with id: ${id}`);
   try {
-    // Find the question
-    const question = await Question.findOne({
-      where: {
-        id,
-      },
-      include: [
-        {
-          model: Option,
-          as: "options",
-        },
-      ],
+    // // Find the question
+    // const question = await Question.findOne({
+    //   where: {
+    //     id,
+    //   },
+    //   include: [
+    //     {
+    //       model: Option,
+    //       as: "options",
+    //     },
+    //   ],
 
-      order: [["options", "createdAt", "ASC"]],
-    });
-    if (!question) {
-      return null;
-    }
-    return question.dataValues as QuestionDetailedData;
+    //   order: [["options", "createdAt", "ASC"]],
+    // });
+    // if (!question) {
+    //   return null;
+    // }
+    // return question.dataValues as QuestionDetailedData;
+    return null
   } catch (error) {
     throw new AppError(
       "Error getting question",
@@ -314,7 +317,11 @@ export const createQuestionInDB = async (question: {
   description: string;
   marks: number;
   section: number;
-}): Promise<QuestionData | null> => {
+  type: QuestionType;
+  image_key: string | null;
+  time_limit: number;
+  allowed_languages: ProgrammingLanguage[];
+}): Promise<QuestionData> => {
   logger.info(`Creating question for assessment: ${question.assessment_id}`);
   const transaction = await sequelize.transaction();
   try {
@@ -362,6 +369,10 @@ export const createQuestionInDB = async (question: {
         description: question.description,
         marks: question.marks,
         section: question.section,
+        type: question.type,
+        image_key: question.image_key,
+        time_limit: question.time_limit,
+        allowed_languages: question.allowed_languages,
       },
       {
         transaction,
@@ -369,7 +380,8 @@ export const createQuestionInDB = async (question: {
       }
     );
     transaction.commit();
-    return createdQuestion;
+    
+    return createdQuestion.dataValues;
   } catch (error: any) {
     transaction.rollback();
     if (error instanceof AppError) {
@@ -452,62 +464,62 @@ export const createQuestionsInBulk = async (
   const transaction = await sequelize.transaction();
 
   try {
-    const uniqueSections = [...new Set(questions.map(q => q.section))];
+    // const uniqueSections = [...new Set(questions.map(q => q.section))];
 
-    // Fetch existing sections
-    const existingSections = await Section.findAll({
-      where: {
-        assessment_id: assessmentId,
-        section: uniqueSections
-      },
-      attributes: ['section'],
-      transaction
-    });
-    // Determine new sections to create
-    const existingSectionNumbers = existingSections.map(s => s.section);
+    // // Fetch existing sections
+    // const existingSections = await Section.findAll({
+    //   where: {
+    //     assessment_id: assessmentId,
+    //     section: uniqueSections
+    //   },
+    //   attributes: ['section'],
+    //   transaction
+    // });
+    // // Determine new sections to create
+    // const existingSectionNumbers = existingSections.map(s => s.section);
 
-    const newSections = uniqueSections
-      .filter(section => !existingSectionNumbers.includes(section))
-      .map(section => ({
-        assessment_id: assessmentId,
-        section: section
-      }));
+    // const newSections = uniqueSections
+    //   .filter(section => !existingSectionNumbers.includes(section))
+    //   .map(section => ({
+    //     assessment_id: assessmentId,
+    //     section: section
+    //   }));
 
-    // Bulk create new sections if any
-    if (newSections.length > 0) {
-      await Section.bulkCreate(newSections, { transaction });
-    }
-    // Prepare bulk question data
-    const time = new Date();
-    const questionData = questions.map((question, index) => ({
-      id: uuid(),
-      assessment_id: assessmentId,
-      description: question.description,
-      marks: question.marks,
-      section: question.section,
-      createdAt: new Date(time.getTime() + index), // Adds 1 ms per index
-      updatedAt: new Date(time.getTime() + index),
-    }));
+    // // Bulk create new sections if any
+    // if (newSections.length > 0) {
+    //   await Section.bulkCreate(newSections, { transaction });
+    // }
+    // // Prepare bulk question data
+    // const time = new Date();
+    // const questionData = questions.map((question, index) => ({
+    //   id: uuid(),
+    //   assessment_id: assessmentId,
+    //   description: question.description,
+    //   marks: question.marks,
+    //   section: question.section,
+    //   createdAt: new Date(time.getTime() + index), // Adds 1 ms per index
+    //   updatedAt: new Date(time.getTime() + index),
+    // }));
 
-    // Bulk create questions
-    const createdQuestions = await Question.bulkCreate(questionData, { transaction });
+    // // Bulk create questions
+    // const createdQuestions = await Question.bulkCreate(questionData, { transaction });
 
-    // Prepare bulk option data
-    const optionData = questions.flatMap((question, index) =>
-      question.options.map((option, optionIndex) => ({
-        id: uuid(),
-        question_id: createdQuestions[index].id,
-        description: option.description,
-        is_correct: option.isCorrect,
-        createdAt: new Date(time.getTime() + optionIndex), // Adds 1 ms per index
-        updatedAt: new Date(time.getTime() + optionIndex),
-      }))
-    );
+    // // Prepare bulk option data
+    // const optionData = questions.flatMap((question, index) =>
+    //   question.options.map((option, optionIndex) => ({
+    //     id: uuid(),
+    //     question_id: createdQuestions[index].id,
+    //     description: option.description,
+    //     is_correct: option.isCorrect,
+    //     createdAt: new Date(time.getTime() + optionIndex), // Adds 1 ms per index
+    //     updatedAt: new Date(time.getTime() + optionIndex),
+    //   }))
+    // );
 
-    // Bulk create options
-    await Option.bulkCreate(optionData, { transaction });
+    // // Bulk create options
+    // await Option.bulkCreate(optionData, { transaction });
 
-    await transaction.commit();
+    // await transaction.commit();
   } catch (error: any) {
     await transaction.rollback();
     throw new AppError(
