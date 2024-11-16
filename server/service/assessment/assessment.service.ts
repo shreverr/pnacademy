@@ -243,6 +243,24 @@ export const createOption = async (option: {
   description: string;
   is_correct: boolean;
 }): Promise<OptionData | null> => {
+  const existingQuestion = await checkQuestionExists(option.question_id);
+
+  if (!existingQuestion) {
+    throw new AppError(
+      "Question not found",
+      404,
+      "Question with this id does not exist so Can't create option",
+      false
+    );
+  } else if (existingQuestion.type === "CODE") {
+    throw new AppError(
+      "Invalid Question Type",
+      400,
+      "Can't create options for a code question",
+      false
+    );
+  }
+
   const optionData = await createOptionInDB({
     id: uuid(),
     question_id: option.question_id,
@@ -344,7 +362,7 @@ export const updateQuestion = async (question: {
   section: number | null;
 }): Promise<QuestionData | null> => {
   const existingQuestion = await checkQuestionExists(question.id);
-  if (existingQuestion == null) {
+  if (!existingQuestion) {
     throw new AppError(
       "Question not found",
       404,
@@ -367,7 +385,7 @@ export const updateOption = async (option: {
   is_correct: boolean | null;
 }): Promise<OptionData | null> => {
   const existingOption = await checkQuestionExists(option.id);
-  if (existingOption == null) {
+  if (!existingOption) {
     throw new AppError(
       "Option not found",
       404,
@@ -462,7 +480,7 @@ export const deleteQuestion = async (question: {
   id: UUID;
 }): Promise<boolean> => {
   const existingQuestion = await checkQuestionExists(question.id);
-  if (existingQuestion == null) {
+  if (!existingQuestion) {
     throw new AppError(
       "Question not found",
       404,

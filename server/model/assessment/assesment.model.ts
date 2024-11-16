@@ -240,7 +240,7 @@ export const getAllAssessments = async (
 
 export const checkQuestionExists = async (
   id: UUID
-): Promise<boolean | null> => {
+): Promise<Question | null> => {
   logger.info(`Checking if question exists with id: ${id}`);
 
   try {
@@ -250,7 +250,7 @@ export const checkQuestionExists = async (
       },
     });
 
-    return question !== null;
+    return question;
   } catch (error) {
     throw new AppError(
       "Error getting question",
