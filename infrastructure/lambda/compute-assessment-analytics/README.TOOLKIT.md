@@ -15,9 +15,9 @@ AWS Toolkit For Visual Studio Code supports local debugging for serverless appli
 
 You can debug the Lambda handlers locally by adding a breakpoint to the source file, then running the launch configuration. This works by using Docker on your local machine.
 
-Invocation parameters, including payloads and request parameters, can be edited either by the `Edit SAM Debug Configuration` command (through the Command Palette or CodeLens) or by editing the `launch.json` file.
+Invocation parameters, including payloads and request parameters, can be edited either by the `Local Invoke and Debug Configuration` command (through the Command Palette or CodeLens) or by editing the `launch.json` file.
 
-AWS Lambda functions not defined in the [`template.yaml`](./template.yaml) file can be invoked and debugged by creating a launch configuration through the CodeLens over the function declaration, or with the `Add SAM Debug Configuration` command.
+AWS Lambda functions not defined in the [`template.yaml`](./template.yaml) file can be invoked and debugged by creating a launch configuration through the CodeLens over the function declaration, or with the `Add Local Invoke and Debug Configuration` command.
 
 ## Deploying Serverless Applications
 

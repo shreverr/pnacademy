@@ -3,6 +3,41 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
+      "name": "compute-assessment-analytics:HelloWorldFunction (nodejs20.x)",
+      "invokeTarget": {
+        "target": "template",
+        "templatePath": "${workspaceFolder}/infrastructure/lambda/compute-assessment-analytics/template.yaml",
+        "logicalId": "HelloWorldFunction"
+      },
+      "lambda": {
+        "payload": {},
+        "environmentVariables": {},
+        "runtime": "nodejs20.x"
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "API compute-assessment-analytics:HelloWorldFunction (nodejs20.x)",
+      "invokeTarget": {
+        "target": "api",
+        "templatePath": "${workspaceFolder}/infrastructure/lambda/compute-assessment-analytics/template.yaml",
+        "logicalId": "HelloWorldFunction"
+      },
+      "api": {
+        "path": "/hello",
+        "httpMethod": "get",
+        "payload": {
+          "json": {}
+        }
+      },
+      "lambda": {
+        "runtime": "nodejs20.x"
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
       "name": "compute-assessment-analytics:ComputeAssessmentAnalyticsFunction (nodejs20.x)",
       "invokeTarget": {
         "target": "template",
@@ -14,7 +49,7 @@
           "assessmentId": "example-assessment-id"
         },
         "environmentVariables": {
-          "ENV_VAR_NAME": "value"  // Add any environment variables needed
+          "ENV_VAR_NAME": "value"
         },
         "runtime": "nodejs20.x"
       }
