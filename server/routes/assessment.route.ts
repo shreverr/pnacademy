@@ -425,15 +425,87 @@ router.patch(
  *                 type: string
  *                 format: uuid
  *                 description: The UUID of the question to be updated.
+ *               assessment_id:
+ *                 type: string
+ *                 format: uuid
+ *                 description: The UUID of the assessment to which the question belongs.
  *               description:
  *                 type: string
  *                 description: The updated description of the question.
  *               marks:
  *                 type: number
  *                 description: The updated marks allocated for the question.
+ *               section:
+ *                 type: number
+ *                 description: The updated section number for the question.
+ *               type:
+ *                 type: string
+ *                 description: The updated type of the question (e.g., MCQ, CODE, etc.).
+ *               time_limit:
+ *                 type: number
+ *                 description: The updated time limit for the question in seconds.
+ *               allowed_languages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: The updated list of programming languages allowed for the question.
+ *               image:
+ *                 type: string
+ *                 description: The updated image for the question.
  *     responses:
  *       '200':
  *         description: Successfully updated question.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       description: The UUID of the updated question.
+ *                     assessment_id:
+ *                       type: string
+ *                       format: uuid
+ *                       description: The UUID of the associated assessment.
+ *                     description:
+ *                       type: string
+ *                       description: The updated description of the question.
+ *                     marks:
+ *                       type: number
+ *                       description: The updated marks allocated to the question.
+ *                     section:
+ *                       type: number
+ *                       description: The updated section of the question.
+ *                     type:
+ *                       type: string
+ *                       description: The updated type of the question.
+ *                     time_limit:
+ *                       type: number
+ *                       description: The updated time limit for the question in seconds.
+ *                     allowed_languages:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: The updated list of allowed programming languages.
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp when the question was created.
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp when the question was last updated.
+ *                     image_url:
+ *                       type: string
+ *                       format: uri
+ *                       description: The URL of the updated image for the question.
  *       '400':
  *         description: Bad request. Invalid data provided.
  *       '404':
@@ -444,6 +516,7 @@ router.patch(
 router.patch(
   "/question",
   authenticateUser(["canManageAssessment"]),
+  upload.single("image"),
   validateQuestionUpdate,
   validateRequest,
   UpdateQuestionController

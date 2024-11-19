@@ -194,6 +194,10 @@ export const UpdateQuestionController: RequestHandler = async (
       description: req.body.description,
       marks: req.body.marks,
       section: req.body.section,
+      type: req.body.type,
+      time_limit: req.body.time_limit,
+      allowed_languages: req.body.allowed_languages,
+      image: req.file as Express.Multer.File
     });
 
     return res.status(201).json({

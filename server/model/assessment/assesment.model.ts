@@ -622,6 +622,10 @@ export const updateQuestionInDB = async (question: {
   description: string | null;
   marks: number | null;
   section: number | null;
+  type: QuestionType;
+  image_key: string | null;
+  time_limit: number;
+  allowed_languages: ProgrammingLanguage[];
 }): Promise<QuestionData | null> => {
   logger.info(`Updating question with id: ${question.id}`);
 
@@ -630,6 +634,10 @@ export const updateQuestionInDB = async (question: {
       description: question.description ?? undefined,
       marks: question.marks ?? undefined,
       section: question.section ?? undefined,
+      type: question.type ?? undefined,
+      image_key: question.image_key ?? undefined,
+      time_limit: question.time_limit ?? undefined,
+      allowed_languages: question.allowed_languages ?? undefined,
     };
     Object.keys(updatedQuestionDate).forEach(
       (key) =>

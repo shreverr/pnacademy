@@ -360,7 +360,13 @@ export const updateQuestion = async (question: {
   description: string | null;
   marks: number | null;
   section: number | null;
+  type: QuestionType
+  time_limit: number
+  allowed_languages: ProgrammingLanguage[]
+  image: Express.Multer.File;
 }): Promise<QuestionData | null> => {
+  let questionImageKey: string | null = null;
+
   const existingQuestion = await checkQuestionExists(question.id);
   if (!existingQuestion) {
     throw new AppError(
@@ -370,12 +376,59 @@ export const updateQuestion = async (question: {
       false
     );
   }
-  const updatedQuestion = await updateQuestionInDB({
-    id: question.id,
-    description: question.description,
-    marks: question.marks,
-    section: question.section,
-  });
+
+  if (question.image) {
+    try {
+      questionImageKey = `question-images/${uuid()}${path.extname(
+        question.image.path
+      )}`;
+
+      await uploadFileToS3(
+        question.image.path,
+        questionImageKey,
+        "image"
+      );
+
+      deleteFileFromDisk(question.image.path);
+    } catch (error: any) {
+      throw new AppError(
+        "File Upload Failed",
+        500,
+        "Failed to upload file to s3",
+        false
+      );
+    }
+  }
+
+  let updatedQuestion: QuestionData | null = null;
+  try {
+    updatedQuestion = await updateQuestionInDB({
+      id: question.id,
+      description: question.description,
+      marks: question.marks,
+      section: question.section,
+      type: question.type,
+      time_limit: question.time_limit,
+      allowed_languages: question.allowed_languages,
+      image_key: questionImageKey
+    });
+  } catch (error: any) {
+    if (questionImageKey) deleteFileFromS3(questionImageKey);
+    throw error
+  }
+
+  const updtedQuestionWithImageUrl: any = updatedQuestion;
+  delete updtedQuestionWithImageUrl.image_key;
+
+  if (questionImageKey) {
+    updtedQuestionWithImageUrl.image_url = await generatePresignedUrl(
+      questionImageKey,
+      60 * 60
+    );
+  }
+
+  if (existingQuestion.image_key) deleteFileFromS3(existingQuestion.image_key);
+
   return updatedQuestion;
 };
 
