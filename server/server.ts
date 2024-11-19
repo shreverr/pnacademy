@@ -20,9 +20,9 @@ const port = process.env.PORT ?? 3000;
 const tempStorageDir = process.env.TEMP_DIR;
 if (!tempStorageDir) {
   throw new AppError(
-    "environment variable not set", 
-    500, 
-    "TEMP_DIR not set", 
+    "environment variable not set",
+    500,
+    "TEMP_DIR not set",
     false
   );
 }
@@ -35,7 +35,7 @@ void connectDatabase();
 
 void sequelize
   .sync({
-   alter: process.env.ENVIRONMENT === "dev",
+    alter: process.env.ENVIRONMENT === "dev",
   })
   .then(async () => {
     await defineCustomRelations()
@@ -49,7 +49,7 @@ void sequelize
 
 const server = app.listen(port, () => {
   logger.info(`Server listening at http://localhost:${port}`);
-  swaggerDocs(app);
+  if (process.env.ENVIRONMENT === "dev") swaggerDocs(app);
 });
 
 process.on("uncaughtException", (err) => {
