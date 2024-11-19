@@ -1,3 +1,5 @@
+import { TestCaseAttributes } from "../schema/assessment/testCase.schema";
+
 export interface AssementData {
   id: string;
   name: string;
@@ -33,7 +35,11 @@ export interface QuestionDetailedData {
   marks: number;
   section: number;
   type: QuestionType;
+  image_key: string | null
+  time_limit: number | null
+  allowed_languages: ProgrammingLanguage[] | null
   options: OptionData[];
+  test_cases: TestCaseAttributes[]
 }
 
 export type QuestionType = "MCQ" | "CODE";

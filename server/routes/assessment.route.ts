@@ -1056,9 +1056,95 @@ router.get(
  *             schema:
  *               type: object
  *               properties:
- *                 question:
+ *                 message:
+ *                   type: string
+ *                   example: Question fetched successfully
+ *                   description: The response message.
+ *                 data:
  *                   type: object
- *                   description: The details of the question.
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: The unique identifier for the question.
+ *                     assessment_id:
+ *                       type: string
+ *                       description: The unique identifier for the assessment.
+ *                     description:
+ *                       type: string
+ *                       description: The description of the question.
+ *                     marks:
+ *                       type: integer
+ *                       description: The marks assigned to the question.
+ *                     section:
+ *                       type: integer
+ *                       description: The section number this question belongs to.
+ *                     type:
+ *                       type: string
+ *                       description: The type of the question (MCQ or CODE).
+ *                     image_key:
+ *                       type: string
+ *                       description: The image key associated with the question (if any).
+ *                       nullable: true
+ *                     time_limit:
+ *                       type: integer
+ *                       description: The time limit for the question in milliseconds.
+ *                       nullable: true
+ *                     allowed_languages:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: The programming languages allowed (only for CODE questions).
+ *                       nullable: true
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The creation timestamp of the question.
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The last update timestamp of the question.
+ *                     options:
+ *                       type: array
+ *                       description: An array of options for MCQ questions.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier for the option.
+ *                           question_id:
+ *                             type: string
+ *                             description: The unique identifier for the question the option belongs to.
+ *                           description:
+ *                             type: string
+ *                             description: The description of the option.
+ *                           is_correct:
+ *                             type: boolean
+ *                             description: Whether the option is correct or not.
+ *                     test_cases:
+ *                       type: array
+ *                       description: An array of test cases for CODE questions.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier for the test case.
+ *                           question_id:
+ *                             type: string
+ *                             description: The unique identifier for the question the test case belongs to.
+ *                           is_sample:
+ *                             type: boolean
+ *                             description: Whether this is a sample test case.
+ *                           input:
+ *                             type: string
+ *                             description: The input for the test case.
+ *                           output:
+ *                             type: string
+ *                             description: The expected output for the test case.
+ *                           explanation:
+ *                             type: string
+ *                             description: The explanation of the test case.
  *       '400':
  *         description: Bad request. Invalid data provided.
  *       '404':

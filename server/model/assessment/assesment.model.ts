@@ -294,24 +294,32 @@ export const getQuestionAndOptionsById = async (
   logger.info(`Getting question with id: ${id}`);
   try {
     // // Find the question
-    // const question = await Question.findOne({
-    //   where: {
-    //     id,
-    //   },
-    //   include: [
-    //     {
-    //       model: Option,
-    //       as: "options",
-    //     },
-    //   ],
+    const question = await Question.findOne({
+      where: {
+        id,
+      },
+      include: [
+        // Conditionally include options or test cases based on the question type
+        {
+          model: Option,
+          as: "options",
+          required: false, // Required false, so it doesn't filter out non-MCQ questions
+        },
+        {
+          model: TestCase,
+          as: "test_cases", // Assuming 'test_cases' is the alias for TestCase.
+          required: false, // Required false, so it doesn't filter out non-CODE questions
+        },
+      ],
 
-    //   order: [["options", "createdAt", "ASC"]],
-    // });
-    // if (!question) {
-    //   return null;
-    // }
-    // return question.dataValues as QuestionDetailedData;
-    return null
+      order: [["options", "createdAt", "ASC"], ["test_cases", "createdAt", "ASC"]],
+    });
+
+    if (!question) {
+      return null;
+    }
+
+    return question.dataValues as QuestionDetailedData;
   } catch (error) {
     throw new AppError(
       "Error getting question",
@@ -407,7 +415,7 @@ export const createQuestionInDB = async (question: {
       }
     );
     transaction.commit();
-    
+
     return createdQuestion.dataValues;
   } catch (error: any) {
     transaction.rollback();
