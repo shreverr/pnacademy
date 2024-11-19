@@ -598,13 +598,24 @@ export const viewAssessmentDetails = async (
 
   const sections: QuestionDetailedData[][] = [];
 
-  assessmentData.questions.forEach((question) => {
-    const sectionIndex = question.section - 1; // section number (1-based) to array index (0-based)
+  for (const question of assessmentData.questions) {
+    let questionWithImageUrl: any = question;
+  
+    if (question.image_key) {
+      questionWithImageUrl.image_url = await generatePresignedUrl(
+        question.image_key,
+        60 * 60
+      );
+    }
+  
+    delete questionWithImageUrl.image_key;
+  
+    const sectionIndex = questionWithImageUrl.section - 1; // section number (1-based) to array index (0-based)
     if (!sections[sectionIndex]) {
       sections[sectionIndex] = [];
     }
-    sections[sectionIndex].push(question);
-  });
+    sections[sectionIndex].push(questionWithImageUrl);
+  }
 
   return {
     id: assessmentData.id,
