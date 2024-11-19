@@ -64,6 +64,7 @@ import { log } from "console";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 import { serve } from "swagger-ui-express";
 import { isValidUUID } from "../../utils/validator";
+import TestCase from "../../schema/assessment/testCase.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -157,18 +158,22 @@ export const getAssessmentById = async (
 
   try {
     const assessment = await Assessment.findOne({
-      where: {
-        id,
-      },
+      where: { id },
       include: [
         {
           model: Question,
           as: "questions",
           include: [
+            // Conditionally include options or test cases based on the question type
             {
               model: Option,
               as: "options",
-              // Ordering options by createdAt in descending order
+              required: false, // Required false, so it doesn't filter out non-MCQ questions
+            },
+            {
+              model: TestCase,
+              as: "test_cases", // Assuming 'test_cases' is the alias for TestCase.
+              required: false, // Required false, so it doesn't filter out non-CODE questions
             },
           ],
         },
@@ -181,14 +186,36 @@ export const getAssessmentById = async (
           { model: Option, as: "options" },
           "createdAt",
           "ASC",
-        ], // Order options by createdAt in descending order
+        ], // Order options by createdAt (for MCQs)
+        [
+          { model: Question, as: "questions" },
+          { model: TestCase, as: "test_cases" },
+          "createdAt",
+          "ASC",
+        ], // Order test cases by createdAt (for CODE questions)
       ],
     });
 
     if (!assessment) {
       return null;
     }
-    const assessmentData = assessment.dataValues as AssementDetailedData;
+
+    // Filter options for MCQ questions and test cases for CODE questions
+    const assessmentData = assessment.toJSON() as AssementDetailedData;
+    assessmentData.questions = assessmentData.questions.map((question) => {
+      if (question.type === "MCQ") {
+        return {
+          ...question,
+          test_cases: [], // Empty since it's an MCQ
+        };
+      } else if (question.type === "CODE") {
+        return {
+          ...question,
+          options: [], // Empty since it's a CODE question
+        };
+      }
+      return question;
+    });
 
     return assessmentData;
   } catch (error) {

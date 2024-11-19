@@ -32,6 +32,7 @@ export interface QuestionDetailedData {
   description: string;
   marks: number;
   section: number;
+  type: QuestionType;
   options: OptionData[];
 }
 
