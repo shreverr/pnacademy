@@ -389,7 +389,7 @@ export const updateQuestion = async (question: {
         "image"
       );
 
-      deleteFileFromDisk(question.image.path);
+      await deleteFileFromDisk(question.image.path);
     } catch (error: any) {
       throw new AppError(
         "File Upload Failed",
@@ -413,7 +413,7 @@ export const updateQuestion = async (question: {
       image_key: questionImageKey
     });
   } catch (error: any) {
-    if (questionImageKey) deleteFileFromS3(questionImageKey);
+    if (questionImageKey) await deleteFileFromS3(questionImageKey);
     throw error
   }
 
@@ -427,7 +427,7 @@ export const updateQuestion = async (question: {
     );
   }
 
-  if (existingQuestion.image_key) deleteFileFromS3(existingQuestion.image_key);
+  if (existingQuestion.image_key) await deleteFileFromS3(existingQuestion.image_key);
 
   return updatedQuestion;
 };
@@ -541,9 +541,13 @@ export const deleteQuestion = async (question: {
       false
     );
   }
+
   const deletedQuestion = await deleteQuestionInDB({
     id: question.id,
   });
+
+  if (existingQuestion.image_key) await deleteFileFromS3(existingQuestion.image_key);
+
   return deletedQuestion;
 };
 
