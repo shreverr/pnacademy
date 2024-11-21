@@ -21,6 +21,7 @@ import { QueryTypes } from "sequelize";
 import { AppError } from "../lib/appError";
 import UserAssessmentResult from './assessment/userAssessmentResult.schema'
 import AssessmentResult from "./assessment/assessmentResult.schema";
+import GroupAssessmentResult from "./assessment/groupAssessmentResult.schema";
 
 const models = [
   "./user/user.schema",
@@ -42,6 +43,7 @@ const models = [
   "./assessment/assessmentResponse.schema",
   "./assessment/userAssessmentResult.schema",
   "./assessment/assessmentResult.schema",
+  "./assessment/groupAssessmentResult.schema",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -206,7 +208,15 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
+  Assessment.hasMany(GroupAssessmentResult, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  });
 
+  Group.hasMany(GroupAssessmentResult, {
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
+  });
 }
 
 //Writing raw SQL to define foreign key constraints for section because squelize does not support composite foreign keys;
