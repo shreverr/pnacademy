@@ -55,6 +55,7 @@ import {
   getAssessmentCountByType,
   searchAssesmentsByQuery,
   searchAssignedAssesmentsByQuery,
+  computeGroupAssessmentAnalytics,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -953,7 +954,8 @@ export const computeResults = async (
   await validateAssessmentEnd(assessmentId)
 
   const { transaction } = await computeUserResultsByAssessment(assessmentId, false)
-  await computeAssessmentAnalytics(assessmentId, true, transaction)
+  await computeAssessmentAnalytics(assessmentId, false, transaction)
+  await computeGroupAssessmentAnalytics(assessmentId, true, transaction)
 
   return true
 };

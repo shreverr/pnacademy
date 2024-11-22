@@ -62,6 +62,8 @@ import { log } from "console";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 import { serve } from "swagger-ui-express";
 import { isValidUUID } from "../../utils/validator";
+import GroupAssessmentResult from "../../schema/assessment/groupAssessmentResult.schema";
+import UserGroup from "../../schema/junction/userGroup.schema";
 
 export const createAssementInDB = async (assessment: {
   id: string;
@@ -1798,6 +1800,128 @@ export const computeAssessmentAnalytics = async (
     } else {
       throw new AppError(
         "Error calculating results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+}
+
+export const computeGroupAssessmentAnalytics = async (
+  assessmentId: string,
+  commitTransaction: boolean,
+  transaction?: Transaction
+): Promise<{
+  results: GroupAssessmentResult[];
+  transaction: Transaction
+}> => {
+  logger.info(`calculating group assessment results`);
+
+  if (!transaction) {
+    transaction = await sequelize.transaction();
+  }
+  try {
+    // First, fetch all group IDs associated with this assessment
+    const groupAssessments = await AssessmentGroup.findAll({
+      where: { assessment_id: assessmentId },
+      attributes: ['group_id'],
+      transaction
+    });
+
+    const groupIds = groupAssessments.map(ga => ga.group_id);
+
+    // Prepare to store group-level results
+    const groupResults: GroupAssessmentResult[] = [];
+
+    // Calculate analytics for each group
+    for (const groupId of groupIds) {
+      // Find users in this group who attempted the assessment
+      const groupUserIds = await UserGroup.findAll({
+        where: { group_id: groupId },
+        attributes: ['user_id'],
+        transaction
+      });
+
+      const userIds = groupUserIds.map(ug => ug.user_id);
+
+      // Calculate group-specific assessment analytics
+      const groupAnalytics = await UserAssessmentResult.findOne({
+        attributes: [
+          [Sequelize.cast(Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('user_id'))), "INTEGER"), 'total_participants'],
+          [Sequelize.cast(Sequelize.fn('AVG', Sequelize.col('marks_scored')), "FLOAT"), 'average_marks'],
+          [Sequelize.cast(Sequelize.fn('AVG', Sequelize.col('correct_percentage')), "FLOAT"), 'average_marks_percentage']
+        ],
+        where: {
+          assessment_id: assessmentId,
+          user_id: { [Op.in]: userIds }
+        },
+        raw: true,
+        transaction
+      }) as unknown as {
+        total_participants: number;
+        average_marks: number;
+        average_marks_percentage: number;
+      };
+
+      // Get total marks for the assessment
+      const totalMarks = await Question.findOne({
+        attributes: [
+          [Sequelize.cast(Sequelize.fn('SUM', Sequelize.col('marks')), "FLOAT"), 'total_marks'],
+        ],
+        where: {
+          assessment_id: assessmentId
+        },
+        raw: true,
+        transaction
+      }) as unknown as {
+        total_marks: number;
+      };
+
+      // Upsert group assessment result
+      const [updatedRowsCount] = await GroupAssessmentResult.upsert({
+        id: uuid(),
+        assessment_id: assessmentId,
+        group_id: groupId,
+        total_participants: groupAnalytics.total_participants,
+        average_marks: groupAnalytics.average_marks,
+        average_marks_percentage: groupAnalytics.average_marks_percentage,
+        total_marks: totalMarks.total_marks,
+      }, {
+        transaction,
+        returning: true
+      });
+
+      // Fetch the upserted or existing group result
+      const groupResult = await GroupAssessmentResult.findOne({
+        where: {
+          assessment_id: assessmentId,
+          group_id: groupId
+        },
+        transaction
+      });
+
+      groupResults.push(groupResult as GroupAssessmentResult);
+    }
+
+    if (commitTransaction) {
+      await transaction.commit();
+    }
+
+    return {
+      results: groupResults,
+      transaction
+    }
+  } catch (error: any) {
+    if (transaction) {
+      await transaction.rollback();
+    }
+
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "Error calculating group assessment results",
         500,
         error,
         true
