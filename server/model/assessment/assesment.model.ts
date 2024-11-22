@@ -1879,8 +1879,20 @@ export const computeGroupAssessmentAnalytics = async (
       };
 
       // Upsert group assessment result
-      const [updatedRowsCount] = await GroupAssessmentResult.upsert({
-        id: uuid(),
+      // const [updatedRowsCount] = await GroupAssessmentResult.upsert({
+      //   id: uuid(),
+      //   assessment_id: assessmentId,
+      //   group_id: groupId,
+      //   total_participants: groupAnalytics.total_participants,
+      //   average_marks: groupAnalytics.average_marks,
+      //   average_marks_percentage: groupAnalytics.average_marks_percentage,
+      //   total_marks: totalMarks.total_marks,
+      // }, {
+      //   transaction,
+      //   returning: true
+      // });
+
+      const [updatedRowsCount] = await GroupAssessmentResult.update({
         assessment_id: assessmentId,
         group_id: groupId,
         total_participants: groupAnalytics.total_participants,
@@ -1888,20 +1900,32 @@ export const computeGroupAssessmentAnalytics = async (
         average_marks_percentage: groupAnalytics.average_marks_percentage,
         total_marks: totalMarks.total_marks,
       }, {
-        transaction,
-        returning: true
-      });
-
-      // Fetch the upserted or existing group result
-      const groupResult = await GroupAssessmentResult.findOne({
-        where: {
-          assessment_id: assessmentId,
-          group_id: groupId
-        },
+        where: { assessment_id: assessmentId, group_id: groupId },
         transaction
       });
+  
+      let updatedGroupAssessmentAnalyticsData: GroupAssessmentResult;
+  
+      if (updatedRowsCount === 0) {
+        // If no rows were updated, create a new record
+        updatedGroupAssessmentAnalyticsData = await GroupAssessmentResult.create({
+          id: uuid(),
+          assessment_id: assessmentId,
+          group_id: groupId,
+          total_participants: groupAnalytics.total_participants,
+          average_marks: groupAnalytics.average_marks,
+          average_marks_percentage: groupAnalytics.average_marks_percentage,
+          total_marks: totalMarks.total_marks,
+        }, { transaction });
+      } else {
+        // If a row was updated, fetch the updated record
+        updatedGroupAssessmentAnalyticsData = await GroupAssessmentResult.findOne({
+          where: { assessment_id: assessmentId, group_id: groupId },
+          transaction
+        }) as GroupAssessmentResult;
+      }
 
-      groupResults.push(groupResult as GroupAssessmentResult);
+      groupResults.push(updatedGroupAssessmentAnalyticsData as GroupAssessmentResult);
     }
 
     if (commitTransaction) {
