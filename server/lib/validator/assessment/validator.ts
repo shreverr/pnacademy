@@ -365,7 +365,7 @@ export const validateGetAssessmentbyGroupId = [
         id|name|description|is_active|start_at|end_at|duration|createdAt|updatedAt.`
     ),
 
-  query("order")  
+  query("order")
     .optional()
     .matches("^(ASC|DESC)$")
     .withMessage(
@@ -772,6 +772,40 @@ export const validateGetAssessmentsResultList = [
     ),
 ];
 
+export const validateGetAssessmentsGroupsList = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(id|name|group_id|total_marks|total_participants|average_marks|average_marks_percentage|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+          id|name|group_id|total_marks|total_participants|average_marks|average_marks_percentage|createdAt|updatedAt`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+         "ASC", "DESC",`
+    ),
+]
+
 export const validateGetMyAssessmentsResultList = [
   query("page")
     .optional()
@@ -885,4 +919,4 @@ export const validateAssesmentsSearch = [
       `Must match one of the specified options:
        "ASC", "DESC",`
     ),
-  ]
+]

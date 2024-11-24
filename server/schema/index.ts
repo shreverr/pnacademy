@@ -217,6 +217,14 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "group_id",
     onDelete: "CASCADE",
   });
+
+  GroupAssessmentResult.belongsTo(Assessment, {
+    foreignKey: "assessment_id"
+  });
+
+  GroupAssessmentResult.belongsTo(Group, {
+    foreignKey: "group_id"
+  });
 }
 
 //Writing raw SQL to define foreign key constraints for section because squelize does not support composite foreign keys;

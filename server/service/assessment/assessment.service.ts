@@ -56,6 +56,7 @@ import {
   searchAssesmentsByQuery,
   searchAssignedAssesmentsByQuery,
   computeGroupAssessmentAnalytics,
+  getAssessmentsGroupsList,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -104,6 +105,7 @@ import { createArchive, deleteFileFromDisk, saveDataToDisk } from "../../lib/fil
 import { nanoid } from "nanoid";
 import consistentRandomizer from "../../utils/shuffel";
 import UserAssessmentResult from "../../schema/assessment/userAssessmentResult.schema";
+import GroupAssessmentResult, { GroupAssessmentResultAttributes } from "../../schema/assessment/groupAssessmentResult.schema";
 
 export const createAssessment = async (assement: {
   name: string;
@@ -1029,6 +1031,39 @@ export const viewAssessmentResultsList = async (
 
   return {
     results: assessmentResultList,
+    totalPages: totalPages,
+  };
+};
+
+export const viewAllAssessmentsGroupsList = async (
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: keyof GroupAssessmentResultAttributes | "name",
+  order?: "ASC" | "DESC"
+): Promise<{
+  groups: GroupAssessmentResult[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "name";
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: AssessmentsGroupsList, count: allGroupsCount } = await getAssessmentsGroupsList(
+    offset,
+    pageSize,
+    sortBy,
+    order
+  );
+
+  logger.debug(allGroupsCount)
+
+  const totalPages = Math.ceil(allGroupsCount / pageSize);
+
+  return {
+    groups: AssessmentsGroupsList,
     totalPages: totalPages,
   };
 };

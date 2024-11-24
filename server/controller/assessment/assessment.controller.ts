@@ -36,6 +36,7 @@ import {
   updateOption,
   updateQuestion,
   updateTag,
+  viewAllAssessmentsGroupsList,
   viewAllTags,
   viewAssessmentAnalytics,
   viewAssessmentAnalyticsChart,
@@ -66,6 +67,7 @@ import {
   type TagAttribute,
 } from "../../types/assessment.types";
 import { deleteFileFromDisk } from "../../lib/file";
+import { GroupAssessmentResultAttributes } from "../../schema/assessment/groupAssessmentResult.schema";
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -804,6 +806,28 @@ export const getAllAssessmentResultController: RequestHandler = async (
       req.query.page as string,
       req.query.pageSize as string,
       req.query.sortBy as AssessmentResultListAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: assessmentResults
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllAssessmentsGroupsListController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const assessmentResults = await viewAllAssessmentsGroupsList(
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as keyof GroupAssessmentResultAttributes | "name",
       req.query.order as "ASC" | "DESC"
     );
 

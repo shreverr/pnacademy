@@ -62,7 +62,7 @@ import { log } from "console";
 import AssessmentResult, { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 import { serve } from "swagger-ui-express";
 import { isValidUUID } from "../../utils/validator";
-import GroupAssessmentResult from "../../schema/assessment/groupAssessmentResult.schema";
+import GroupAssessmentResult, { GroupAssessmentResultAttributes } from "../../schema/assessment/groupAssessmentResult.schema";
 import UserGroup from "../../schema/junction/userGroup.schema";
 
 export const createAssementInDB = async (assessment: {
@@ -2129,6 +2129,97 @@ export const getAssessmentResultList = async (
       ),
       count: allAssessmentResults.count,
     };
+    return plainData;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting assessment results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getAssessmentsGroupsList = async (
+  offset?: number,
+  pageSize?: number,
+  sortBy?: keyof GroupAssessmentResultAttributes | "name",
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: GroupAssessmentResult[];
+  count: number
+}> => {
+  try {
+    let findOptions: FindAndCountOptions = {}
+    if ((offset !== null || offset !== undefined) && pageSize && sortBy && order) {
+      findOptions = {
+        limit: pageSize,
+        offset: offset,
+        order: [[sortBy, order]],
+      }
+
+      if (sortBy === "name") {
+        findOptions.order = [[{ model: Group, as: "group" }, sortBy, order]];
+      }
+    }
+
+    findOptions = {
+      ...findOptions,
+      attributes: [
+        'group_id',
+        [Sequelize.fn('COUNT', Sequelize.col('assessment_id')), 'total_assessments'],
+        [Sequelize.fn('MAX', Sequelize.col('group.name')), 'group_name'], // Get group name
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(DISTINCT user_groups.user_id)
+            FROM user_groups
+            WHERE user_groups.group_id = group_assessment_result.group_id
+          )`),
+          'total_users'
+        ]
+      ],
+      group: ['group_id', 'group.id'], // Group by both group_id and group.id to maintain association
+      include: [
+        {
+          model: Group,
+          attributes: [],
+          required: true,
+          subQuery: false
+        },
+      ],
+    }
+
+    const allGroups = await GroupAssessmentResult.findAll(findOptions);
+
+    const totalCount = await GroupAssessmentResult.count({
+      distinct: true,
+      col: 'group_id'
+    });
+
+    if (totalCount === 0) {
+      throw new AppError(
+        "no results for groups found",
+        404,
+        "no results for groups found",
+        false
+      );
+    }
+
+    // Convert the data to plain object
+    let plainData: {
+      rows: GroupAssessmentResult[];
+      count: number;
+    } = {
+      rows: allGroups.map((group: any) =>
+        group.get({ plain: true })
+      ),
+      count: totalCount,
+    };
+
     return plainData;
   } catch (error: any) {
     if (error instanceof AppError) {

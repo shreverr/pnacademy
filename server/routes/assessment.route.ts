@@ -20,6 +20,7 @@ import {
   exportAssessmentController,
   generateAiQuestionsController,
   getAllAssessmentResultController,
+  getAllAssessmentsGroupsListController,
   getAssessmentAnalytics,
   getAssessmentAnalyticsChart,
   getAssessmentSectionsController,
@@ -90,6 +91,7 @@ import {
   validateGenerateAssessmentSave,
   validateGetAssessmentAnalytics,
   validateGetAssessmentAnalyticsChart,
+  validateGetAssessmentsGroupsList,
   validateGetAssessmentsResultList,
   validateGetMyAssessmentsResultList,
   validateGetResult,
@@ -3105,6 +3107,131 @@ router.get(
   validateGetMyAssessmentsResultList,
   validateRequest,
   getUserAssessmentsResultListController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/groups:
+ *   get:
+ *     summary: Retrieve a list of assessment groups
+ *     description: This endpoint retrieves a paginated list of assessment groups, including sorting and ordering options.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *       - name: pageSize
+ *         in: query
+ *         required: false
+ *         description: The number of results per page.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 2
+ *       - name: sortBy
+ *         in: query
+ *         required: false
+ *         description: The field by which to sort the results.
+ *         schema:
+ *           type: string
+ *           example: name
+ *           enum:
+ *             - name
+ *             - total_assessments
+ *             - total_users
+ *       - name: order
+ *         in: query
+ *         required: false
+ *         description: The order in which to sort the results (ascending or descending).
+ *         schema:
+ *           type: string
+ *           example: DESC
+ *           enum:
+ *             - ASC
+ *             - DESC
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessment groups.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     groups:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           group_id:
+ *                             type: string
+ *                             description: The unique identifier of the group.
+ *                             example: d397c620-5583-424b-8a50-ed923e2c8e3e
+ *                           total_assessments:
+ *                             type: string
+ *                             description: The total number of assessments in the group.
+ *                             example: "1"
+ *                           group_name:
+ *                             type: string
+ *                             description: The name of the group.
+ *                             example: students
+ *                           total_users:
+ *                             type: string
+ *                             description: The total number of users in the group.
+ *                             example: "1"
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 2
+ *       '400':
+ *         description: Bad Request. The input parameters are invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid query parameters
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving assessment groups
+ */
+router.get(
+  "/groups",
+  authenticateUser(["canManageReports"]),
+  validateGetAssessmentsGroupsList,
+  validateRequest,
+  getAllAssessmentsGroupsListController
 )
 
 /**
