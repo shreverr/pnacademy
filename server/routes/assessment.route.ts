@@ -27,7 +27,8 @@ import {
   getAssessmentTimeController,
   getAssessmentTotalController,
   getDraftAssessmentCountController,
-  getGetGroupAssessmentAnalyticsController,
+  getGroupAssessmentAnalyticsController,
+  getGroupAssessmentResultsController,
   getOngoingAssessmentController,
   getPastAssessmentController,
   getResultController,
@@ -95,6 +96,7 @@ import {
   validateGetAssessmentsGroupsList,
   validateGetAssessmentsResultList,
   validateGetGroupAssessmentAnalytics,
+  validateGetGroupAssessmentResults,
   validateGetMyAssessmentsResultList,
   validateGetResult,
   validatePublishResult,
@@ -3376,7 +3378,200 @@ router.get(
   authenticateUser(["canManageReports"]),
   validateGetGroupAssessmentAnalytics,
   validateRequest,
-  getGetGroupAssessmentAnalyticsController
+  getGroupAssessmentAnalyticsController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/{assessmentId}/{groupId}/results:
+ *   get:
+ *     summary: Retrieve a list of assessment results for a specific group
+ *     description: This endpoint retrieves a paginated list of assessment results for a specific group, including sorting and ordering options.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: assessmentId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the assessment.
+ *         schema:
+ *           type: string
+ *           example: 123e4567-e89b-12d3-a456-426614174000
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the group.
+ *         schema:
+ *           type: string
+ *           example: c3c911cb-e8f1-4d90-9e75-83062bdd6df1
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *       - name: pageSize
+ *         in: query
+ *         required: false
+ *         description: The number of results per page.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 2
+ *       - name: sortBy
+ *         in: query
+ *         required: false
+ *         description: The field by which to sort the results.
+ *         schema:
+ *           type: string
+ *           example: first_name
+ *           enum:
+ *             - first_name
+ *             - last_name
+ *             - email
+ *             - marks_scored
+ *             - correct_percentage
+ *             - createdAt
+ *             - updatedAt
+ *       - name: order
+ *         in: query
+ *         required: false
+ *         description: The order in which to sort the results (ascending or descending).
+ *         schema:
+ *           type: string
+ *           example: ASC
+ *           enum:
+ *             - ASC
+ *             - DESC
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessment results for the group.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     results:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: The unique identifier for the assessment result.
+ *                             example: 435bc8f1-353b-489f-88ad-95d7d0885667
+ *                           user_id:
+ *                             type: string
+ *                             description: The unique identifier of the user.
+ *                             example: 81d2c0fc-3f78-4aef-abd5-4f9f1f60a63e
+ *                           correct_answers_count:
+ *                             type: integer
+ *                             description: The number of correct answers given by the user.
+ *                             example: 5
+ *                           marks_scored:
+ *                             type: integer
+ *                             description: The total marks scored by the user.
+ *                             example: 15
+ *                           correct_percentage:
+ *                             type: number
+ *                             format: float
+ *                             description: The percentage of correct answers.
+ *                             example: 50
+ *                           wrong_answers_count:
+ *                             type: integer
+ *                             description: The number of wrong answers given by the user.
+ *                             example: 5
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp when the result was created.
+ *                             example: 2024-11-22T20:24:22.746Z
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             description: The timestamp when the result was last updated.
+ *                             example: 2024-11-22T21:17:54.868Z
+ *                           user:
+ *                             type: object
+ *                             description: Information about the user.
+ *                             properties:
+ *                               first_name:
+ *                                 type: string
+ *                                 description: The first name of the user.
+ *                                 example: student1
+ *                               last_name:
+ *                                 type: string
+ *                                 description: The last name of the user.
+ *                                 example: Verma
+ *                               email:
+ *                                 type: string
+ *                                 description: The email of the user.
+ *                                 example: student1@gmail.com
+ *                     totalPages:
+ *                       type: integer
+ *                       description: The total number of pages available.
+ *                       example: 1
+ *       '400':
+ *         description: Bad Request. The input parameters are invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid query parameters
+ *       '404':
+ *         description: Not Found. The assessment or group does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Assessment or group not found
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving assessment results
+ */
+router.get(
+  "/:assessmentId/:groupId/results",
+  authenticateUser(["canManageReports"]),
+  validateGetGroupAssessmentResults,
+  validateRequest,
+  getGroupAssessmentResultsController
 )
 
 /**

@@ -2065,6 +2065,101 @@ export const getResultsByAssessmentId = async (
   }
 };
 
+export const getResultsByAssessmentIdAndGroupId = async (
+  assessmentId: string,
+  groupId: string,
+  offset?: number,
+  pageSize?: number,
+  sortBy?: UserResultAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: UserResult[];
+  count: number;
+}> => {
+  try {
+    let findOptions: FindAndCountOptions = {
+      subQuery: false
+    };
+
+    // Handle pagination and sorting
+    if ((offset !== null && offset !== undefined) && pageSize && sortBy && order) {
+      findOptions.limit = pageSize;
+      findOptions.offset = offset;
+      
+      // Handle sorting for user attributes vs result attributes
+      if (sortBy === "first_name" || sortBy === "last_name" || sortBy === "email") {
+        findOptions.order = [[{ model: User, as: "user" }, sortBy, order]];
+      } else {
+        findOptions.order = [[sortBy, order]];
+      }
+    }
+
+    // Set up the query options
+    findOptions = {
+      ...findOptions,
+      attributes: [
+        "id",
+        "user_id",
+        "correct_answers_count",
+        "marks_scored",
+        "correct_percentage",
+        "wrong_answers_count",
+        "createdAt",
+        "updatedAt"
+      ],
+      include: [{
+        model: User,
+        as: "user",
+        required: true,
+        attributes: ["first_name", "last_name", "email"],
+        include: [{
+          model: UserGroup,
+          as: "user_groups", // Changed from userGroups to user_groups
+          where: { group_id: groupId },
+          attributes: [],
+          required: true
+        }]
+      }],
+      where: {
+        assessment_id: assessmentId
+      },
+      distinct: true
+    };
+
+    const allAssessmentResults = await UserAssessmentResult.findAndCountAll(findOptions);
+
+    if (allAssessmentResults.count === 0) {
+      throw new AppError(
+        "Assessment results not found",
+        404,
+        "No assessment results found for users in this group",
+        false
+      );
+    }
+
+    // Convert to plain object
+    const plainData = {
+      rows: allAssessmentResults.rows.map((assessmentResult: any) =>
+        assessmentResult.get({ plain: true })
+      ),
+      count: allAssessmentResults.count
+    };
+
+    return plainData;
+
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(
+      "Error getting assessment results",
+      500,
+      error,
+      true
+    );
+  }
+};
+
 export const getAssessmentResultList = async (
   offset?: number,
   pageSize?: number,

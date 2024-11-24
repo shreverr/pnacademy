@@ -865,6 +865,54 @@ export const validateGetGroupAssessmentAnalytics = [
     .withMessage("groupId should be a valid UUID v4"),
 ];
 
+export const validateGetGroupAssessmentResults = [
+  param("assessmentId")
+    .not()
+    .isEmpty()
+    .withMessage("assessmentId cannot be empty")
+    .isUUID(4)
+    .withMessage("assessmentId should be a valid UUID v4"),
+
+  param("groupId")
+    .not()
+    .isEmpty()
+    .withMessage("groupId cannot be empty")
+    .isUUID(4)
+    .withMessage("groupId should be a valid UUID v4"),
+
+    query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(user_id|first_name|last_name|email|correct_answers_count|marks_scored|correct_percentage|wrong_answers_count|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+          user_id|first_name|last_name|email|correct_answers_count|marks_scored|correct_percentage|wrong_answers_count|createdAt|updatedAt`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+         "ASC", "DESC",`
+    ),
+];
+
 export const validateGetAssessmentAnalyticsChart = [
   query("metric")
     .matches("^(average_marks_percentage|total_participants|average_marks)$")

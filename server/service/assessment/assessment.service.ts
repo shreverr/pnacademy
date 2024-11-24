@@ -58,6 +58,7 @@ import {
   computeGroupAssessmentAnalytics,
   getAssessmentsGroupsList,
   getGroupAssessmentAnalyticsByAssessmentIdAndGroupId,
+  getResultsByAssessmentIdAndGroupId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -998,6 +999,41 @@ export const viewAssessmentResults = async (
   );
 
   const totalPages = Math.ceil(allTagsCount / pageSize);
+
+  return {
+    results: results,
+    totalPages: totalPages,
+  };
+};
+
+export const viewGroupAssessmentResults = async (
+  assessmentId: string,
+  groupId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: UserResultAttributes,
+  order?: "ASC" | "DESC"
+): Promise<{
+  results: UserResult[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "first_name";
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: results, count: allResultsCount } = await getResultsByAssessmentIdAndGroupId(
+    assessmentId,
+    groupId,
+    offset,
+    pageSize,
+    sortBy,
+    order
+  );
+
+  const totalPages = Math.ceil(allResultsCount / pageSize);
 
   return {
     results: results,

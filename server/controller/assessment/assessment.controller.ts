@@ -49,6 +49,7 @@ import {
   viewAssessmentTime,
   viewAssignedAssessments,
   viewGroupAssessmentAnalytics,
+  viewGroupAssessmentResults,
   viewQuestionDetails,
   viewTag,
   viewUserAssessmentResultsList,
@@ -797,6 +798,30 @@ export const getResultController: RequestHandler = async (
   }
 };
 
+export const getGroupAssessmentResultsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const groupAssessmentResults = await viewGroupAssessmentResults(
+      req.params.assessmentId,
+      req.params.groupId,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as UserResultAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: groupAssessmentResults
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getAllAssessmentResultController: RequestHandler = async (
   req: Request,
   res: Response,
@@ -883,7 +908,7 @@ export const getAssessmentAnalytics: RequestHandler = async (
   }
 };
 
-export const getGetGroupAssessmentAnalyticsController: RequestHandler = async (
+export const getGroupAssessmentAnalyticsController: RequestHandler = async (
   req: Request,
   res: Response,
   next: NextFunction
