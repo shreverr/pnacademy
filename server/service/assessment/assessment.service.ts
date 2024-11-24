@@ -57,6 +57,7 @@ import {
   searchAssignedAssesmentsByQuery,
   computeGroupAssessmentAnalytics,
   getAssessmentsGroupsList,
+  getGroupAssessmentAnalyticsByAssessmentIdAndGroupId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -1107,6 +1108,15 @@ export const viewAssessmentAnalytics = async (
   const assessmentAnalytics = await getAssessmentAnalyticsByAssessmentId(assessmentId);
 
   return assessmentAnalytics;
+};
+
+export const viewGroupAssessmentAnalytics = async (
+  assessmentId: string,
+  groupId: string
+): Promise<GroupAssessmentResultAttributes> => {
+  const groupAssessmentAnalytics = await getGroupAssessmentAnalyticsByAssessmentIdAndGroupId(assessmentId, groupId);
+
+  return groupAssessmentAnalytics;
 };
 
 export const viewAssessmentAnalyticsChart = async (

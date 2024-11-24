@@ -27,6 +27,7 @@ import {
   getAssessmentTimeController,
   getAssessmentTotalController,
   getDraftAssessmentCountController,
+  getGetGroupAssessmentAnalyticsController,
   getOngoingAssessmentController,
   getPastAssessmentController,
   getResultController,
@@ -93,6 +94,7 @@ import {
   validateGetAssessmentAnalyticsChart,
   validateGetAssessmentsGroupsList,
   validateGetAssessmentsResultList,
+  validateGetGroupAssessmentAnalytics,
   validateGetMyAssessmentsResultList,
   validateGetResult,
   validatePublishResult,
@@ -3232,6 +3234,149 @@ router.get(
   validateGetAssessmentsGroupsList,
   validateRequest,
   getAllAssessmentsGroupsListController
+)
+
+/**
+ * @swagger
+ * /v1/assessment/{assessmentId}/{groupId}/analytics:
+ *   get:
+ *     summary: Retrieve analytics for a specific assessment and group
+ *     description: This endpoint retrieves detailed analytics for a specific assessment within a given group, including metrics such as total users, average marks, and percentages.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: assessmentId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the assessment.
+ *         schema:
+ *           type: string
+ *           example: 35e8fd68-eae7-4dcd-a229-5d7d4a8085ea
+ *       - name: groupId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the group.
+ *         schema:
+ *           type: string
+ *           example: 369decfb-136e-42ef-b71d-f55faa173900
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved analytics for the assessment and group.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total_users:
+ *                       type: string
+ *                       description: The total number of users in the group.
+ *                       example: "3"
+ *                     id:
+ *                       type: string
+ *                       description: The unique identifier for the analytics record.
+ *                       example: c45b27cf-6bcd-459f-87ee-73ed936eda7a
+ *                     assessment_id:
+ *                       type: string
+ *                       description: The unique identifier of the assessment.
+ *                       example: 35e8fd68-eae7-4dcd-a229-5d7d4a8085ea
+ *                     group_id:
+ *                       type: string
+ *                       description: The unique identifier of the group.
+ *                       example: 369decfb-136e-42ef-b71d-f55faa173900
+ *                     total_marks:
+ *                       type: integer
+ *                       description: The total marks for the assessment.
+ *                       example: 30
+ *                     total_participants:
+ *                       type: integer
+ *                       description: The total number of participants in the assessment.
+ *                       example: 3
+ *                     average_marks:
+ *                       type: number
+ *                       format: float
+ *                       description: The average marks scored by participants.
+ *                       example: 17.333333333333332
+ *                     average_marks_percentage:
+ *                       type: number
+ *                       format: float
+ *                       description: The average percentage of marks scored by participants.
+ *                       example: 63.333333333333336
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp when the analytics record was created.
+ *                       example: 2024-11-22T21:17:47.448Z
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The timestamp when the analytics record was last updated.
+ *                       example: 2024-11-22T21:17:54.878Z
+ *                     group:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                           description: The name of the group.
+ *                           example: hoes
+ *       '400':
+ *         description: Bad Request. The input parameters are invalid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error in the request.
+ *                   example: Invalid path parameters
+ *       '404':
+ *         description: Not Found. The assessment or group could not be found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Assessment or group not found
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving analytics
+ */
+router.get(
+  "/:assessmentId/:groupId/analytics",
+  authenticateUser(["canManageReports"]),
+  validateGetGroupAssessmentAnalytics,
+  validateRequest,
+  getGetGroupAssessmentAnalyticsController
 )
 
 /**

@@ -790,11 +790,11 @@ export const validateGetAssessmentsGroupsList = [
   query("sortBy")
     .optional()
     .matches(
-      "^(id|name|group_id|total_marks|total_participants|average_marks|average_marks_percentage|createdAt|updatedAt)$"
+      "^(id|name|group_id|createdAt|updatedAt)$"
     )
     .withMessage(
       `Must match one of the specified options:
-          id|name|group_id|total_marks|total_participants|average_marks|average_marks_percentage|createdAt|updatedAt`
+          id|name|group_id|createdAt|updatedAt`
     ),
 
   query("order")
@@ -847,6 +847,22 @@ export const validateGetAssessmentAnalytics = [
     .withMessage("assessmentId cannot be empty")
     .isUUID(4)
     .withMessage("assessmentId should be a valid UUID v4")
+];
+
+export const validateGetGroupAssessmentAnalytics = [
+  param("assessmentId")
+    .not()
+    .isEmpty()
+    .withMessage("assessmentId cannot be empty")
+    .isUUID(4)
+    .withMessage("assessmentId should be a valid UUID v4"),
+
+  param("groupId")
+    .not()
+    .isEmpty()
+    .withMessage("groupId cannot be empty")
+    .isUUID(4)
+    .withMessage("groupId should be a valid UUID v4"),
 ];
 
 export const validateGetAssessmentAnalyticsChart = [

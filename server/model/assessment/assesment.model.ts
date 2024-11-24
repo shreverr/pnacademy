@@ -1903,9 +1903,9 @@ export const computeGroupAssessmentAnalytics = async (
         where: { assessment_id: assessmentId, group_id: groupId },
         transaction
       });
-  
+
       let updatedGroupAssessmentAnalyticsData: GroupAssessmentResult;
-  
+
       if (updatedRowsCount === 0) {
         // If no rows were updated, create a new record
         updatedGroupAssessmentAnalyticsData = await GroupAssessmentResult.create({
@@ -2378,6 +2378,67 @@ export const getAssessmentAnalyticsByAssessmentId = async (
     } else {
       throw new AppError(
         "error getting assessment results",
+        500,
+        error,
+        true
+      );
+    }
+  }
+};
+
+export const getGroupAssessmentAnalyticsByAssessmentIdAndGroupId = async (
+  assessmentId: string,
+  groupId: string,
+): Promise<GroupAssessmentResultAttributes> => {
+  try {
+    const assessmentAnalytics = await GroupAssessmentResult.findOne({
+      include: [
+        {
+          model: Group,
+          attributes: ["name"],
+        },
+      ],
+      where: {
+        assessment_id: assessmentId,
+        group_id: groupId,
+      },
+      attributes: [
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(DISTINCT user_groups.user_id)
+            FROM user_groups
+            WHERE user_groups.group_id = group_assessment_result.group_id
+          )`),
+          'total_users'
+        ],
+        "id",
+        "assessment_id",
+        "group_id",
+        "total_marks",
+        "total_participants",
+        "average_marks",
+        "average_marks_percentage",
+        "createdAt",
+        "updatedAt",
+      ]
+    });
+
+    if (!assessmentAnalytics) {
+      throw new AppError(
+        "Group Assessment result not found",
+        404,
+        "Group Assessment result not found",
+        false
+      );
+    }
+
+    return assessmentAnalytics;
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        "error getting group assessment analytics",
         500,
         error,
         true
