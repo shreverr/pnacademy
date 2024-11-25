@@ -1045,6 +1045,7 @@ export const viewGroupAssessmentResults = async (
 export const getUserAssessmentResponses = async (
   assessmentId: string,
   userId: string,
+  self: boolean,
   pageStr?: string,
   pageSizeStr?: string,
   order?: "ASC" | "DESC"
@@ -1052,6 +1053,19 @@ export const getUserAssessmentResponses = async (
   sections: any[];
   totalPages: number;
 }> => {
+  if (self) {
+    const assignedAssessments = (await viewAssignedAssessmentsByUserId(userId)).rows;
+
+    if (!assignedAssessments.find((assessment) => assessment.id === assessmentId)) {
+      throw new AppError(
+        "Unauthorized",
+        403,
+        "User is not authorized to view responses for this assessment",
+        false
+      );
+    }
+  }
+
   const page = parseInt(pageStr ?? "1");
   const pageSize = parseInt(pageSizeStr ?? "10");
   order = order ?? "ASC";

@@ -29,6 +29,7 @@ import {
   getDraftAssessmentCountController,
   getGroupAssessmentAnalyticsController,
   getGroupAssessmentResultsController,
+  getMyAssessmentResponsesController,
   getOngoingAssessmentController,
   getPastAssessmentController,
   getResultController,
@@ -98,6 +99,7 @@ import {
   validateGetAssessmentsResultList,
   validateGetGroupAssessmentAnalytics,
   validateGetGroupAssessmentResults,
+  validateGetMyAssessmentResponses,
   validateGetMyAssessmentsResultList,
   validateGetResult,
   validateGetUserAssessmentResponses,
@@ -4567,6 +4569,150 @@ router.get(
   validateGetUserAssessmentResponses,
   validateRequest,
   getUserAssessmentResponsesController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/{assessmentId}/my-responses:
+ *   get:
+ *     summary: Retrieve user responses for a specific assessment
+ *     description: Get detailed responses for all questions answered by a user in a specific assessment, organized by sections.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: assessmentId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the assessment.
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *       - name: pageSize
+ *         in: query
+ *         required: false
+ *         description: The number of results per page.
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 100
+ *       - name: order
+ *         in: query
+ *         required: false
+ *         description: The order of results (ascending or descending).
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           example: ASC
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved assessment responses.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     sections:
+ *                       type: array
+ *                       items:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                               format: uuid
+ *                               description: Question identifier
+ *                             description:
+ *                               type: string
+ *                               description: The question text
+ *                             marks:
+ *                               type: integer
+ *                               description: Marks allocated for the question
+ *                             section:
+ *                               type: integer
+ *                               description: Section number of the question
+ *                             options:
+ *                               type: array
+ *                               items:
+ *                                 type: object
+ *                                 properties:
+ *                                   id:
+ *                                     type: string
+ *                                     format: uuid
+ *                                     description: Option identifier
+ *                                   description:
+ *                                     type: string
+ *                                     description: Option text
+ *                                   is_correct:
+ *                                     type: boolean
+ *                                     description: Indicates if this is the correct option
+ *                                   is_selected:
+ *                                     type: boolean
+ *                                     description: Indicates if this option was selected by the user
+ *                     totalPages:
+ *                       type: integer
+ *                       description: Total number of pages available
+ *                       example: 1
+ *       '400':
+ *         description: Bad request. Invalid parameters provided.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Invalid parameters provided
+ *       '404':
+ *         description: Assessment or user not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Assessment or user not found
+ *       '500':
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ */
+router.get(
+  "/:assessmentId/my-responses",
+  authenticateUser(["canViewReport"]),
+  validateGetMyAssessmentResponses,
+  validateRequest,
+  getMyAssessmentResponsesController
 );
 
 export default router;

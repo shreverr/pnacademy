@@ -1140,6 +1140,7 @@ export const getUserAssessmentResponsesController: RequestHandler = async (
     const userAssessmentResponses = await getUserAssessmentResponses(
       req.params.assessmentId,
       req.params.userId,
+      false,
       req.query.page as string,
       req.query.pageSize as string,
       req.query.order as "ASC" | "DESC"
@@ -1148,6 +1149,30 @@ export const getUserAssessmentResponsesController: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       data: userAssessmentResponses
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyAssessmentResponsesController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const myAssessmentResponses = await getUserAssessmentResponses(
+      req.params.assessmentId,
+      req.user.userId,
+      true,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: myAssessmentResponses
     });
   } catch (error) {
     next(error);
