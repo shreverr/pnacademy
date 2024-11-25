@@ -59,6 +59,7 @@ import {
   getAssessmentsGroupsList,
   getGroupAssessmentAnalyticsByAssessmentIdAndGroupId,
   getResultsByAssessmentIdAndGroupId,
+  getUserAssessmentResponsesByAssessmentIdAndUserId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -1037,6 +1038,54 @@ export const viewGroupAssessmentResults = async (
 
   return {
     results: results,
+    totalPages: totalPages,
+  };
+};
+
+export const getUserAssessmentResponses = async (
+  assessmentId: string,
+  userId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  order?: "ASC" | "DESC"
+): Promise<{
+  sections: any[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  order = order ?? "ASC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: questions, count: allResultsCount } = await getUserAssessmentResponsesByAssessmentIdAndUserId(
+    assessmentId,
+    userId,
+    offset,
+    pageSize,
+    order
+  );
+
+  const sections: any = []
+
+  questions.forEach((question) => {
+    question.options.forEach((option: any) => {
+      option.is_selected = option.id === question.selected_option_id
+    })
+
+    question.selected_option_id = undefined
+
+    const sectionIndex = question.section - 1; // section number (1-based) to array index (0-based)
+    if (!sections[sectionIndex]) {
+      sections[sectionIndex] = [];
+    }
+    sections[sectionIndex].push(question);
+  });
+
+  const totalPages = Math.ceil(allResultsCount / pageSize);
+
+  return {
+    sections: sections,
     totalPages: totalPages,
   };
 };

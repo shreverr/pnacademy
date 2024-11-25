@@ -17,6 +17,7 @@ import {
   endSection,
   exportAssessments,
   generateAiQuestionsService,
+  getUserAssessmentResponses,
   publishResult,
   removeGroupFromAssessment,
   removeSectionFromAssessment,
@@ -1129,3 +1130,26 @@ export const searchAssignedAssesmentsController: RequestHandler = async (
     next(error)
   }
 }
+
+export const getUserAssessmentResponsesController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userAssessmentResponses = await getUserAssessmentResponses(
+      req.params.assessmentId,
+      req.params.userId,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: userAssessmentResponses
+    });
+  } catch (error) {
+    next(error);
+  }
+};

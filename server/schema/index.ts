@@ -138,6 +138,22 @@ const instantiateModels = async (): Promise<void> => {
     onDelete: "CASCADE",
   });
 
+  AssessmentResponse.belongsTo(Question, {  
+    foreignKey: "question_id",
+  });
+
+  AssessmentResponse.belongsTo(User, {
+    foreignKey: "user_id",
+  });
+
+  AssessmentResponse.belongsTo(Assessment, {
+    foreignKey: "assessment_id",
+  });
+
+  AssessmentResponse.belongsTo(Option, {
+    foreignKey: "selected_option_id",
+  });
+
   Option.hasMany(AssessmentResponse, {
     foreignKey: "selected_option_id",
     onDelete: "CASCADE",

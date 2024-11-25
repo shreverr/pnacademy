@@ -2085,7 +2085,7 @@ export const getResultsByAssessmentIdAndGroupId = async (
     if ((offset !== null && offset !== undefined) && pageSize && sortBy && order) {
       findOptions.limit = pageSize;
       findOptions.offset = offset;
-      
+
       // Handle sorting for user attributes vs result attributes
       if (sortBy === "first_name" || sortBy === "last_name" || sortBy === "email") {
         findOptions.order = [[{ model: User, as: "user" }, sortBy, order]];
@@ -2160,6 +2160,92 @@ export const getResultsByAssessmentIdAndGroupId = async (
   }
 };
 
+export const getUserAssessmentResponsesByAssessmentIdAndUserId = async (
+  assessmentId: string,
+  userId: string,
+  offset?: number,
+  pageSize?: number,
+  order?: "ASC" | "DESC"
+): Promise<{
+  rows: any[];
+  count: number;
+}> => {
+  try {
+    // Initialize findOptions with base configuration
+    const findOptions: FindAndCountOptions = {
+      subQuery: false,
+      // model: Question,
+      include: [
+        {
+          model: Option,
+          required: true,
+          attributes: { exclude: ["createdAt", "updatedAt", "question_id"] },
+          separate: true
+        },
+        {
+          model: AssessmentResponse,
+          required: false, // Use left join to include unanswered questions
+          where: {
+            user_id: userId
+          },
+          attributes: ["selected_option_id"]
+        }
+      ],
+      where: {
+        assessment_id: assessmentId
+      },
+      attributes: { exclude: ["createdAt", "updatedAt", "assessment_id"] }
+    };
+
+    // Add pagination and sorting if parameters are provided
+    if (typeof pageSize === 'number' && typeof offset === 'number') {
+      findOptions.limit = pageSize;
+      findOptions.offset = offset;
+    }
+
+    // Add sorting if parameters are provided
+    if (order) {
+      findOptions.order = [['createdAt', order], ['section', 'ASC']];
+    }
+
+    const allQuestions = await Question.findAndCountAll(findOptions);
+
+    if (allQuestions.count === 0) {
+      throw new AppError(
+        "Questions not found",
+        404,
+        "No questions found for this assessment",
+        false
+      );
+    }
+
+    // Convert to plain object and format the response
+    const plainData = {
+      rows: allQuestions.rows.map((question: any) => {
+        const plainQuestion = question.get({ plain: true });
+        return {
+          ...plainQuestion,
+          assessment_responses: undefined, // Remove this property if you don't need it
+          selected_option_id: plainQuestion.assessment_responses?.[0]?.selected_option_id || null,
+        };
+      }),
+      count: allQuestions.count
+    };
+
+    return plainData as any;
+
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(
+      "Error getting assessment questions",
+      500,
+      error,
+      true
+    );
+  }
+};
 export const getAssessmentResultList = async (
   offset?: number,
   pageSize?: number,
