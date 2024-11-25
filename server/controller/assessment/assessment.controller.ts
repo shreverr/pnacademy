@@ -17,6 +17,7 @@ import {
   endSection,
   exportAssessments,
   generateAiQuestionsService,
+  getQuestionExplanation,
   getUserAssessmentResponses,
   publishResult,
   removeGroupFromAssessment,
@@ -1173,6 +1174,25 @@ export const getMyAssessmentResponsesController: RequestHandler = async (
     return res.status(200).json({
       status: "success",
       data: myAssessmentResponses
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getQuestionExplanationController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const questionExplanation = await getQuestionExplanation(
+      req.params.questionId,
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: questionExplanation
     });
   } catch (error) {
     next(error);

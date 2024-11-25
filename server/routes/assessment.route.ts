@@ -32,6 +32,7 @@ import {
   getMyAssessmentResponsesController,
   getOngoingAssessmentController,
   getPastAssessmentController,
+  getQuestionExplanationController,
   getResultController,
   getScheduledAssessmentController,
   getUserAssessmentResponsesController,
@@ -101,6 +102,7 @@ import {
   validateGetGroupAssessmentResults,
   validateGetMyAssessmentResponses,
   validateGetMyAssessmentsResultList,
+  validateGetQuestionExplanation,
   validateGetResult,
   validateGetUserAssessmentResponses,
   validatePublishResult,
@@ -4713,6 +4715,80 @@ router.get(
   validateGetMyAssessmentResponses,
   validateRequest,
   getMyAssessmentResponsesController
+);
+
+/**
+ * @swagger
+ * /v1/assessment/{questionId}/explain:
+ *   get:
+ *     summary: Get explanation for a specific assessment question
+ *     description: Retrieves the detailed explanation for a specific question in an assessment by its ID.
+ *     tags:
+ *       - Assessment View Controller
+ *     parameters:
+ *       - name: questionId
+ *         in: path
+ *         required: true
+ *         description: The unique identifier of the question.
+ *         schema:
+ *           type: string
+ *           example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved the question explanation.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the operation.
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     explanation:
+ *                       type: string
+ *                       description: The detailed explanation for the question.
+ *                       example: "Node.js is not a framework for building user interfaces (front-end), a database system for storing data, or a compiler that translates JavaScript into machine code. Instead, Node.js is a runtime environment that allows you to execute JavaScript code on a server. This means you can use JavaScript to build the back-end (server-side) logic of web applications, APIs, and other server-based systems. It provides an environment with libraries and tools to handle network requests, file systems, and other server-side tasks, all using JavaScript."
+ *       '404':
+ *         description: Question not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating that the question was not found.
+ *                   example: Question not found
+ *       '500':
+ *         description: Internal Server Error. An unexpected error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: The status of the error.
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   description: A message describing the error.
+ *                   example: Error retrieving question explanation
+ */
+router.get(
+  "/:questionId/explain",
+  authenticateUser(["canViewReport", "canManageReports"], true),
+  validateGetQuestionExplanation,
+  validateRequest,
+  getQuestionExplanationController
 );
 
 export default router;

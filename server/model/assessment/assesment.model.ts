@@ -1159,6 +1159,60 @@ export const generateAiQuestions = async (
   }
 };
 
+export const generateQuestionExplanation = async (
+  question: string,
+  options: string[],
+  correctOption: string
+): Promise<string> => {
+  try {
+    const prompt = `
+    You are tasked with explaing why "${correctOption} is the correct answer among 
+    ${options.map((option, index) => `${index + 1}. "${option}"\n`)} for the question ${question}".
+    
+    Output the result as a JSON should have the following structure:
+    - "explanation": A string containing the explanation.
+    
+    Use the following information for context between the triple quotes:
+    """
+    Question: ${question}
+    Options: ${options.map((option, index) => `${index + 1}. "${option}"\n`)}
+    Correct Option: ${correctOption}
+    """
+ 
+    `;
+    const data = await model.generateContent(prompt);
+    const responseText = data.response.text();
+
+    let parsedExplanation: { explanation: string };
+
+    try {
+      parsedExplanation = JSON.parse(responseText);
+    } catch (error) {
+      if (
+        responseText.includes("```json\n") &&
+        responseText.includes("\n```")
+      ) {
+        const jsonContent = responseText
+          .trim()
+          .split("```json\n")[1]
+          .split("\n```")[0];
+        parsedExplanation = JSON.parse(jsonContent);
+      } else {
+        throw new Error("Response format is incorrect.");
+      }
+    }
+
+    return parsedExplanation.explanation;
+  } catch (error) {
+    throw new AppError(
+      "Error generating AI questions",
+      500,
+      String(error),
+      true
+    );
+  }
+};
+
 export const removeSectionFromAssessmentById = async (
   assessmentId: string,
   section: number

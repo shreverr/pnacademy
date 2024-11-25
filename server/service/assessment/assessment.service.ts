@@ -60,6 +60,7 @@ import {
   getGroupAssessmentAnalyticsByAssessmentIdAndGroupId,
   getResultsByAssessmentIdAndGroupId,
   getUserAssessmentResponsesByAssessmentIdAndUserId,
+  generateQuestionExplanation,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -532,7 +533,7 @@ export const viewAssessmentBulk = async (
 
 export const viewQuestionDetails = async (
   userId: UUID
-): Promise<QuestionDetailedData | null> => {
+): Promise<QuestionDetailedData> => {
   const questionData = await getQuestionAndOptionsById(userId);
   if (questionData === null) {
     throw new AppError(
@@ -747,6 +748,39 @@ export const generateAiQuestionsService = async (
     );
   }
   return questions;
+};
+
+
+export const getQuestionExplanation = async (
+  questionId: string
+): Promise<{ explanation: string } | null> => {
+  const question = await viewQuestionDetails(questionId as UUID)
+  let correctOption: string = ''
+  let options: string[] = []
+  
+  question.options.forEach((option) => {
+    if (option.is_correct) {
+      correctOption = option.description
+    }
+
+    options.push(option.description)
+  })
+
+  const explanation = await generateQuestionExplanation(
+    question.description,
+    options,
+    correctOption
+  );
+
+  if (explanation === null) {
+    throw new AppError(
+      "Explanation Generation Failed",
+      404,
+      "Explanation failed to generate",
+      false
+    );
+  }
+  return { explanation };
 };
 
 export const saveGeneratedAiQuestions = async (assessment: {

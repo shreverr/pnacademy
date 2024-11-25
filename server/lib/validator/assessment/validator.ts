@@ -1053,3 +1053,12 @@ export const validateGetMyAssessmentResponses = [
          "ASC", "DESC",`
     ),
 ];
+
+export const validateGetQuestionExplanation = [
+  param("questionId")
+    .not()
+    .isEmpty()
+    .withMessage("questionId cannot be empty")
+    .isUUID(4)
+    .withMessage("questionId should be a valid UUID v4"),
+];
