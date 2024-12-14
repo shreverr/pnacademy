@@ -806,6 +806,47 @@ export const validateGetAssessmentsGroupsList = [
     ),
 ]
 
+export const validateGetGroupsAssessmentResultsList = [
+  param("groupId")
+  .not()
+  .isEmpty()
+  .withMessage("groupId cannot be empty")
+  .isUUID(4)
+  .withMessage("groupId should be a valid UUID v4"),
+
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches(
+      "^(id|name|group_id|createdAt|updatedAt)$"
+    )
+    .withMessage(
+      `Must match one of the specified options:
+          id|name|group_id|createdAt|updatedAt`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+         "ASC", "DESC",`
+    ),
+]
+
 export const validateGetMyAssessmentsResultList = [
   query("page")
     .optional()
@@ -880,7 +921,7 @@ export const validateGetGroupAssessmentResults = [
     .isUUID(4)
     .withMessage("groupId should be a valid UUID v4"),
 
-    query("page")
+  query("page")
     .optional()
     .isInt({
       min: 1,
@@ -1000,7 +1041,7 @@ export const validateGetUserAssessmentResponses = [
     .isUUID(4)
     .withMessage("userId should be a valid UUID v4"),
 
-    query("page")
+  query("page")
     .optional()
     .isInt({
       min: 1,
@@ -1031,7 +1072,7 @@ export const validateGetMyAssessmentResponses = [
     .isUUID(4)
     .withMessage("assessmentId should be a valid UUID v4"),
 
-    query("page")
+  query("page")
     .optional()
     .isInt({
       min: 1,

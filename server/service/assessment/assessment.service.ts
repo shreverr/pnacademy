@@ -61,6 +61,7 @@ import {
   getResultsByAssessmentIdAndGroupId,
   getUserAssessmentResponsesByAssessmentIdAndUserId,
   generateQuestionExplanation,
+  getResultsListByGroupId,
 } from "../../model/assessment/assesment.model";
 import {
   type OptionData,
@@ -1075,6 +1076,40 @@ export const viewGroupAssessmentResults = async (
     totalPages: totalPages,
   };
 };
+
+export const viewGroupsAssessmentResultsList = async (
+  groupId: string,
+  pageStr?: string,
+  pageSizeStr?: string,
+  sortBy?: keyof AssessmentResultAttributes | 'createdAt' | 'updatedAt',
+  order?: "ASC" | "DESC"
+): Promise<{
+  results: AssessmentResult[];
+  totalPages: number;
+}> => {
+  const page = parseInt(pageStr ?? "1");
+  const pageSize = parseInt(pageSizeStr ?? "10");
+  sortBy = sortBy ?? "createdAt";
+  order = order ?? "DESC";
+
+  const offset = (page - 1) * pageSize;
+
+  const { rows: results, count: allResultsCount } = await getResultsListByGroupId(
+    groupId,
+    offset,
+    pageSize,
+    sortBy,
+    order
+  );
+
+  const totalPages = Math.ceil(allResultsCount / pageSize);
+
+  return {
+    results: results,
+    totalPages: totalPages,
+  };
+};
+
 
 export const getUserAssessmentResponses = async (
   assessmentId: string,

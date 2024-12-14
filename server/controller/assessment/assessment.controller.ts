@@ -52,6 +52,7 @@ import {
   viewAssignedAssessments,
   viewGroupAssessmentAnalytics,
   viewGroupAssessmentResults,
+  viewGroupsAssessmentResultsList,
   viewQuestionDetails,
   viewTag,
   viewUserAssessmentResultsList,
@@ -72,6 +73,7 @@ import {
 } from "../../types/assessment.types";
 import { deleteFileFromDisk } from "../../lib/file";
 import { GroupAssessmentResultAttributes } from "../../schema/assessment/groupAssessmentResult.schema";
+import { AssessmentResultAttributes } from "../../schema/assessment/assessmentResult.schema";
 
 export const CreateAssessmentController: RequestHandler = async (
   req: Request,
@@ -812,6 +814,29 @@ export const getGroupAssessmentResultsController: RequestHandler = async (
       req.query.page as string,
       req.query.pageSize as string,
       req.query.sortBy as UserResultAttributes,
+      req.query.order as "ASC" | "DESC"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      data: groupAssessmentResults
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getGroupsAssessmentResultsListController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const groupAssessmentResults = await viewGroupsAssessmentResultsList(
+      req.params.groupId,
+      req.query.page as string,
+      req.query.pageSize as string,
+      req.query.sortBy as "createdAt" | "updatedAt" | keyof AssessmentResultAttributes,
       req.query.order as "ASC" | "DESC"
     );
 
