@@ -2601,11 +2601,14 @@ export const getUserAssessmentResultList = async (
           uar.wrong_answers_count,
           a.id AS "assessment.id",
           a.name AS "assessment.name",
-          a.description AS "assessment.description"
+          a.description AS "assessment.description",
+          ar.total_marks AS "assessment.total_marks"
       FROM 
           user_assessment_results uar
       INNER JOIN 
           assessments a ON uar.assessment_id = a.id
+      INNER JOIN 
+          assessment_results ar ON a.id = ar.assessment_id
       INNER JOIN 
           published_assessments pa ON a.id = pa.assessment_id
       WHERE 
@@ -2653,7 +2656,8 @@ export const getUserAssessmentResultList = async (
       assessment: {
         id: result['assessment.id'],
         name: result['assessment.name'],
-        description: result['assessment.description']
+        description: result['assessment.description'],
+        total_marks: result['assessment.total_marks']
       }
     }));
 

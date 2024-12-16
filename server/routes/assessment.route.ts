@@ -3078,6 +3078,10 @@ router.get(
  *                                 type: string
  *                                 description: A description of the assessment.
  *                                 example: A new project
+ *                               total_marks:
+ *                                 type: string
+ *                                 description: Total marks of the assessment.
+ *                                 example: A new project
  *                     totalPages:
  *                       type: integer
  *                       description: The total number of pages available.
