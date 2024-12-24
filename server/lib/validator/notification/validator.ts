@@ -170,3 +170,60 @@ export const validateGroupSearch = [
        "ASC", "DESC",`
     ),
 ];
+
+export const validateGetAllGroups = [
+  query("page")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page must be a number >= 1"),
+
+  query("pageSize")
+    .optional()
+    .isInt({
+      min: 1,
+    })
+    .withMessage("Page size must be a number >= 1"),
+
+  query("sortBy")
+    .optional()
+    .matches("^(id|name|createdAt|updatedAt)$")
+    .withMessage(
+      `Column names must match one of the specified options:
+        "id", "name", "createdAt",
+        or "updatedAt".`
+    ),
+
+  query("order")
+    .optional()
+    .matches("^(ASC|DESC)$")
+    .withMessage(
+      `Must match one of the specified options:
+       "ASC", "DESC",`
+    ),
+];
+
+export const validateGroupsId = [
+  check("groupIds.*")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+
+    .withMessage("Should be a valid uuid v4"),
+];
+
+export const validateGroupUpdate = [
+  check("id")
+    .not()
+    .isEmpty()
+    .isUUID(4)
+
+    .withMessage("Should be a valid uuid v4"),
+
+  check("name")
+    .optional()
+    .isLength({ min: 2, max: 255 })
+
+    .withMessage("Group name must be 2 - 255 characters long"),
+];

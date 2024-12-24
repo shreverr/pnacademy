@@ -39,7 +39,7 @@ import { UUID } from "crypto";
 import logger from "../../config/logger";
 import { csvToObjectArray, objectArrayToCSV } from "../../utils/csvParser";
 import { deleteFileFromDisk } from "../../lib/file";
-import { getAssessmentCountByType } from "../../model/assessment/assesment.model";
+// import { getAssessmentCountByType } from "../../model/assessment/assesment.model";
 import User from "../../schema/user/user.schema";
 
 export const viewUserDetails = async (
@@ -626,18 +626,18 @@ export const searchUsers = async (
 };
 
 
-export const totalUserAssessmentCount= async (userId: string): Promise<number> => {
-  const assessmentCount = await getAssessmentCountByType({type: 'total',user_id: userId});
-  return assessmentCount;;
-}
-export const totalOngoingUserAssessmentCount= async (userId: string): Promise<number> => {
-  const assessmentCount = await getAssessmentCountByType({type: 'ongoing',user_id: userId});
-  return assessmentCount;;
-}
-export const totalscheduledUserAssessmentCount= async (userId: string): Promise<number> => {
-  const assessmentCount = await getAssessmentCountByType({type: 'scheduled',user_id: userId});
-  return assessmentCount;;
-}
+// export const totalUserAssessmentCount= async (userId: string): Promise<number> => {
+//   const assessmentCount = await getAssessmentCountByType({type: 'total',user_id: userId});
+//   return assessmentCount;;
+// }
+// export const totalOngoingUserAssessmentCount= async (userId: string): Promise<number> => {
+//   const assessmentCount = await getAssessmentCountByType({type: 'ongoing',user_id: userId});
+//   return assessmentCount;;
+// }
+// export const totalscheduledUserAssessmentCount= async (userId: string): Promise<number> => {
+//   const assessmentCount = await getAssessmentCountByType({type: 'scheduled',user_id: userId});
+//   return assessmentCount;;
+// }
 export const viewAllUsersCount= async (): Promise<number> => {
   const allUsersCount = await getAllUserCount();
 

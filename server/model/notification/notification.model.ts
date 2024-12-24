@@ -8,8 +8,6 @@ import { groupAttributes, NotificationSortBy } from '../../types/notification.ty
 import NotificationGroup from '../../schema/junction/notificationGroup.schema'
 import User from '../../schema/user/user.schema'
 import { isValidUUID } from '../../utils/validator'
-import { AssementData, AssessmentAttribute } from '../../types/assessment.types'
-import Assessment, { AssessmentAttributes } from '../../schema/assessment/assessment.schema'
 import AssessmentGroup from '../../schema/junction/assessmentGroup.schema'
 import { log } from 'console'
 
@@ -480,57 +478,57 @@ export const viewGroupCount = async (): Promise<number> => {
     );
   }
 }
-export const getAssessmentByGroupIdInDB = async (
-  groupId: string,
-  offset?: number,
-  pageSize?: number,
-  sortBy?: Exclude<keyof AssessmentAttributes, "created_by">,
-  order?: "ASC" | "DESC"
-): Promise<{
-  rows: Omit<AssessmentAttributes, "created_by">[];
-  count: number;
-}> => {
-  try {
-    const findOptions: FindAndCountOptions = {
-      where: {
-        group_id: groupId,
-      },
-      include: [
-        {
-          model: Assessment,
-          required: true, // Use INNER JOIN for better performance
-          attributes: {
-            exclude: ["created_by"],
-          },
-        },
-      ],
-    };
+// export const getAssessmentByGroupIdInDB = async (
+//   groupId: string,
+//   offset?: number,
+//   pageSize?: number,
+//   sortBy?: Exclude<keyof AssessmentAttributes, "created_by">,
+//   order?: "ASC" | "DESC"
+// ): Promise<{
+//   rows: Omit<AssessmentAttributes, "created_by">[];
+//   count: number;
+// }> => {
+//   try {
+//     const findOptions: FindAndCountOptions = {
+//       where: {
+//         group_id: groupId,
+//       },
+//       include: [
+//         {
+//           model: Assessment,
+//           required: true, // Use INNER JOIN for better performance
+//           attributes: {
+//             exclude: ["created_by"],
+//           },
+//         },
+//       ],
+//     };
 
-    // Add sorting and pagination if provided
-    if (offset !== undefined && pageSize && sortBy && order) {
-      findOptions.limit = pageSize;
-      findOptions.offset = offset;
-      // Fix: Sort by the assessment model's column instead of assessment_group
-      findOptions.order = [[{ model: Assessment, as: 'Assessment' }, sortBy, order]];
-    }
+//     // Add sorting and pagination if provided
+//     if (offset !== undefined && pageSize && sortBy && order) {
+//       findOptions.limit = pageSize;
+//       findOptions.offset = offset;
+//       // Fix: Sort by the assessment model's column instead of assessment_group
+//       findOptions.order = [[{ model: Assessment, as: 'Assessment' }, sortBy, order]];
+//     }
 
-    const allAssessments = await AssessmentGroup.findAndCountAll(findOptions);
+//     const allAssessments = await AssessmentGroup.findAndCountAll(findOptions);
 
-    // Transform the data to match the expected type
-    const plainData = {
-      rows: allAssessments.rows.map((assessmentGroup) => 
-        (assessmentGroup.get({ plain: true }) as any).assessment
-      ),
-      count: allAssessments.count,
-    };
+//     // Transform the data to match the expected type
+//     const plainData = {
+//       rows: allAssessments.rows.map((assessmentGroup) => 
+//         (assessmentGroup.get({ plain: true }) as any).assessment
+//       ),
+//       count: allAssessments.count,
+//     };
 
-    return plainData;
-  } catch (error: any) {
-    throw new AppError(
-      "error getting all assessments",
-      500,
-      error,
-      true
-    );
-  }
-};
+//     return plainData;
+//   } catch (error: any) {
+//     throw new AppError(
+//       "error getting all assessments",
+//       500,
+//       error,
+//       true
+//     );
+//   }
+// };

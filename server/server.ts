@@ -4,7 +4,7 @@ import logger from "./config/logger";
 import swaggerDocs from "./config/swagger";
 import { AppError } from "./lib/appError";
 import fs from "fs";
-import { defineCustomRelations, initFullTextSearch } from "./schema";
+import { initFullTextSearch } from "./schema";
 import { createSuperAdminIfNotExists } from "./utils/serverInit";
 
 logger.info("/////////////////////////////////////////////");
@@ -38,7 +38,6 @@ void sequelize
     alter: process.env.ENVIRONMENT === "dev",
   })
   .then(async () => {
-    await defineCustomRelations()
     await initFullTextSearch()
     await createSuperAdminIfNotExists()
     logger.info("Postgres database synced successfully!");

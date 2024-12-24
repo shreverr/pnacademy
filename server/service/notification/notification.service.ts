@@ -10,7 +10,7 @@ import {
   deleteNotificationInDB,
   getAllGroups,
   getAllNotifications,
-  getAssessmentByGroupIdInDB,
+  // getAssessmentByGroupIdInDB,
   getGroupById,
   getGroupByName,
   getnotificationById,
@@ -36,8 +36,8 @@ import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
 import { NotificationAttributes } from "../../schema/group/notification.schema";
 import Group from "../../schema/group/group.schema";
-import { AssementData, AssessmentAttribute } from "../../types/assessment.types";
-import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
+// import { AssementData, AssessmentAttribute } from "../../types/assessment.types";
+// import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 
 export const createNotification = async (notification: {
   description: string;
@@ -432,37 +432,37 @@ export const viewAllGroupsCount = async (): Promise<number> => {
   return allGroupsCount;
 };
 
-export const getAssessmentByGroupId= async (
-  groupId: string,
-  pageStr?: string,
-  pageSizeStr?: string,
-  sortBy?: Exclude<keyof AssessmentAttributes, "created_by">,
-  order?: "ASC" | "DESC"
+// export const getAssessmentByGroupId= async (
+//   groupId: string,
+//   pageStr?: string,
+//   pageSizeStr?: string,
+//   sortBy?: Exclude<keyof AssessmentAttributes, "created_by">,
+//   order?: "ASC" | "DESC"
 
-): Promise<{
-  assessments: Omit<AssessmentAttributes, "created_by">[];
-  totalPages: number;
-}> => {  
+// ): Promise<{
+//   assessments: Omit<AssessmentAttributes, "created_by">[];
+//   totalPages: number;
+// }> => {  
   
-  const page = parseInt(pageStr ?? "1");
-  const pageSize = parseInt(pageSizeStr ?? "10");
-  sortBy = sortBy ?? "name";
-  order = order ?? "ASC";
+//   const page = parseInt(pageStr ?? "1");
+//   const pageSize = parseInt(pageSizeStr ?? "10");
+//   sortBy = sortBy ?? "name";
+//   order = order ?? "ASC";
 
-  const offset = (page - 1) * pageSize;
+//   const offset = (page - 1) * pageSize;
 
-  const { rows: allAssesmentsData, count: allAssesmentsCount } =
-    await getAssessmentByGroupIdInDB(
-      groupId,
-      offset,
-      pageSize,
-      sortBy,
-      order
-    );
-    const totalPages = Math.ceil(allAssesmentsCount / pageSize);
+//   const { rows: allAssesmentsData, count: allAssesmentsCount } =
+//     await getAssessmentByGroupIdInDB(
+//       groupId,
+//       offset,
+//       pageSize,
+//       sortBy,
+//       order
+//     );
+//     const totalPages = Math.ceil(allAssesmentsCount / pageSize);
 
-    return {
-      assessments: allAssesmentsData, 
-      totalPages: totalPages,
-    };
-}
+//     return {
+//       assessments: allAssesmentsData, 
+//       totalPages: totalPages,
+//     };
+// }

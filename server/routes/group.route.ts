@@ -13,11 +13,10 @@ import {
   deleteGroupController,
   getAllGroupsController,
   getAllGroupsCountController,
-  getAssessmentByGroupIdController,
+  // getAssessmentByGroupIdController,
   UpdateGroupController,
 } from "../controller/notification,/notification.controller";
-import { validateGetAssessmentbyGroupId } from "../lib/validator/assessment/validator";
-import { getAssessmentAnalytics } from "../controller/assessment/assessment.controller";
+// import { validateGetAssessmentbyGroupId } from "../lib/validator/assessment/validator";
 
 const router: Router = express.Router();
 
@@ -429,125 +428,125 @@ router.get(
 );
 
 
-/**
- * @swagger
- * /v1/groups/assessment:
- *   get:
- *     summary: Get assessments by group ID
- *     tags:
- *       - Group
- *     parameters:
- *       - in: query
- *         name: groupId
- *         schema:
- *           type: string
- *           format: uuid
- *         required: true
- *         description: ID of the group to retrieve assessments for
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Page number for pagination
- *       - in: query
- *         name: pageSize
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 10
- *         description: Number of items per page
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [name, createdAt, start_at, end_at]
- *           default: name
- *         description: Field to sort by
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *           default: ASC
- *         description: Sort order
- *     responses:
- *       '200':
- *         description: Assessments retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "success"
- *                 data:
- *                   type: object
- *                   properties:
- *                     assessments:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                             format: uuid
- *                           name:
- *                             type: string
- *                           description:
- *                             type: string
- *                           is_active:
- *                             type: boolean
- *                           start_at:
- *                             type: string
- *                             format: date-time
- *                           end_at:
- *                             type: string
- *                             format: date-time
- *                           duration:
- *                             type: integer
- *                           search_vector:
- *                             type: string
- *                           createdAt:
- *                             type: string
- *                             format: date-time
- *                           updatedAt:
- *                             type: string
- *                             format: date-time
- *                         required:
- *                           - id
- *                           - name
- *                           - description
- *                           - is_active
- *                           - start_at
- *                           - end_at
- *                           - duration
- *                     totalPages:
- *                       type: integer
- *                   required:
- *                     - assessments
- *                     - totalPages
- *               required:
- *                 - message
- *                 - data
- *       '400':
- *         description: Bad request. Invalid parameters provided
- *       '401':
- *         description: Unauthorized. User doesn't have required permissions
- *       '404':
- *         description: Group not found
- *       '500':
- *         description: Internal server error
- */
-router.get(
-  "/groups/assessment",
-  authenticateUser(["canViewReport"]),
-  validateGetAssessmentbyGroupId,
-  validateRequest,
-  getAssessmentByGroupIdController
-)
+// /**
+//  * @swagger
+//  * /v1/groups/assessment:
+//  *   get:
+//  *     summary: Get assessments by group ID
+//  *     tags:
+//  *       - Group
+//  *     parameters:
+//  *       - in: query
+//  *         name: groupId
+//  *         schema:
+//  *           type: string
+//  *           format: uuid
+//  *         required: true
+//  *         description: ID of the group to retrieve assessments for
+//  *       - in: query
+//  *         name: page
+//  *         schema:
+//  *           type: integer
+//  *           minimum: 1
+//  *           default: 1
+//  *         description: Page number for pagination
+//  *       - in: query
+//  *         name: pageSize
+//  *         schema:
+//  *           type: integer
+//  *           minimum: 1
+//  *           default: 10
+//  *         description: Number of items per page
+//  *       - in: query
+//  *         name: sortBy
+//  *         schema:
+//  *           type: string
+//  *           enum: [name, createdAt, start_at, end_at]
+//  *           default: name
+//  *         description: Field to sort by
+//  *       - in: query
+//  *         name: order
+//  *         schema:
+//  *           type: string
+//  *           enum: [ASC, DESC]
+//  *           default: ASC
+//  *         description: Sort order
+//  *     responses:
+//  *       '200':
+//  *         description: Assessments retrieved successfully
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 message:
+//  *                   type: string
+//  *                   example: "success"
+//  *                 data:
+//  *                   type: object
+//  *                   properties:
+//  *                     assessments:
+//  *                       type: array
+//  *                       items:
+//  *                         type: object
+//  *                         properties:
+//  *                           id:
+//  *                             type: string
+//  *                             format: uuid
+//  *                           name:
+//  *                             type: string
+//  *                           description:
+//  *                             type: string
+//  *                           is_active:
+//  *                             type: boolean
+//  *                           start_at:
+//  *                             type: string
+//  *                             format: date-time
+//  *                           end_at:
+//  *                             type: string
+//  *                             format: date-time
+//  *                           duration:
+//  *                             type: integer
+//  *                           search_vector:
+//  *                             type: string
+//  *                           createdAt:
+//  *                             type: string
+//  *                             format: date-time
+//  *                           updatedAt:
+//  *                             type: string
+//  *                             format: date-time
+//  *                         required:
+//  *                           - id
+//  *                           - name
+//  *                           - description
+//  *                           - is_active
+//  *                           - start_at
+//  *                           - end_at
+//  *                           - duration
+//  *                     totalPages:
+//  *                       type: integer
+//  *                   required:
+//  *                     - assessments
+//  *                     - totalPages
+//  *               required:
+//  *                 - message
+//  *                 - data
+//  *       '400':
+//  *         description: Bad request. Invalid parameters provided
+//  *       '401':
+//  *         description: Unauthorized. User doesn't have required permissions
+//  *       '404':
+//  *         description: Group not found
+//  *       '500':
+//  *         description: Internal server error
+//  */
+// router.get(
+//   "/groups/assessment",
+//   authenticateUser(["canViewReport"]),
+//   validateGetAssessmentbyGroupId,
+//   validateRequest,
+//   getAssessmentByGroupIdController
+// )
 
 
 export default router;
