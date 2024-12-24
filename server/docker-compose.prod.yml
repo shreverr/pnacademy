@@ -26,3 +26,11 @@ services:
       target: production
     volumes: []
     command: pm2-runtime start ecosystem.config.js
+  
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data

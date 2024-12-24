@@ -6,6 +6,7 @@ import { AppError } from "./lib/appError";
 import fs from "fs";
 import { initFullTextSearch } from "./schema";
 import { createSuperAdminIfNotExists } from "./utils/serverInit";
+import redis from "./config/redis";
 
 logger.info("/////////////////////////////////////////////");
 logger.info("/////////////////////////////////////////////");
@@ -45,6 +46,10 @@ void sequelize
   .catch((error) => {
     logger.fatal(error);
   });
+
+
+// Redis initialization
+  redis
 
 const server = app.listen(port, () => {
   logger.info(`Server listening at http://localhost:${port}`);
