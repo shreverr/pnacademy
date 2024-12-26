@@ -28,7 +28,7 @@ export const scheduleAssessmentEndEvent = async (
   endAtUTC: Date
 ): Promise<void> => {
   try {
-    logger.info("Scheduling assessment end event")
+    logger.info(`Scheduling assessment end event for ${assessmentId}`)
 
     endAtUTC = new Date(endAtUTC);
     const endAtCronExpression = `cron(${endAtUTC.getUTCMinutes()} ${endAtUTC.getUTCHours()} ${endAtUTC.getUTCDate()} ${endAtUTC.getUTCMonth() + 1} ? ${endAtUTC.getUTCFullYear()})`;

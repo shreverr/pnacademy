@@ -5,7 +5,7 @@ import type { AppError } from './appError'
 class ErrorHandler {
   public async handleError (error: AppError, responseStream: Response): Promise<Response> {
     logger.error(error)
-    return responseStream.status(error.httpCode).json({
+    return responseStream.status(error.httpCode ?? 500).json({
       status: 'error',
       message: error.message
     })

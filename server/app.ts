@@ -14,7 +14,7 @@ app.use(cors())
 app.use(express.json());
 app.use(jsonParseError)
 app.use(pinoHttp({ logger, useLevel: "trace" }));
-app.use("/v1", router);
+app.use(router);
 app.use(handleError);
 
 instantiateModels();
