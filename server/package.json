@@ -18,6 +18,7 @@
     "@aws-sdk/client-s3": "^3.577.0",
     "@aws-sdk/s3-request-presigner": "^3.577.0",
     "@google/generative-ai": "^0.16.0",
+    "@scalar/express-api-reference": "^0.4.173",
     "@types/bcryptjs": "^2.4.6",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
