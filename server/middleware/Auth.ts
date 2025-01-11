@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-export const authenticateUser = (permissions?: Permissions[]) => {
+export const authenticateUser = (permissions?: Permissions[], requireAny: boolean = false) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]
@@ -32,15 +32,18 @@ export const authenticateUser = (permissions?: Permissions[]) => {
           .json({ error: commonErrorsDictionary.forbidden.name })
       }
 
-      //checks if all the permissions in the array are present in the user's permissions
-      if (permissions
-        && process.env.ENVIRONMENT === 'prod'
-        && (!permissions.every(permission => user.permissions.includes(permission)))) {
-        return res.status(commonErrorsDictionary.unauthorized.httpCode)
-          .json({
-            error: commonErrorsDictionary.unauthorized.name,
-            message: "Insufficient permissions"
-          })
+      if (permissions) {
+        const hasPermissions = requireAny
+          ? permissions.some(permission => user.permissions.includes(permission))  // OR logic
+          : permissions.every(permission => user.permissions.includes(permission)); // AND logic (default)
+
+        if (!hasPermissions) {
+          return res.status(commonErrorsDictionary.unauthorized.httpCode)
+            .json({
+              error: commonErrorsDictionary.unauthorized.name,
+              message: "Insufficient permissions"
+            })
+        }
       }
 
       req.user = user
