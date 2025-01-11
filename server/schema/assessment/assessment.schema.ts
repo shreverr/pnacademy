@@ -9,9 +9,10 @@ export interface AssessmentAttributes {
   isActive: boolean;
   startAt: Date;
   endAt: Date;
-  duration: number; 
+  duration: number;
   isPublished: boolean;
   totalMarks?: number;
+  search_vector?: any; // tsvector type
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -27,6 +28,7 @@ class Assessment extends Model<AssessmentAttributes> implements AssessmentAttrib
   public duration!: number;
   public isPublished!: boolean;
   public totalMarks?: number;
+  public search_vector?: any; // tsvector type
   public createdAt?: Date;
   public updatedAt?: Date;
 }
@@ -77,6 +79,10 @@ Assessment.init(
       allowNull: false,
       defaultValue: 0,
     },
+    search_vector: {
+      type: DataTypes.TSVECTOR,
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -94,5 +100,16 @@ Assessment.init(
     timestamps: true, // Automatically handle createdAt and updatedAt
   }
 );
+
+
+Assessment.addHook('beforeFind', (options) => {
+  options.attributes = { exclude: ['search_vector'] };
+});
+
+Assessment.addHook('afterCreate', (instance) => {
+  if (instance && instance.dataValues) {
+    delete instance.dataValues.search_vector;
+  }
+});
 
 export default Assessment;

@@ -11,6 +11,8 @@ import AssessmentGroup from "./junction/assessmentGroup.schema";
 import { sequelize } from "../config/database";
 import { QueryTypes } from "sequelize";
 import { AppError } from "../lib/appError";
+import Assessment from "./assessment/assessment.schema";
+import ProctoringOptions from "./assessment/proctoringOptions.schema";
 
 const models = [
   "./user/user.schema",
@@ -23,6 +25,8 @@ const models = [
   "./junction/notificationGroup.schema",
   "./junction/userGroup.schema",
   "./junction/assessmentGroup.schema",
+  "./assessment/assessment.schema.ts",
+  "./assessment/proctoringOptions.schema.ts",
 ];
 
 const instantiateModels = async (): Promise<void> => {
@@ -68,6 +72,28 @@ const instantiateModels = async (): Promise<void> => {
     foreignKey: "group_id",
     onDelete: "CASCADE",
   });
+
+  Assessment.hasOne(ProctoringOptions, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  })
+
+  ProctoringOptions.belongsTo(Assessment, {
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  })
+
+  Group.belongsToMany(Assessment, {
+    through: AssessmentGroup,
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
+  })
+
+  Assessment.belongsToMany(Group, {
+    through: AssessmentGroup,
+    foreignKey: "assessment_id",
+    onDelete: "CASCADE",
+  })
 }
 
 //Writing raw SQL to define foreign key constraints for section because squelize does not support composite foreign keys;
@@ -114,14 +140,14 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
-    // await sequelize.query(`
-    //   CREATE INDEX IF NOT EXISTS assessments_search_idx 
-    //   ON assessments 
-    //   USING GIN (search_vector);
-    // `, {
-    //   type: QueryTypes.RAW,
-    //   transaction
-    // });
+    await sequelize.query(`
+      CREATE INDEX IF NOT EXISTS assessments_search_idx 
+      ON assessments 
+      USING GIN (search_vector);
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
 
     // Create or replace the trigger function
     await sequelize.query(`
@@ -154,20 +180,20 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
-    // await sequelize.query(`
-    //   CREATE OR REPLACE FUNCTION assessments_search_vector_update() RETURNS trigger AS $func$
-    //   BEGIN
-    //     NEW.search_vector := 
-    //       setweight(to_tsvector('english', COALESCE(NEW.name, '')), 'A') ||
-    //       setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'A')
-    //       ;
-    //     RETURN NEW;
-    //   END;
-    //   $func$ LANGUAGE plpgsql;
-    // `, {
-    //   type: QueryTypes.RAW,
-    //   transaction
-    // });
+    await sequelize.query(`
+      CREATE OR REPLACE FUNCTION assessments_search_vector_update() RETURNS trigger AS $func$
+      BEGIN
+        NEW.search_vector := 
+          setweight(to_tsvector('english', COALESCE(NEW.name, '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'A')
+          ;
+        RETURN NEW;
+      END;
+      $func$ LANGUAGE plpgsql;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
 
     // Drop and recreate trigger
     await sequelize.query(`
@@ -212,15 +238,15 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
-    // await sequelize.query(`
-    //   CREATE TRIGGER assessments_search_vector_update
-    //   BEFORE INSERT OR UPDATE ON assessments
-    //   FOR EACH ROW
-    //   EXECUTE FUNCTION assessments_search_vector_update();
-    // `, {
-    //   type: QueryTypes.RAW,
-    //   transaction
-    // });
+    await sequelize.query(`
+      CREATE TRIGGER assessments_search_vector_update
+      BEFORE INSERT OR UPDATE ON assessments
+      FOR EACH ROW
+      EXECUTE FUNCTION assessments_search_vector_update();
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
 
     // Update existing records
     await sequelize.query(`
@@ -246,16 +272,16 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
-    // await sequelize.query(`
-    //   UPDATE assessments SET
-    //   search_vector = 
-    //     setweight(to_tsvector('english', COALESCE(name, '')), 'A') ||
-    //     setweight(to_tsvector('english', COALESCE(description, '')), 'A')
-    //   WHERE search_vector IS NULL;
-    // `, {
-    //   type: QueryTypes.RAW,
-    //   transaction
-    // });
+    await sequelize.query(`
+      UPDATE assessments SET
+      search_vector = 
+        setweight(to_tsvector('english', COALESCE(name, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(description, '')), 'A')
+      WHERE search_vector IS NULL;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
 
     await transaction.commit();
   } catch (error: any) {

@@ -61,7 +61,13 @@ User.init(
 )
 
 User.addHook('beforeFind', (options) => {
-  options.attributes = { exclude: ['search_vector'] };  
+  options.attributes = { exclude: ['search_vector'] };
+});
+
+User.addHook('afterCreate', (instance) => {
+  if (instance && instance.dataValues) {
+    delete instance.dataValues.search_vector;
+  }
 });
 
 export default User

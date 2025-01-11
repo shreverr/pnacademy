@@ -35,7 +35,13 @@ Group.init(
 )
 
 Group.addHook('beforeFind', (options) => {
-    options.attributes = { exclude: ['search_vector'] };  
+  options.attributes = { exclude: ['search_vector'] };
+});
+
+Group.addHook('afterCreate', (instance) => {
+  if (instance && instance.dataValues) {
+    delete instance.dataValues.search_vector;
+  }
 });
 
 export default Group
