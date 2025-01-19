@@ -1,4 +1,4 @@
-import { check, query, ValidationChain } from "express-validator";
+import { check, param, query, ValidationChain } from "express-validator";
 import { AssessmentAttributes } from "../../../schema/assessment/assessment.schema";
 
 type ValidTypes = "string" | "boolean" | "number" | "date" | "any" | "uuid";
@@ -242,6 +242,10 @@ export const validateAssessmentGet = [
 ];
 
 export const validateAssessmentUpdate = [
+  param("id")
+    .isUUID()
+    .withMessage("Assessment ID must be a valid UUIDv4"),
+
   check("image")
     .optional()
     .custom((value, { req }) => {
@@ -301,4 +305,10 @@ export const validateAssessmentUpdate = [
     .optional()
     .isBoolean()
     .withMessage("isPublished must be a boolean"),
+];
+
+export const validateAssessmentDelete = [
+  param("id")
+    .isUUID()
+    .withMessage("Assessment ID must be a valid UUIDv4"),
 ];

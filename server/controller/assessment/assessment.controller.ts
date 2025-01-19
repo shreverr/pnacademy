@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import { RequestHandler } from "express";
-import { createAssessment, getAssessments, updateAssessment } from "../../service/assessment/assessment.service";
+import { createAssessment, deleteAssessment, getAssessments, updateAssessment } from "../../service/assessment/assessment.service";
 import { permission } from "process";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import logger from "../../config/logger";
@@ -88,6 +88,22 @@ export const updateAssessmentController: RequestHandler = async (
     });
 
     return isUpdated ? res.status(204).send() : res.status(500).send()
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const deleteAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const isDeleted = await deleteAssessment({
+      id: req.params.id,
+    });
+
+    return isDeleted ? res.status(204).send() : res.status(404).send()
   } catch (error) {
     next(error);
   }

@@ -8,7 +8,7 @@ import { deleteFileFromS3, uploadFileToS3 } from "../../lib/file";
 import { deleteFileFromDisk } from "../../lib/file";
 import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
-import { scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
+import { deleteEventRule, scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
 
 /**
  * Creates a new assessment with optional image upload functionality.
@@ -211,6 +211,43 @@ export const updateAssessment = async (assessment: {
         imageKey: imageKey
       }, 'assessments');
 
+      throw new AppError(`Error scheduling assessment end event`, 500, error, true);
+    }
+  }
+
+  // Return assessment with image URL if it is provided
+  return affectedCount > 0;
+};
+
+export const deleteAssessment = async (assessment: {
+  id: string,
+}): Promise<boolean> => {
+  const existingAssessment = await assessmentRepository.findById(assessment.id, {}, { cacheKeyPrefix: 'assessments' });
+  if(!existingAssessment) {
+    throw new AppError(`Assessment not found`, 404, 'Assessment not found', true);
+  }
+
+  // delete image to S3 if provided
+  if (existingAssessment.imageKey) {
+    try {
+        await deleteFileFromS3(existingAssessment.imageKey);
+    } catch (error: any) {
+      throw new AppError(`Error deleting image to S3`, 500, error, true);
+    }
+  }
+
+  // update assessment in database
+  let affectedCount: number
+  try {
+    affectedCount = await assessmentRepository.delete(assessment.id, 'assessments');
+  } catch (error: any) {
+    throw new AppError(`Error deleting assessment`, 500, error, true);
+  }
+
+  if (existingAssessment.endAt) {
+    try {
+      await deleteEventRule(existingAssessment.id);
+    } catch (error: any) {
       throw new AppError(`Error scheduling assessment end event`, 500, error, true);
     }
   }

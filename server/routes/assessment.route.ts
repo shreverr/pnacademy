@@ -3,8 +3,8 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import { validateRequest } from "../utils/validateRequest";
 import { upload } from "../middleware/multer";
-import { validateAssessmentCreate, validateAssessmentGet, validateAssessmentUpdate } from "../lib/validator/assessment/validator";
-import { createAssessmentController, getAssessmentController, updateAssessmentController } from "../controller/assessment/assessment.controller";
+import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate } from "../lib/validator/assessment/validator";
+import { createAssessmentController, deleteAssessmentController, getAssessmentController, updateAssessmentController } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -300,6 +300,42 @@ router.patch(
   validateAssessmentUpdate,
   validateRequest,
   updateAssessmentController
+);
+
+/**
+ * @swagger
+ * /v2/assessments/{id}:
+ *   delete:
+ *     summary: Delete an assessment
+ *     description: Remove an existing assessment. Only users with canManageAssessment permission can perform this action.
+ *     tags:
+ *       - Assessments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The UUID of the assessment to delete
+ *     responses:
+ *       204:
+ *         description: Assessment successfully deleted
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *       403:
+ *         description: Forbidden - User lacks required permissions
+ *       404:
+ *         description: Assessment not found
+ */
+router.delete(
+  "/:id",
+  authenticateUser(["canManageAssessment"]),
+  validateAssessmentDelete,
+  validateRequest,
+  deleteAssessmentController
 );
 
 export default router;
