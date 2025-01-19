@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import { RequestHandler } from "express";
-import { createAssessment, getAssessments } from "../../service/assessment/assessment.service";
+import { createAssessment, getAssessments, updateAssessment } from "../../service/assessment/assessment.service";
 import { permission } from "process";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 import logger from "../../config/logger";
@@ -68,3 +68,27 @@ export const getAssessmentController: RequestHandler = async (
     next(error);
   }
 };
+
+export const updateAssessmentController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const isUpdated = await updateAssessment({
+      id: req.params.id,
+      name: req.body.name,
+      imagePath: req.file?.path,
+      description: req.body.description,
+      isActive: req.body.isActive,
+      startAt: req.body.startAt,
+      endAt: req.body.endAt,
+      duration: req.body.duration,
+      isPublished: req.body.isPublished,
+    });
+
+    return isUpdated ? res.status(204).send() : res.status(500).send()
+  } catch (error) {
+    next(error);
+  }
+}

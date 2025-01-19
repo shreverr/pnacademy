@@ -3,8 +3,8 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import { validateRequest } from "../utils/validateRequest";
 import { upload } from "../middleware/multer";
-import { validateAssessmentCreate, validateAssessmentGet } from "../lib/validator/assessment/validator";
-import { createAssessmentController, getAssessmentController } from "../controller/assessment/assessment.controller";
+import { validateAssessmentCreate, validateAssessmentGet, validateAssessmentUpdate } from "../lib/validator/assessment/validator";
+import { createAssessmentController, getAssessmentController, updateAssessmentController } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -230,6 +230,76 @@ router.get(
   validateAssessmentGet,
   validateRequest,
   getAssessmentController
+);
+
+/**
+ * @swagger
+ * /v2/assessments/{id}:
+ *   patch:
+ *     summary: Update an existing assessment
+ *     description: Update assessment details including optional image upload
+ *     tags:
+ *       - Assessments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Assessment ID
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Updated Assessment Name"
+ *               isActive:
+ *                 type: boolean
+ *               startAt:
+ *                 type: string
+ *                 format: date-time
+ *               endAt:
+ *                 type: string
+ *                 format: date-time
+ *               duration:
+ *                 type: integer
+ *               isPublished:
+ *                 type: boolean
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional binary image file
+ *               description:
+ *                 type: string
+ *     responses:
+ *       204:
+ *         description: Assessment successfully updated
+ *       400:
+ *         description: Invalid request payload
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *       403:
+ *         description: Forbidden - User lacks required permissions
+ *       404:
+ *         description: Assessment not found
+ *       500:
+ *         description: Internal server error during update
+ */
+router.patch(
+  "/:id",
+  authenticateUser(["canManageAssessment"]),
+  upload.single("image"),
+  validateAssessmentUpdate,
+  validateRequest,
+  updateAssessmentController
 );
 
 export default router;
