@@ -8,7 +8,11 @@ import logger from "../config/logger";
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user: {
+        userId: string,
+        roleId: string,
+        permissions: Permissions[]
+      }
     }
   }
 }

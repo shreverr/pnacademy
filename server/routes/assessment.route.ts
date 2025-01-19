@@ -3,9 +3,8 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import { validateRequest } from "../utils/validateRequest";
 import { upload } from "../middleware/multer";
-import { CreateNotificationController } from "../controller/notification,/notification.controller";
-import { validateAssessmentCreate } from "../lib/validator/assessment/validator";
-import { createAssessmentController } from "../controller/assessment/assessment.controller";
+import { validateAssessmentCreate, validateAssessmentGet } from "../lib/validator/assessment/validator";
+import { createAssessmentController, getAssessmentController } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -119,6 +118,14 @@ router.post(
   validateAssessmentCreate,
   validateRequest,
   createAssessmentController
+);
+
+router.get(
+  "/",
+  authenticateUser(["canManageAssessment", "canAttemptAssessment"], true),
+  validateAssessmentGet,
+  validateRequest,
+  getAssessmentController
 );
 
 export default router;

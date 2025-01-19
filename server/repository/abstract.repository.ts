@@ -1,12 +1,13 @@
 import redis from '../config/redis';
-import { Model, FindOptions, ModelStatic, WhereOptions, Transaction, Op, CreateOptions, UpdateOptions, DestroyOptions } from 'sequelize';
+import { Model, FindOptions, ModelStatic, WhereOptions, Transaction, Op, CreateOptions, UpdateOptions, DestroyOptions, literal } from 'sequelize';
 
 interface CacheOptions {
   cacheKeyPrefix: string;
   ttl?: number;
 }
 
-interface QueryOptions {
+export interface QueryOptions {
+  search?: string
   includes?: string[];
   filters?: WhereOptions;
   pagination?: {
@@ -79,6 +80,18 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
       });
     }
 
+    if (options.search) {
+      findOptions.where = {
+        ...findOptions.where,
+        [Op.and]: [
+          literal(`search_vector @@ plainto_tsquery('english', '${options.search}')`),
+        ]
+      }
+
+      const rankOrder: [any, string] = [literal(`ts_rank(search_vector, plainto_tsquery('english', '${options.search}'))`), 'DESC'];
+      findOptions.order = findOptions.order ? [...(findOptions.order as any[]), rankOrder] : [rankOrder];
+    }
+
     if (options.transaction) {
       findOptions.transaction = options.transaction;
     }
@@ -122,26 +135,28 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
   async findAll(
     queryOptions: QueryOptions,
     cacheOptions: CacheOptions
-  ): Promise<T[]> {
+  ): Promise<{ rows: T[]; count: number; }> {
     const { cacheKeyPrefix, ttl = 300 } = cacheOptions;
     const findOptions = this.parseQueryOptions(queryOptions);
+    console.log(findOptions);
+
     const cacheKey = this.generateCacheKey(cacheKeyPrefix, findOptions);
 
     try {
       if (!queryOptions.transaction) {
         const cachedData = await redis.get(cacheKey);
-        if (cachedData) return JSON.parse(cachedData) as T[];
+        if (cachedData) return JSON.parse(cachedData) as { rows: T[]; count: number };
       }
 
-      const results = await this.model.findAll(findOptions) as T[];
-      if (results.length > 0 && !queryOptions.transaction) {
+      const results = await this.model.findAndCountAll(findOptions);
+      if (results.count > 0 && !queryOptions.transaction) {
         await redis.set(cacheKey, JSON.stringify(results), 'EX', ttl);
       }
 
       return results;
     } catch (error) {
       console.error('Repository operation failed:', error);
-      return this.model.findAll(findOptions) as Promise<T[]>;
+      return this.model.findAndCountAll(findOptions) as Promise<{ rows: T[]; count: number }>;
     }
   }
 
@@ -202,7 +217,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
   // Bulk Operations
   async bulkCreate(options: BulkCreateOptions<T>): Promise<T[]> {
     const { records, transaction, ignoreDuplicates = false, returning = true } = options;
-    
+
     const result = await this.model.bulkCreate(records, {
       ignoreDuplicates,
       returning,
@@ -225,7 +240,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
     } else {
       await this.withTransaction(async (t) => {
         for (const { id, data } of records) {
-          const [count] = await this.update(id, data, { transaction});
+          const [count] = await this.update(id, data, { transaction });
           updatedCount += count;
         }
       });
@@ -237,7 +252,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
 
   async bulkDelete(options: BulkDeleteOptions): Promise<number> {
     const { ids, transaction, force = false } = options;
-    
+
     const result = await this.model.destroy({
       where: { id: { [Op.in]: ids } } as any,
       force,
@@ -266,7 +281,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
 class AssessmentRepository extends AbstractRepository<any> {
   constructor(model: ModelStatic<any>) {
     super(model);
-    
+
     this.registerInclude('proctoringOptions', {
       model: 'ProctoringOptions',
       as: 'proctoringOptions'
@@ -282,7 +297,7 @@ class AssessmentRepository extends AbstractRepository<any> {
   async createAssessmentWithOptions(assessmentData: any, proctoringData: any): Promise<any> {
     return this.withTransaction(async (transaction) => {
       const assessment = await this.create(assessmentData, { transaction });
-      
+
       const proctoringOptions = await this.model.sequelize!.model('ProctoringOptions').create(
         {
           ...proctoringData,

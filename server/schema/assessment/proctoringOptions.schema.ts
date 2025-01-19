@@ -1,6 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../config/database';
-import Assessment from './assessment.schema';
 
 export interface ProctoringOptionsAttributes {
   id: string;

@@ -1,4 +1,134 @@
-import { check } from "express-validator";
+import { check, query, ValidationChain } from "express-validator";
+import { AssessmentAttributes } from "../../../schema/assessment/assessment.schema";
+
+type ValidTypes = 'string' | 'boolean' | 'number' | 'date' | 'any' | 'uuid';
+type TypeMap<T> = Record<keyof T, ValidTypes>;
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export const validateSort = (schema: Object) => {
+  return query('sort')
+    .optional()
+    .custom((value) => {
+      if (typeof value !== 'string') {
+        throw new Error('Sort must be a string');
+      }
+
+      const sortPairs = value.split(',');
+      for (const pair of sortPairs) {
+        const [attribute, order] = pair.split(':');
+
+        // Check if the attribute is allowed
+        if (!Object.keys(schema).includes(attribute)) {
+          throw new Error(`Invalid attribute: ${attribute}.Format: <attribute1>:<order1>, <attribute2>:<order2>,... .Allowed attributes are: ${Object.keys(schema).join(', ')}`);
+        }
+
+        // Check if the order is valid
+        if (order !== 'asc' && order !== 'desc') {
+          throw new Error(`Invalid order: ${order}.Format: <attribute1>:<order1>, <attribute2>:<order2>,... . Order must be either "asc" or "desc"`);
+        }
+      }
+
+      return true;
+    })
+}
+
+export const validateFilters = <T extends Record<string, unknown>>(schema: Object) => {
+  return query('filters')
+    .optional()
+    .custom((filters: string) => {
+      let parsedFilters: Record<string, unknown>;
+      try {
+        parsedFilters = JSON.parse(filters);
+      } catch {
+        return false;
+      }
+
+      const typeMap = schema as TypeMap<T>;
+      for (const key in parsedFilters) {
+        if (!Object.prototype.hasOwnProperty.call(typeMap, key)) {
+          return false;
+        }
+
+        const value = parsedFilters[key];
+        const expectedType = typeMap[key as keyof T];
+
+        switch (expectedType) {
+          case 'string':
+            if (typeof value !== 'string') return false;
+            break;
+          case 'boolean':
+            if (typeof value !== 'boolean') return false;
+            break;
+          case 'number':
+            if (typeof value !== 'number') return false;
+            break;
+          case 'date':
+            if (typeof value !== 'string' || isNaN(Date.parse(value))) return false;
+            break;
+          case 'uuid':
+            return typeof value === 'string' && UUID_V4_REGEX.test(value);
+          case 'any':
+            break;
+          default:
+            return false;
+        }
+      }
+
+      return true;
+    })
+    .withMessage((value) => {
+      if (!value) {
+        return 'filters parameter is required';
+      }
+
+      try {
+        const parsedFilters = JSON.parse(value);
+        const typeMap = schema as TypeMap<T>;
+
+        for (const key in parsedFilters) {
+          if (!Object.prototype.hasOwnProperty.call(typeMap, key)) {
+            return `Invalid filter key: '${key}' is not a valid attribute`;
+          }
+
+          const filterValue = parsedFilters[key];
+          const expectedType = typeMap[key as keyof T];
+
+          switch (expectedType) {
+            case 'string':
+              if (typeof filterValue !== 'string') {
+                return `Invalid type for '${key}': expected string`;
+              }
+              break;
+            case 'boolean':
+              if (typeof filterValue !== 'boolean') {
+                return `Invalid type for '${key}': expected boolean`;
+              }
+              break;
+            case 'number':
+              if (typeof filterValue !== 'number') {
+                return `Invalid type for '${key}': expected number`;
+              }
+              break;
+            case 'date':
+              if (typeof filterValue !== 'string' || isNaN(Date.parse(filterValue))) {
+                return `Invalid type for '${key}': expected a valid ISO date string`;
+              }
+              break;
+            case 'uuid':
+              return `Invalid type for '${key}': expected a valid UUIDv4`;
+            case 'any':
+              break;
+            default:
+              return `Unsupported type for '${key}'`;
+          }
+        }
+      } catch {
+        return 'filters must be a valid JSON object';
+      }
+
+      return 'Invalid filters';
+    });
+};
 
 export const validateAssessmentCreate = [
   check("image")
@@ -52,4 +182,58 @@ export const validateAssessmentCreate = [
   check("isPublished")
     .isBoolean()
     .withMessage("isPublished must be a boolean"),
+];
+
+export const validateAssessmentGet = [
+  query('search')
+    .optional()
+    .isString()
+    .trim()
+    .escape(),
+
+  validateSort({
+    id: 'uuid',
+    name: 'string',
+    description: 'string',
+    isActive: 'boolean',
+    startAt: 'date',
+    endAt: 'date',
+    duration: 'number',
+    isPublished: 'boolean',
+    totalMarks: 'number',
+    createdAt: 'date',
+    updatedAt: 'date'
+  }),
+
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer')
+    .toInt(),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100')
+    .toInt(),
+
+  validateFilters<AssessmentAttributes & Record<string, unknown>>({
+    id: 'uuid',
+    name: 'string',
+    description: 'string',
+    isActive: 'boolean',
+    startAt: 'date',
+    endAt: 'date',
+    duration: 'number',
+    isPublished: 'boolean',
+    totalMarks: 'number',
+    createdAt: 'date',
+    updatedAt: 'date'
+  }),
+
+  query('include')
+    .optional()
+    .not().isEmpty()
+    .isIn(['allowedDevices'])
+    .withMessage('Adds additional information. Supported: allowedDevices')
 ];

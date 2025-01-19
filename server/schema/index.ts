@@ -4,7 +4,6 @@ import Role from "./user/role.schema";
 import User from "./user/user.schema";
 import Group from "./group/group.schema";
 import Notification from "./group/notification.schema";
-import QuestionTag from "./junction/questionTag.schema";
 import NotificationGroup from "./junction/notificationGroup.schema";
 import UserGroup from "./junction/userGroup.schema";
 import AssessmentGroup from "./junction/assessmentGroup.schema";
@@ -74,12 +73,12 @@ const instantiateModels = async (): Promise<void> => {
   });
 
   Assessment.hasOne(ProctoringOptions, {
-    foreignKey: "assessment_id",
+    foreignKey: "assessmentId",
     onDelete: "CASCADE",
   })
 
   ProctoringOptions.belongsTo(Assessment, {
-    foreignKey: "assessment_id",
+    foreignKey: "assessmentId",
     onDelete: "CASCADE",
   })
 
@@ -210,12 +209,12 @@ export const initFullTextSearch = async () => {
       transaction
     });
 
-    // await sequelize.query(`
-    //   DROP TRIGGER IF EXISTS assessments_search_vector_update ON assessments;
-    // `, {
-    //   type: QueryTypes.RAW,
-    //   transaction
-    // });
+    await sequelize.query(`
+      DROP TRIGGER IF EXISTS assessments_search_vector_update ON assessments;
+    `, {
+      type: QueryTypes.RAW,
+      transaction
+    });
 
 
     await sequelize.query(`
