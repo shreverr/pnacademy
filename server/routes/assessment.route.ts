@@ -120,6 +120,110 @@ router.post(
   createAssessmentController
 );
 
+/**
+ * @swagger
+ * /v2/assessments:
+ *   get:
+ *     summary: Get list of assessments
+ *     description: Retrieve a list of assessments with optional filtering, sorting, and pagination
+ *     tags:
+ *       - Assessments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for full-text search
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Sorting criteria (e.g., "name:asc,createdAt:desc")
+ *         example: "createdAt:desc"
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Number of items per page
+ *       - in: query
+ *         name: filters
+ *         schema:
+ *           type: string
+ *         description: JSON string of filter criteria
+ *         example: '{"isActive":true,"isPublished":true}'
+ *       - in: query
+ *         name: include
+ *         schema:
+ *           type: string
+ *           enum: [allowedDevices]
+ *         description: Additional related data to include
+ *     responses:
+ *       200:
+ *         description: List of assessments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                         nullable: true
+ *                       isActive:
+ *                         type: boolean
+ *                       startAt:
+ *                         type: string
+ *                         format: date-time
+ *                       endAt:
+ *                         type: string
+ *                         format: date-time
+ *                       duration:
+ *                         type: integer
+ *                       isPublished:
+ *                         type: boolean
+ *                       totalMarks:
+ *                         type: integer
+ *                       imageUrl:
+ *                         type: string
+ *                         nullable: true
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *       403:
+ *         description: Forbidden - User lacks required permissions
+ *       404:
+ *         description: No assessments found matching the criteria
+ */
 router.get(
   "/",
   authenticateUser(["canManageAssessment", "canAttemptAssessment"], true),

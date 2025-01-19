@@ -112,13 +112,6 @@ export const getAssessments = async (query: {
   userId?: string
 }, assigned: boolean)
   : Promise<{ data: Assessment[], totalPages: number }> => {
-  // let filters: WhereOptions = { ...query.filters }
-  // if (assigned && !query.userId) throw new AppError('userId not defined', 500, 'userId not defined', false)
-
-  // if (assigned) {
-
-  // }
-  
   let queryOptions: QueryOptions = {
     search: query.search,
     includes: query.includes,
@@ -132,8 +125,26 @@ export const getAssessments = async (query: {
 
   const queryResult = await assessmentRepository.findAll(queryOptions, { cacheKeyPrefix: 'assessments' })
 
+  const processedResults = await Promise.all(
+    queryResult.rows.map(async (assessment) => {
+      let assessmentWithImageUrl: any = {
+        ...assessment.dataValues,
+        imageKey: undefined // Remove imageKey from response
+      }
+
+      if (assessment.imageKey) {
+        const imageUrl = await generatePresignedUrl(assessment.imageKey, 60 * 60);
+        assessmentWithImageUrl = { ...assessmentWithImageUrl, imageUrl };
+
+        return assessmentWithImageUrl;
+      }
+
+      return assessmentWithImageUrl;
+    })
+  );
+
   return {
-    data: queryResult.rows,
+    data: processedResults as Assessment[],
     totalPages: Math.ceil(queryResult.count / (query.limit || 10))
   }
 };

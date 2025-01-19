@@ -138,8 +138,6 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
   ): Promise<{ rows: T[]; count: number; }> {
     const { cacheKeyPrefix, ttl = 300 } = cacheOptions;
     const findOptions = this.parseQueryOptions(queryOptions);
-    console.log(findOptions);
-
     const cacheKey = this.generateCacheKey(cacheKeyPrefix, findOptions);
 
     try {
@@ -274,44 +272,6 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
     } catch (error) {
       console.error('Cache invalidation failed:', error);
     }
-  }
-}
-
-// Example usage with transactions and bulk operations
-class AssessmentRepository extends AbstractRepository<any> {
-  constructor(model: ModelStatic<any>) {
-    super(model);
-
-    this.registerInclude('proctoringOptions', {
-      model: 'ProctoringOptions',
-      as: 'proctoringOptions'
-    });
-
-    this.registerInclude('allowedDevices', {
-      model: 'ProctoringOptions',
-      as: 'proctoringOptions',
-      attributes: ['allowedDevices']
-    });
-  }
-
-  async createAssessmentWithOptions(assessmentData: any, proctoringData: any): Promise<any> {
-    return this.withTransaction(async (transaction) => {
-      const assessment = await this.create(assessmentData, { transaction });
-
-      const proctoringOptions = await this.model.sequelize!.model('ProctoringOptions').create(
-        {
-          ...proctoringData,
-          assessmentId: assessment.id
-        },
-        { transaction }
-      );
-
-      return { assessment, proctoringOptions };
-    });
-  }
-
-  protected async invalidateCache(): Promise<void> {
-    await super.invalidateCache('assessment:*');
   }
 }
 
