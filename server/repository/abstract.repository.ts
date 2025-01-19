@@ -1,3 +1,4 @@
+import logger from '../config/logger';
 import redis from '../config/redis';
 import { Model, FindOptions, ModelStatic, WhereOptions, Transaction, Op, CreateOptions, UpdateOptions, DestroyOptions, literal } from 'sequelize';
 
@@ -176,17 +177,19 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
   // Single Record Operations
   async create(
     data: T['_creationAttributes'],
-    options: CreateOptions = {}
+    cacheKeyPattern: string,
+    options: CreateOptions = {},
   ): Promise<T> {
     const result = await this.model.create(data, options);
-    if (!options.transaction) await this.invalidateCache();
+    if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
     return result;
   }
 
   async update(
     id: number | string,
     data: Partial<T['_attributes']>,
-    options: Omit<UpdateOptions, 'where'> = {}
+    cacheKeyPattern: string,
+    options: Omit<UpdateOptions, 'where'> = {},
   ): Promise<[number]> {
     const result = await this.model.update(
       data,
@@ -196,19 +199,20 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
         ...options
       } as UpdateOptions
     );
-    if (!options.transaction) await this.invalidateCache();
+    if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
     return result;
   }
 
   async delete(
     id: number | string,
-    options: DestroyOptions = {}
+    cacheKeyPattern: string,
+    options: DestroyOptions = {},
   ): Promise<number> {
     const result = await this.model.destroy({
       where: { id } as any,
       ...options
     });
-    if (!options.transaction) await this.invalidateCache();
+    if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
     return result;
   }
 
@@ -226,19 +230,19 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
     return result;
   }
 
-  async bulkUpdate(options: BulkUpdateOptions<T>): Promise<number> {
+  async bulkUpdate(options: BulkUpdateOptions<T>, cacheKeyPattern: string): Promise<number> {
     const { records, transaction } = options;
     let updatedCount = 0;
 
     if (transaction) {
       for (const { id, data } of records) {
-        const [count] = await this.update(id, data, { transaction });
+        const [count] = await this.update(id, data, cacheKeyPattern, { transaction });
         updatedCount += count;
       }
     } else {
       await this.withTransaction(async (t) => {
         for (const { id, data } of records) {
-          const [count] = await this.update(id, data, { transaction });
+          const [count] = await this.update(id, data, cacheKeyPattern, { transaction });
           updatedCount += count;
         }
       });
@@ -264,15 +268,42 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
   protected async invalidateCache(pattern?: string): Promise<void> {
     try {
       if (pattern) {
-        const keys = await redis.keys(pattern);
-        if (keys.length > 0) {
-          await redis.del(keys);
+        let cursor = '0'; // Start with cursor 0
+        const keysToDelete: string[] = [];
+  
+        do {
+          // Use SCAN to find keys matching the pattern
+          const [newCursor, keys] = await redis.scan(
+            cursor,
+            'MATCH',
+            `${pattern}:*`, // Add the wildcard to match keys starting with the pattern
+            'COUNT',
+            100 // Adjust the batch size as needed
+          );
+  
+          // Add the found keys to the list of keys to delete
+          keysToDelete.push(...keys);
+  
+          // Update the cursor for the next iteration
+          cursor = newCursor;
+        } while (cursor !== '0'); // Continue until the cursor returns to '0'
+  
+        // Log the keys to be deleted
+        logger.info(`Keys to delete: ${keysToDelete.join(', ')}`);
+  
+        // Delete the keys in bulk if any were found
+        if (keysToDelete.length > 0) {
+          await redis.del(...keysToDelete);
+          logger.info(`Deleted ${keysToDelete.length} keys matching pattern: ${pattern}:*`);
+        } else {
+          logger.info(`No keys found matching pattern: ${pattern}:*`);
         }
       }
     } catch (error) {
       console.error('Cache invalidation failed:', error);
     }
   }
+  
 }
 
 export default AbstractRepository;

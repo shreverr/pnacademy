@@ -9,7 +9,6 @@ import { deleteFileFromDisk } from "../../lib/file";
 import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
 import { scheduleAssessmentEndEvent } from "../../lib/assessment/event";
-import { Op, literal } from "sequelize";
 
 /**
  * Creates a new assessment with optional image upload functionality.
@@ -63,7 +62,7 @@ export const createAssessment = async (assessment: {
       ...assessment,
       id: uuid(),
       imageKey: imageKey
-    });
+    }, 'assessments');
     logger.info(`Assessment created successfully: ${savedAssessment.id}`);
   } catch (error: any) {
     if (imageKey) {
@@ -93,7 +92,7 @@ export const createAssessment = async (assessment: {
       await deleteFileFromS3(imageKey);
     }
 
-    assessmentRepository.delete(savedAssessment.id);
+    assessmentRepository.delete(savedAssessment.id, 'assessments');
 
     throw new AppError(`Error scheduling assessment end event`, 500, error, true);
   }
