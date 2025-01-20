@@ -351,3 +351,49 @@ export const validateProctoringOptionsCreate = [
     .isBoolean()
     .withMessage("awardZeroMarksOnKickout must be a boolean value"),
 ];
+
+export const validateProctoringOptionsUpdate = [
+  param("assessmentId")
+    .isUUID()
+    .withMessage("Assessment ID must be a valid UUIDv4"),
+
+  check("basic")
+    .optional()
+    .isBoolean()
+    .withMessage("basic must be a boolean value"),
+
+  check("ai")
+    .optional()
+    .isBoolean()
+    .withMessage("ai must be a boolean value"),
+
+  check("aiWithHuman")
+    .optional()
+    .isBoolean()
+    .withMessage("aiWithHuman must be a boolean value"),
+
+  check("allowedDevices")
+    .optional()
+    .isArray()
+    .withMessage("allowedDevices must be an array")
+    .custom((value: string[]) => {
+      const validDevices = ["WEB", "MOBILE"];
+      return value.every(device => validDevices.includes(device));
+    })
+    .withMessage("allowedDevices must contain only 'WEB' or 'MOBILE'"),
+
+  check("maxAllowedWarnings")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("maxAllowedWarnings must be a positive integer"),
+
+  check("autoKickOut")
+    .optional()
+    .isBoolean()
+    .withMessage("autoKickOut must be a boolean value"),
+
+  check("awardZeroMarksOnKickout")
+    .optional()
+    .isBoolean()
+    .withMessage("awardZeroMarksOnKickout must be a boolean value"),
+];

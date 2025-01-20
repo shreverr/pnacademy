@@ -3,8 +3,8 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import { validateRequest } from "../utils/validateRequest";
 import { upload } from "../middleware/multer";
-import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate, validateProctoringOptionsCreate } from "../lib/validator/assessment/validator";
-import { createAssessmentController, createProctoringOptionsController, deleteAssessmentController, getAssessmentController, updateAssessmentController } from "../controller/assessment/assessment.controller";
+import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate, validateProctoringOptionsCreate, validateProctoringOptionsUpdate } from "../lib/validator/assessment/validator";
+import { createAssessmentController, createProctoringOptionsController, deleteAssessmentController, getAssessmentController, updateAssessmentController, updateProctoringOptionsController } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -463,6 +463,79 @@ router.post(
   validateProctoringOptionsCreate,
   validateRequest,
   createProctoringOptionsController
+);
+
+/**
+ * @swagger
+ * /v2/assessments/{assessmentId}/proctoring-options:
+ *   patch:
+ *     summary: Update proctoring options for an assessment
+ *     description: Modify existing proctoring settings for an assessment
+ *     tags:
+ *       - Assessments
+ *       - Proctoring
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: assessmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The UUID of the assessment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               basic:
+ *                 type: boolean
+ *                 description: Enable basic proctoring features
+ *               ai:
+ *                 type: boolean
+ *                 description: Enable AI-based proctoring
+ *               aiWithHuman:
+ *                 type: boolean
+ *                 description: Enable AI proctoring with human supervision
+ *               allowedDevices:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [WEB, MOBILE]
+ *                 description: List of allowed devices for assessment
+ *               maxAllowedWarnings:
+ *                 type: integer
+ *                 minimum: 0
+ *                 description: Maximum warnings before action is taken
+ *               autoKickOut:
+ *                 type: boolean
+ *                 description: Automatically remove student after max warnings
+ *               awardZeroMarksOnKickout:
+ *                 type: boolean
+ *                 description: Award zero marks when student is kicked out
+ *     responses:
+ *       204:
+ *         description: Proctoring options updated successfully
+ *       400:
+ *         description: Invalid request payload
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *       403:
+ *         description: Forbidden - User lacks required permissions
+ *       404:
+ *         description: Assessment or proctoring options not found 
+ *       500:
+ *         description: Someting went wrong
+ */
+router.patch(
+  "/:assessmentId/proctoring-options",
+  authenticateUser(["canManageAssessment"]),
+  validateProctoringOptionsUpdate,
+  validateRequest,
+  updateProctoringOptionsController
 );
 
 export default router;

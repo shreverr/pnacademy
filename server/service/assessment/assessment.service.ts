@@ -163,7 +163,7 @@ export const updateAssessment = async (assessment: {
   isPublished?: boolean
 }): Promise<boolean> => {
   const existingAssessment = await assessmentRepository.findById(assessment.id, {}, { cacheKeyPrefix: 'assessments' });
-  if(!existingAssessment) {
+  if (!existingAssessment) {
     throw new AppError(`Assessment not found`, 404, 'Assessment not found', true);
   }
 
@@ -203,7 +203,7 @@ export const updateAssessment = async (assessment: {
 
   if (assessment.endAt) {
     try {
-      await updateAssessmentEndEventSchedule(assessment.id,assessment.endAt);
+      await updateAssessmentEndEventSchedule(assessment.id, assessment.endAt);
     } catch (error: any) {
       if (imageKey) {
         await deleteFileFromS3(imageKey);
@@ -226,14 +226,14 @@ export const deleteAssessment = async (assessment: {
   id: string,
 }): Promise<boolean> => {
   const existingAssessment = await assessmentRepository.findById(assessment.id, {}, { cacheKeyPrefix: 'assessments' });
-  if(!existingAssessment) {
+  if (!existingAssessment) {
     throw new AppError(`Assessment not found`, 404, 'Assessment not found', true);
   }
 
   // delete image to S3 if provided
   if (existingAssessment.imageKey) {
     try {
-        await deleteFileFromS3(existingAssessment.imageKey);
+      await deleteFileFromS3(existingAssessment.imageKey);
     } catch (error: any) {
       throw new AppError(`Error deleting image to S3`, 500, error, true);
     }
@@ -268,7 +268,7 @@ export const createProctoringOptions = async (proctoringOptions: {
   maxAllowedWarnings: number;
   autoKickOut: boolean;
   awardZeroMarksOnKickout: boolean;
-}): Promise<ProctoringOptions| null> => {
+}): Promise<ProctoringOptions | null> => {
   // Create proctoring options in database
   let savedProctoringOptions: ProctoringOptions
   try {
@@ -285,9 +285,33 @@ export const createProctoringOptions = async (proctoringOptions: {
     if (error instanceof ForeignKeyConstraintError) {
       throw new AppError(`Assessment not found`, 404, error.message, true);
     }
-    
+
     throw new AppError(`Error creating proctoring options`, 500, error, true);
   }
 
   return savedProctoringOptions;
+};
+
+export const updateProctoringOptions = async (assessmentId: string, proctoringOptions: {
+  basic?: boolean;
+  ai?: boolean;
+  aiWithHuman?: boolean;
+  allowedDevices?: string[];
+  maxAllowedWarnings?: number;
+  autoKickOut?: boolean;
+  awardZeroMarksOnKickout?: boolean;
+}): Promise<boolean> => {
+  // update assessment in database
+  let affectedCount: number
+
+  try {
+    [affectedCount] = await proctoringOptionsRepository.updateWithWhere({ where: { assessmentId } }, {
+      ...proctoringOptions
+    }, 'proctoringOptions');
+
+  } catch (error: any) {
+    throw new AppError(`Error updating assessment`, 500, error, true);
+  }
+
+  return affectedCount > 0;
 };

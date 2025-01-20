@@ -36,7 +36,7 @@ void connectDatabase();
 
 void sequelize
   .sync({
-    force: true,
+    force: false,
   })
   .then(async () => {
     await initFullTextSearch()

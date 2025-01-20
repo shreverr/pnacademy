@@ -199,6 +199,26 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
         ...options
       } as UpdateOptions
     );
+    if(result[0] <= 0) return result
+
+    if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
+    return result;
+  }
+
+  async updateWithWhere(
+    options: UpdateOptions,
+    data: Partial<T['_attributes']>,
+    cacheKeyPattern: string,
+  ): Promise<[number]> {
+    const result = await this.model.update(
+      data,
+      {
+        returning: true,
+        ...options
+      } as UpdateOptions
+    );
+    if(result[0] <= 0) return result
+
     if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
     return result;
   }
