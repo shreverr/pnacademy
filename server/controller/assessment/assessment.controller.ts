@@ -1,9 +1,7 @@
 import { NextFunction, Response, Request } from "express";
 import { RequestHandler } from "express";
-import { createAssessment, deleteAssessment, getAssessments, updateAssessment } from "../../service/assessment/assessment.service";
-import { permission } from "process";
+import { createAssessment, createProctoringOptions, deleteAssessment, getAssessments, updateAssessment } from "../../service/assessment/assessment.service";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
-import logger from "../../config/logger";
 
 export const createAssessmentController: RequestHandler = async (
   req: Request,
@@ -104,6 +102,31 @@ export const deleteAssessmentController: RequestHandler = async (
     });
 
     return isDeleted ? res.status(204).send() : res.status(404).send()
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const createProctoringOptionsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const proctoringOptions = await createProctoringOptions({
+      assessmentId: req.params.assessmentId,
+      basic: req.body.basic,
+      ai: req.body.ai,
+      aiWithHuman: req.body.aiWithHuman,
+      allowedDevices: req.body.allowedDevices,
+      maxAllowedWarnings: req.body.maxAllowedWarnings,
+      autoKickOut: req.body.autoKickOut,
+      awardZeroMarksOnKickout: req.body.awardZeroMarksOnKickout,
+    });
+    return res.status(201).json({
+      status: "success",
+      data: proctoringOptions,
+    });
   } catch (error) {
     next(error);
   }

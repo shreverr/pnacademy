@@ -3,8 +3,8 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import { validateRequest } from "../utils/validateRequest";
 import { upload } from "../middleware/multer";
-import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate } from "../lib/validator/assessment/validator";
-import { createAssessmentController, deleteAssessmentController, getAssessmentController, updateAssessmentController } from "../controller/assessment/assessment.controller";
+import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate, validateProctoringOptionsCreate } from "../lib/validator/assessment/validator";
+import { createAssessmentController, createProctoringOptionsController, deleteAssessmentController, getAssessmentController, updateAssessmentController } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -336,6 +336,133 @@ router.delete(
   validateAssessmentDelete,
   validateRequest,
   deleteAssessmentController
+);
+
+/**
+ * @swagger
+ * /v2/assessments/{assessmentId}/proctoring-options:
+ *   post:
+ *     summary: Create proctoring options for an assessment
+ *     description: Create proctoring settings including basic, AI, and device restrictions
+ *     tags:
+ *       - Assessments
+ *       - Proctoring
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: assessmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The UUID of the assessment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - basic
+ *               - ai
+ *               - aiWithHuman
+ *               - allowedDevices
+ *               - maxAllowedWarnings
+ *               - autoKickOut
+ *               - awardZeroMarksOnKickout
+ *             properties:
+ *               basic:
+ *                 type: boolean
+ *                 description: Enable basic proctoring features
+ *                 example: true
+ *               ai:
+ *                 type: boolean
+ *                 description: Enable AI-based proctoring
+ *                 example: true
+ *               aiWithHuman:
+ *                 type: boolean
+ *                 description: Enable AI proctoring with human supervision
+ *                 example: false
+ *               allowedDevices:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [WEB, MOBILE]
+ *                 description: List of allowed devices for assessment
+ *                 example: ["WEB", "MOBILE"]
+ *               maxAllowedWarnings:
+ *                 type: integer
+ *                 minimum: 0
+ *                 description: Maximum warnings before action is taken
+ *                 example: 3
+ *               autoKickOut:
+ *                 type: boolean
+ *                 description: Automatically remove student after max warnings
+ *                 example: true
+ *               awardZeroMarksOnKickout:
+ *                 type: boolean
+ *                 description: Award zero marks when student is kicked out
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Proctoring options created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     assessmentId:
+ *                       type: string
+ *                       format: uuid
+ *                     basic:
+ *                       type: boolean
+ *                     ai:
+ *                       type: boolean
+ *                     aiWithHuman:
+ *                       type: boolean
+ *                     allowedDevices:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     maxAllowedWarnings:
+ *                       type: integer
+ *                     autoKickOut:
+ *                       type: boolean
+ *                     awardZeroMarksOnKickout:
+ *                       type: boolean
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Invalid request payload
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *       403:
+ *         description: Forbidden - User lacks required permissions
+ *       404:
+ *         description: Assessment not found
+ *       409:
+ *         description: Proctoring options already exist for this assessment
+ */
+router.post(
+  "/:assessmentId/proctoring-options",
+  authenticateUser(["canManageAssessment"]),
+  validateProctoringOptionsCreate,
+  validateRequest,
+  createProctoringOptionsController
 );
 
 export default router;

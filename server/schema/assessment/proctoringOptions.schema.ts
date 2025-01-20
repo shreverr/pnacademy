@@ -38,6 +38,7 @@ ProctoringOptions.init(
     },
     assessmentId: {
       type: DataTypes.UUID,
+      unique: true,
       allowNull: false,
     },
     basic: {
@@ -62,7 +63,7 @@ ProctoringOptions.init(
     },
     maxAllowedWarnings: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     autoKickOut: {
       type: DataTypes.BOOLEAN,

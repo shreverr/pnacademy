@@ -312,3 +312,42 @@ export const validateAssessmentDelete = [
     .isUUID()
     .withMessage("Assessment ID must be a valid UUIDv4"),
 ];
+
+export const validateProctoringOptionsCreate = [
+  param("assessmentId")
+    .isUUID()
+    .withMessage("Assessment ID must be a valid UUIDv4"),
+
+  check("basic")
+    .isBoolean()
+    .withMessage("basic must be a boolean value"),
+
+  check("ai")
+    .isBoolean()
+    .withMessage("ai must be a boolean value"),
+
+  check("aiWithHuman")
+    .isBoolean()
+    .withMessage("aiWithHuman must be a boolean value"),
+
+  check("allowedDevices")
+    .isArray()
+    .withMessage("allowedDevices must be an array")
+    .custom((value: string[]) => {
+      const validDevices = ["WEB", "MOBILE"];
+      return value.every(device => validDevices.includes(device));
+    })
+    .withMessage("allowedDevices must contain only 'WEB' or 'MOBILE'"),
+
+  check("maxAllowedWarnings")
+    .isInt({ min: 0 })
+    .withMessage("maxAllowedWarnings must be a positive integer"),
+
+  check("autoKickOut")
+    .isBoolean()
+    .withMessage("autoKickOut must be a boolean value"),
+
+  check("awardZeroMarksOnKickout")
+    .isBoolean()
+    .withMessage("awardZeroMarksOnKickout must be a boolean value"),
+];

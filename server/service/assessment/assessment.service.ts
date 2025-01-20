@@ -9,6 +9,9 @@ import { deleteFileFromDisk } from "../../lib/file";
 import path from "path";
 import { generatePresignedUrl } from "../../utils/s3";
 import { deleteEventRule, scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
+import ProctoringOptions from "../../schema/assessment/proctoringOptions.schema";
+import proctoringOptionsRepository from "../../repository/proctoringOptions.repository";
+import { ForeignKeyConstraintError, UniqueConstraintError } from "sequelize";
 
 /**
  * Creates a new assessment with optional image upload functionality.
@@ -254,4 +257,37 @@ export const deleteAssessment = async (assessment: {
 
   // Return assessment with image URL if it is provided
   return affectedCount > 0;
+};
+
+export const createProctoringOptions = async (proctoringOptions: {
+  assessmentId: string;
+  basic: boolean;
+  ai: boolean;
+  aiWithHuman: boolean;
+  allowedDevices: string[];
+  maxAllowedWarnings: number;
+  autoKickOut: boolean;
+  awardZeroMarksOnKickout: boolean;
+}): Promise<ProctoringOptions| null> => {
+  // Create proctoring options in database
+  let savedProctoringOptions: ProctoringOptions
+  try {
+    savedProctoringOptions = await proctoringOptionsRepository.create({
+      ...proctoringOptions,
+      id: uuid(),
+    }, 'proctoringOptions');
+    logger.info(`Assessment created successfully: ${savedProctoringOptions.id}`);
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError) {
+      throw new AppError(`Proctoring options already exists for assessment`, 409, error.message, false);
+    }
+
+    if (error instanceof ForeignKeyConstraintError) {
+      throw new AppError(`Assessment not found`, 404, error.message, true);
+    }
+    
+    throw new AppError(`Error creating proctoring options`, 500, error, true);
+  }
+
+  return savedProctoringOptions;
 };
