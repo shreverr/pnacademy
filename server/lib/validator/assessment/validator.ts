@@ -397,3 +397,9 @@ export const validateProctoringOptionsUpdate = [
     .isBoolean()
     .withMessage("awardZeroMarksOnKickout must be a boolean value"),
 ];
+
+export const validateProctoringOptionsGet = [
+  param("assessmentId")
+    .isUUID()
+    .withMessage("Assessment ID must be a valid UUIDv4"),
+];

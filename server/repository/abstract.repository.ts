@@ -1,6 +1,7 @@
 import logger from '../config/logger';
 import redis from '../config/redis';
 import { Model, FindOptions, ModelStatic, WhereOptions, Transaction, Op, CreateOptions, UpdateOptions, DestroyOptions, literal } from 'sequelize';
+import { AppError } from '../lib/appError';
 
 interface CacheOptions {
   cacheKeyPrefix: string;
@@ -133,6 +134,27 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
     }
   }
 
+  async findWithWhere(
+    findOptions: FindOptions,
+    cacheOptions: CacheOptions
+  ): Promise<T | null> {
+    const { cacheKeyPrefix, ttl = 300 } = cacheOptions;
+    const cacheKey = this.generateCacheKey(cacheKeyPrefix, { ...findOptions });
+
+    try {
+      const cachedData = await redis.get(cacheKey);
+      if (cachedData) return JSON.parse(cachedData) as T;
+
+      const result = await this.model.findOne(findOptions) as T | null;
+      await redis.set(cacheKey, JSON.stringify(result), 'EX', ttl);
+
+      return result;
+    } catch (error) {
+      logger.error(`Repository operation failed: ${error}`);
+      throw error
+    }
+  }
+
   async findAll(
     queryOptions: QueryOptions,
     cacheOptions: CacheOptions
@@ -199,7 +221,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
         ...options
       } as UpdateOptions
     );
-    if(result[0] <= 0) return result
+    if (result[0] <= 0) return result
 
     if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
     return result;
@@ -217,7 +239,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
         ...options
       } as UpdateOptions
     );
-    if(result[0] <= 0) return result
+    if (result[0] <= 0) return result
 
     if (!options.transaction) await this.invalidateCache(cacheKeyPattern);
     return result;
@@ -290,7 +312,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
       if (pattern) {
         let cursor = '0'; // Start with cursor 0
         const keysToDelete: string[] = [];
-  
+
         do {
           // Use SCAN to find keys matching the pattern
           const [newCursor, keys] = await redis.scan(
@@ -300,17 +322,17 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
             'COUNT',
             100 // Adjust the batch size as needed
           );
-  
+
           // Add the found keys to the list of keys to delete
           keysToDelete.push(...keys);
-  
+
           // Update the cursor for the next iteration
           cursor = newCursor;
         } while (cursor !== '0'); // Continue until the cursor returns to '0'
-  
+
         // Log the keys to be deleted
         logger.info(`Keys to delete: ${keysToDelete.join(', ')}`);
-  
+
         // Delete the keys in bulk if any were found
         if (keysToDelete.length > 0) {
           await redis.del(...keysToDelete);
@@ -323,7 +345,7 @@ abstract class AbstractRepository<T extends Model & ModelWithAttributes> {
       console.error('Cache invalidation failed:', error);
     }
   }
-  
+
 }
 
 export default AbstractRepository;

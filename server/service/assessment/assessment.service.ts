@@ -11,7 +11,9 @@ import { generatePresignedUrl } from "../../utils/s3";
 import { deleteEventRule, scheduleAssessmentEndEvent, updateAssessmentEndEventSchedule } from "../../lib/assessment/event";
 import ProctoringOptions from "../../schema/assessment/proctoringOptions.schema";
 import proctoringOptionsRepository from "../../repository/proctoringOptions.repository";
-import { ForeignKeyConstraintError, UniqueConstraintError } from "sequelize";
+import { FindOptions, ForeignKeyConstraintError, UniqueConstraintError, where } from "sequelize";
+import Group from "../../schema/group/group.schema";
+import User from "../../schema/user/user.schema";
 
 /**
  * Creates a new assessment with optional image upload functionality.
@@ -314,4 +316,49 @@ export const updateProctoringOptions = async (assessmentId: string, proctoringOp
   }
 
   return affectedCount > 0;
+};
+
+export const getProctoringOptions = async (query: {
+  assessmentId: string
+  userId?: string
+}, assigned: boolean)
+  : Promise<ProctoringOptions | null> => {
+  let queryOptions: FindOptions = {
+    where: { assessmentId: query.assessmentId },
+  }
+
+  if (assigned) {
+    queryOptions = {
+      ...queryOptions,
+      include: [
+        {
+          model: Assessment,
+          where: { id: query.assessmentId }, // Ensure the assessment exists
+          include: [
+            {
+              model: Group,
+              include: [
+                {
+                  model: User,
+                  where: { id: query.userId }, // Ensure the user is part of the group
+                  attributes: [], // Exclude user attributes from the result
+                  required: true, // Inner join to enforce the condition
+                },
+              ],
+              attributes: [], // Exclude group attributes from the result
+              required: true, // Inner join to enforce the condition
+            },
+          ],
+          attributes: [], // Exclude assessment attributes from the result
+          required: true, // Inner join to enforce the condition
+        },
+      ],
+    }
+  }
+
+  const queryResult = await proctoringOptionsRepository.findWithWhere(queryOptions, {
+    cacheKeyPrefix: 'assessments'
+  })
+
+  return queryResult
 };

@@ -3,8 +3,8 @@ import type { Router } from "express";
 import { authenticateUser } from "../middleware/Auth";
 import { validateRequest } from "../utils/validateRequest";
 import { upload } from "../middleware/multer";
-import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate, validateProctoringOptionsCreate, validateProctoringOptionsUpdate } from "../lib/validator/assessment/validator";
-import { createAssessmentController, createProctoringOptionsController, deleteAssessmentController, getAssessmentController, updateAssessmentController, updateProctoringOptionsController } from "../controller/assessment/assessment.controller";
+import { validateAssessmentCreate, validateAssessmentDelete, validateAssessmentGet, validateAssessmentUpdate, validateProctoringOptionsCreate, validateProctoringOptionsGet, validateProctoringOptionsUpdate } from "../lib/validator/assessment/validator";
+import { createAssessmentController, createProctoringOptionsController, deleteAssessmentController, getAssessmentController, getProctoringOptionsController, updateAssessmentController, updateProctoringOptionsController } from "../controller/assessment/assessment.controller";
 
 const router: Router = express.Router();
 
@@ -536,6 +536,90 @@ router.patch(
   validateProctoringOptionsUpdate,
   validateRequest,
   updateProctoringOptionsController
+);
+
+/**
+ * @swagger
+ * /v2/assessments/{assessmentId}/proctoring-options:
+ *   get:
+ *     summary: Get proctoring options for an assessment
+ *     description: Retrieve the proctoring settings for a specific assessment
+ *     tags:
+ *       - Assessments
+ *       - Proctoring
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: assessmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The UUID of the assessment
+ *     responses:
+ *       200:
+ *         description: Proctoring options retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     assessmentId:
+ *                       type: string
+ *                       format: uuid
+ *                     basic:
+ *                       type: boolean
+ *                       description: Basic proctoring enabled status
+ *                     ai:
+ *                       type: boolean
+ *                       description: AI proctoring enabled status
+ *                     aiWithHuman:
+ *                       type: boolean
+ *                       description: AI with human supervision status
+ *                     allowedDevices:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         enum: [WEB, MOBILE]
+ *                       description: List of allowed devices
+ *                     maxAllowedWarnings:
+ *                       type: integer
+ *                       description: Maximum warnings allowed
+ *                     autoKickOut:
+ *                       type: boolean
+ *                       description: Auto kick out enabled status
+ *                     awardZeroMarksOnKickout:
+ *                       type: boolean
+ *                       description: Zero marks on kickout status
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *       403:
+ *         description: Forbidden - User lacks required permissions
+ *       404:
+ *         description: Proctoring options not found for the assessment
+ */
+router.get(
+  "/:assessmentId/proctoring-options",
+  authenticateUser(["canManageAssessment", "canAttemptAssessment"], true),
+  validateProctoringOptionsGet,
+  validateRequest,
+  getProctoringOptionsController
 );
 
 export default router;

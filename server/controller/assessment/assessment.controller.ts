@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import { RequestHandler } from "express";
-import { createAssessment, createProctoringOptions, deleteAssessment, getAssessments, updateAssessment, updateProctoringOptions } from "../../service/assessment/assessment.service";
+import { createAssessment, createProctoringOptions, deleteAssessment, getAssessments, getProctoringOptions, updateAssessment, updateProctoringOptions } from "../../service/assessment/assessment.service";
 import { AssessmentAttributes } from "../../schema/assessment/assessment.schema";
 
 export const createAssessmentController: RequestHandler = async (
@@ -153,3 +153,26 @@ export const updateProctoringOptionsController: RequestHandler = async (
     next(error);
   }
 }
+
+export const getProctoringOptionsController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Check if user has management permission
+    const isRestrictedUser = !req.user.permissions.includes('canManageAssessment');
+
+    const queryResults = await getProctoringOptions({ assessmentId: req.params.assessmentId, userId: req.user.userId }, isRestrictedUser);
+
+    // Return 404 if no results, otherwise return success with data
+    return queryResults
+      ? res.status(200).json({
+        status: "success",
+        data: queryResults,
+      })
+      : res.status(404).send()
+  } catch (error) {
+    next(error);
+  }
+};
